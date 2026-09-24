@@ -1,0 +1,653 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/mathlib-initiative/formalization.yaml/main/schema/formalization.schema.json
+# Palomar submission draft: all compared statements are listed in alignment.
+version: v0.4
+
+project:
+  name: 'lean-CA: foundations of complex analysis of one variable in Lean 4'
+  description: >-
+    A Lean 4 formalization, built on Mathlib, of classical complex analysis of one variable. The 45
+    compared results cover global primitives and logarithms, Cauchy and residue theory for cycles,
+    Laurent expansions, the argument principle and Rouché, Hurwitz and local mapping, Montel and Vitali,
+    Runge approximation and Mittag–Leffler, Cauchy–Pompeiu, Weierstrass and Hadamard factorization,
+    Blaschke and Riesz factorization, normalized Riemann mapping, Schwarz–Pick and Koebe estimates,
+    harmonic and subharmonic functions, the Dirichlet problem and Green functions under an exterior-disc
+    condition, reflection, natural boundaries and removability. Several integral and local results
+    allow complex Banach-space values. These are source-based classical results; no new mathematical
+    theorem is claimed. The project grew out of work on Carlson’s approach to special functions and
+    now provides a separate complex-analysis library.
+  authors:
+    - Bastiaan J. Braams
+  license: Apache-2.0
+  responsible_maintainers:
+    - Bastiaan J. Braams
+
+repository:
+  role: substantive-development
+
+classification:
+  arxiv:
+    - math.CV
+  msc2020:
+    - 30-04
+    - 30C35
+    - 30C55
+    - 30D15
+    - 30D45
+    - 30E10
+    - 30E20
+    - 31A05
+
+sources:
+  - title: Functions of One Complex Variable I (second edition)
+    authors:
+      - John B. Conway
+    location: Graduate Texts in Mathematics 11, Springer, 1978
+    type: book
+    relationship: formalizes
+    note: >-
+      Conway I: selected results of Chapters IV–XI, especially Cauchy and residue theory, normal families,
+      Runge, Mittag–Leffler, products, mapping and potential theory. The alignment below records the
+      compared results, not complete coverage of these chapters.
+  - title: Functions of One Complex Variable II
+    authors:
+      - John B. Conway
+    location: Graduate Texts in Mathematics 159, Springer, 1995
+    type: book
+    relationship: formalizes
+    note: >-
+      Conway II: selected univalent-function results in Chapter 14, potential theory in Chapter 19,
+      and Blaschke and Riesz factorization in Chapter 20.
+  - title: Complex Analysis (fourth edition)
+    authors:
+      - Serge Lang
+    location: Graduate Texts in Mathematics 103, Springer, 1999
+    type: book
+    relationship: formalizes
+    note: >-
+      Lang: classical one-variable theory, particularly Chapter XIII §3 for finite-order entire functions
+      and Hadamard factorization; see COVERAGE.md for the wider comparison.
+  - title: Complex Analysis
+    authors:
+      - Theodore W. Gamelin
+    location: Undergraduate Texts in Mathematics, Springer, 2001
+    type: book
+    relationship: formalizes
+    note: >-
+      Gamelin: Schwarz–Pick, Riemann mapping, normal families, harmonic functions and the Dirichlet
+      problem; chapter and section references are in the alignment.
+  - title: Complex Analysis
+    authors:
+      - Elias M. Stein
+      - Rami Shakarchi
+    location: Princeton Lectures in Analysis II, Princeton University Press, 2003
+    type: book
+    relationship: formalizes
+    note: >-
+      Stein–Shakarchi: selected Cauchy, residue and reflection results and Chapter 5 on entire functions
+      and Hadamard factorization.
+  - title: 'Basic Complex Analysis: A Comprehensive Course in Analysis, Part 2A'
+    authors:
+      - Barry Simon
+    location: American Mathematical Society, 2015
+    type: book
+    relationship: formalizes
+    note: >-
+      Simon: selected integral, approximation, mapping and factorization results, as cited in module
+      headers and the alignment; no claim of full coverage.
+  - title: Classical Analysis in the Complex Plane
+    authors:
+      - Robert B. Burckel
+    location: Birkhäuser/Springer, 2021
+    type: book
+    relationship: formalizes
+    note: >-
+      Burckel: selected removability, normal-family and approximation results; also a reference for
+      the library coverage review.
+  - title: An Introduction to Complex Analysis in Several Variables (second edition)
+    authors:
+      - Lars Hörmander
+    location: North-Holland Mathematical Library 7, North-Holland, 1973
+    type: book
+    relationship: formalizes
+    note: >-
+      Only the one-variable Cauchy–Pompeiu and subharmonic material of Chapter I, cited by the corresponding
+      module headers; no several-variable theorem is included in the challenge.
+  - title: An Introduction to Complex Analysis
+    authors:
+      - Ravi P. Agarwal
+      - Kanishka Perera
+      - Sandra Pinelas
+    location: Springer, 2011
+    type: book
+    relationship: background
+    note: Companion reference used for the coverage review, especially Lectures 25–44.
+  - title: Complex Analysis (third edition)
+    authors:
+      - Joseph Bak
+      - Donald J. Newman
+    location: Undergraduate Texts in Mathematics 249, Springer, 2010
+    type: book
+    relationship: background
+    note: Companion reference used for the coverage review, Chapters 4–18.
+  - title: Complex Function Theory
+    authors:
+      - Maurice Heins
+    location: Academic Press, 1968
+    type: book
+    relationship: background
+    note: Companion reference for integral theory, approximation, entire functions and conformal mapping.
+  - title: Theory of Complex Functions
+    authors:
+      - Reinhold Remmert
+    location: Graduate Texts in Mathematics 122, Springer, 1991
+    type: book
+    relationship: background
+    note: Companion reference for local holomorphic theory, Cauchy formulas, convergence and continuation.
+
+related_formalizations:
+  - id: https://github.com/leanprover-community/mathlib4
+    relationship: builds-on
+    note: >-
+      The pinned Mathlib release supplies the underlying topology, integration, power series, local
+      holomorphic theory, Schwarz lemma, meromorphic orders and divisors, harmonic theory, Jensen
+      formula and functional analysis. This repository extends those foundations.
+  - id: https://github.com/vbeffara/RMT4/tree/69a9efe77e912647d651aa7368856955b24dca2f
+    relationship: other
+    note: >-
+      Vincent Beffara: Montel, both Hurwitz theorems and Riemann mapping, closely overlapping the
+      compared results. See CREDITS.md for differences in domain hypotheses and normalization.
+  - id: https://github.com/leanprover-community/mathlib4/pull/33505
+    relationship: other
+    note: >-
+      Yury Kudryashov: Riemann mapping, Hurwitz and a holomorphic argument principle. The Hurwitz
+      declaration names coincide; the reviewed PR assumes a countably generated filter, whereas this
+      project only requires a nontrivial filter. PR status and inspected revision are recorded in
+      CREDITS.md.
+  - id: https://github.com/leanprover-community/mathlib4/pull/43100
+    relationship: other
+    note: >-
+      JJYYY-JJY, with credited coauthor ajirving: higher Cauchy formulas at an interior point of a
+      disc, including Banach-valued versions. Closely related to the compared cauchy_derivatives statement.
+  - id: https://github.com/leanprover-community/mathlib4/pull/29588
+    relationship: other
+    note: >-
+      Roman Kvasnytskyi: scalar residues defined using circle integrals, independence of radius and
+      simple-pole formulas; related to this project’s Banach-valued residue API.
+  - id: https://github.com/leanprover-community/mathlib4/pull/39232
+    relationship: other
+    note: >-
+      Submitted by jerwaynejones; the source credits Jeremy Tan. A rectangular contour residue formula
+      for specified simple poles and a holomorphic remainder, overlapping a special case of cycle
+      residue theory.
+  - id: https://github.com/leibniz-rs/PrimeNumberTheoremAnd/tree/8dc50485d7166be58b05ee0d54216c06a4b3aef9
+    relationship: other
+    note: >-
+      Matteo Cipollina: Weierstrass elementary factors, the same small-disc factor estimate, finite-order
+      zero counting and Hadamard factorization. The Hadamard theorem is a close mathematical match
+      with different growth and genus conventions. The fork also contains the PNT+ contributors’ rectangular
+      simple-pole residue theorem. Inspected source was not rebuilt in the attribution review.
+  - id: https://github.com/will1491/RiemannDynamics/tree/b3fa37cc0f18a23ea66b654ea3f73eb472129010
+    relationship: other
+    note: >-
+      Will (Ziang) Li: compact-support Cauchy–Pompeiu, differentiating the Cauchy transform and solving
+      the antiholomorphic derivative equation. These overlap the scalar case of the project’s Banach-valued,
+      parameter-dependent theory. Its Montel theorem imports Beffara’s result.
+  - id: https://github.com/leanprover-community/mathlib4/pull/42630
+    relationship: other
+    note: 'Will (Ziang) Li: Wirtinger derivatives and the Cauchy–Riemann characterization, related
+      to dbarAlong.'
+  - id: https://github.com/kebekus/ProjectVD/tree/8dd096581f1578e2d0b75b099c8314a198902f1b
+    relationship: other
+    note: >-
+      Stefan Kebekus: Wirtinger operators, and harmonic, meromorphic, divisor and Jensen foundations
+      contributed to Mathlib. Related ongoing Poisson–Jensen, growth and reciprocal-disc-factor work
+      is distinguished from identical theorem matches in CREDITS.md.
+  - id: https://github.com/phasetr/ising-model/tree/bb1a2dd19c8b70f33201daf130729ddb4790b66f
+    relationship: other
+    note: >-
+      The phasetr/ising-model contributors: scalar Montel extraction and Vitali–Porter with an interior
+      accumulation point, close matches to the selected finite-dimensional-valued statements.
+  - id: https://github.com/girving/ray/tree/753f7131cf96f4651294de4398368abf136c34de
+    relationship: other
+    note: >-
+      Geoffrey Irving: normalized holomorphic logarithms on discs, holomorphic parameter integrals
+      and locally uniform analytic limits. The selected logarithm theorem treats simply connected
+      open domains.
+  - id: https://github.com/vbeffara/Curvint/tree/00b0bf1cfa3106fa92329f5f52e449186db0c9d3
+    relationship: other
+    note: >-
+      Vincent Beffara: covering spaces of local primitives, contour integration by lifting and primitives
+      on star-convex domains. Related infrastructure, not a claim that the selected simply connected
+      primitive theorem is present there.
+  - id: https://github.com/leanprover-community/mathlib4/pull/26950
+    relationship: other
+    note: >-
+      Junyan Xu: étalé-space and monodromy infrastructure toward primitives. The reviewed primitive
+      file contains no declarations; this is credit for a related approach, not a completed theorem
+      match.
+  - id: https://github.com/leanprover-community/mathlib4/pull/33368
+    relationship: other
+    note: >-
+      Yury Kudryashov: unit-disc shifts, agreeing with discMobius after changing the parameter’s sign.
+      PR #33381 contains related Schwarz estimates.
+  - id: https://github.com/leanprover-community/mathlib4/pull/26479
+    relationship: other
+    note: >-
+      thefundamentaltheor3m: Cauchy–Goursat for unbounded rectangles, related to the broader library’s
+      improper contour theory, outside the selected challenge.
+
+status:
+  scope: >-
+    The submission selects 45 principal results from ComplexAnalysis; supporting Analysis and Topology
+    modules are used by the proofs but contribute no separately selected theorem. The library contains
+    further contour, approximation, continuation and growth theory described in SYNOPSIS.md. This
+    is not a complete formalization of the cited books. Full Picard theory, general boundary extension
+    of conformal maps and a full Hardy-space inner–outer theory are outside the submission. The counts
+    below concern the substantive library and Solution.lean; Challenge.lean intentionally has 45 theorem-proof
+    holes and no definition holes.
+  sorry_count: 0
+  sorry_in_definitions: 0
+  axioms: []
+
+automation:
+  methods:
+    - method: manual
+      tool_setup: Human choice of scope, references and conventions, direction of development, and
+        responsibility for the submission.
+    - method: agent
+      framework: Codex
+      models:
+        - gpt-6-astra
+    - method: agent
+      framework: Claude Code
+      models:
+        - claude-fable-5-1
+        - claude-opus-5-5
+  notes: >-
+    Human-directed development using GPT and Claude through terminal coding agents. The listed identifiers
+    record the latest models used; historical model versions and costs have not been reconstructed.
+    Coding agents assisted mathematical development, Lean proof writing, debugging, documentation
+    and review, using terminal builds under AGENTS.md. No exhaustive human line-by-line proof review
+    is claimed. Challenge.lean gives independent statements over Mathlib and explicit supporting definitions;
+    Solution.lean proves them using the substantive library in this repository.
+
+fidelity:
+  divergences: >-
+    The comparison preserves the library hypotheses. Runge disjointness is written as A ∩ K = ∅. Cauchy
+    and residue cycles are finite families of closed C¹ paths with vanishing index outside the domain;
+    the cycle residue theorem allows isolated singularities of any type, with finitely many specified
+    exceptional points. The Laurent theorem uses a closed annulus on which the function is holomorphic
+    on a neighborhood. Montel and Vitali allow finite-dimensional complex Banach targets; the iterated-derivative
+    convergence statement is pointwise. Mittag–Leffler takes principal parts holomorphic on the whole
+    punctured plane at each specified singularity. The sequential Weierstrass factorization uses nonzero
+    zeros tending to infinity, with multiplicities; Hadamard uses an intrinsic countable index type,
+    including finite and empty cases. HasOrderLE is the explicit bound A exp(B |z|^ρ); the genus k
+    satisfies ρ < k + 1 and the polynomial degree is at most k, rather than defining the order by
+    a limsup. The Blaschke condition counts multiplicities at nonzero zeros. Riesz factorization gives
+    a zero-free bounded factor and is not a complete Hardy-space inner–outer factorization. Koebe
+    growth is the upper bound; distortion has both bounds. Subharmonic functions are real-valued;
+    the selected C² Laplacian result is the sufficient direction. The general Dirichlet and Green
+    results assume bounded open sets with an exterior closed disc touching the closure only at each
+    boundary point; the Green function is asserted nonnegative off its pole. Countable-set removability
+    and several integral statements generalize scalar textbook formulations. In the two Weierstrass
+    challenge statements finite-set cardinality is written as Set.ncard; the product statement also
+    includes its proved entire-function property.
+
+review:
+  status: agent-reviewed
+  notes: >-
+    Validated on 24 September 2026 with Lean and Mathlib v4.35.0-rc2. The library passes lake build;
+    the submission passes lake build Challenge Solution and lake env lean on each new Lean file. The
+    only proof holes are the 45 deliberate Challenge theorem bodies; the library and Solution contain
+    none. The metadata passes the v0.4 schema. All 45 solution theorems use only propext, Classical.choice
+    and Quot.sound. Comparator accepts all 45 comparisons and the supporting definitions, and Lean’s
+    kernel, NanoDa and con-ron accept the exported solution. The ordinary sandbox build could not
+    mount this checkout’s intentional .lake symlink, so that source-to-export sandbox stage remains
+    unvalidated locally. Instead, the bundled leanexport exported the successfully built modules using
+    Comparator’s theorem, axiom and primitive roots; lake comparator checked those exports through
+    its supported --challenge-from-export and --solution-from-export options, with its kernel sandboxes
+    enabled. Statement selection, hypotheses, copied definitions and credits were reviewed by a coding
+    agent. Palomar editorial review is pending; no independent human peer review or source-author
+    endorsement is claimed.
+
+alignment:
+  namespace: LeanCA
+  statements:
+    - source: Conway I, IV.5 (Cauchy theory and primitives)
+      lean: LeanCA.primitives
+      module: Challenge
+      status: proved
+      note: Primitives on simply connected open sets, with prescribed value; Banach-valued.
+      library_declaration: DifferentiableOn.exists_primitive_of_isSimplyConnected
+      library_file: ComplexAnalysis/HasPrimitives.lean
+    - source: Conway I, IV.6 (logarithms on simply connected domains)
+      lean: LeanCA.logarithm
+      module: Challenge
+      status: proved
+      note: A normalized holomorphic logarithm of a nonvanishing function on a simply connected domain.
+      library_declaration: Complex.exists_analyticOnNhd_logBranch_eq
+      library_file: ComplexAnalysis/BranchLog.lean
+    - source: Conway I, IV.5; Remmert, Chapter 8 (Cauchy derivative formulas)
+      lean: LeanCA.cauchy_derivatives
+      module: Challenge
+      status: proved
+      note: The Cauchy formula for every iterated derivative at any interior point of a disc.
+      library_declaration: DiffContOnCl.iteratedDeriv_eq_circleIntegral_sub_zpow_smul
+      library_file: ComplexAnalysis/CauchyDerivatives.lean
+    - source: Conway I, IV.4 (index of a closed curve)
+      lean: LeanCA.winding_integer
+      module: Challenge
+      status: proved
+      note: The winding index of a closed C¹ curve avoiding the evaluation point is an integer.
+      library_declaration: Complex.exists_int_curveIndex
+      library_file: ComplexAnalysis/CurveIndex.lean
+    - source: Conway I, IV.5.4; Simon, 4.2.1
+      lean: LeanCA.cauchy_theorem
+      module: Challenge
+      status: proved
+      note: Cauchy’s theorem for cycles homologous to zero in an open set; Banach-valued.
+      library_declaration: Complex.Cycle.integral_eq_zero
+      library_file: ComplexAnalysis/Cycle/Cauchy.lean
+    - source: Conway I, IV.5.4; Simon, 4.2.1
+      lean: LeanCA.cauchy_formula
+      module: Challenge
+      status: proved
+      note: The index-weighted Cauchy formula for cycles homologous to zero; Banach-valued.
+      library_declaration: Complex.Cycle.integral_sub_inv_smul_eq_index_smul
+      library_file: ComplexAnalysis/Cycle/Cauchy.lean
+    - source: Conway I, V.2.2 (residue theorem)
+      lean: LeanCA.residue_theorem
+      module: Challenge
+      status: proved
+      note: The residue theorem for a cycle and finitely many isolated singularities of any type.
+      library_declaration: Complex.Cycle.integral_eq_sum_index_smul_residue
+      library_file: ComplexAnalysis/Cycle/Residue.lean
+    - source: Conway I, V.1 (Laurent expansions)
+      lean: LeanCA.laurent_expansion
+      module: Challenge
+      status: proved
+      note: The bilateral Laurent expansion on an annulus; Banach-valued.
+      library_declaration: Complex.hasSum_circleLaurentCoeff_annulus
+      library_file: ComplexAnalysis/LaurentSeries/Basic.lean
+    - source: Conway I, V.2 (residues)
+      lean: LeanCA.residue_higher_pole
+      module: Challenge
+      status: proved
+      note: The residue of a holomorphic numerator divided by an arbitrary positive power.
+      library_declaration: Complex.residue_sub_zpow_smul
+      library_file: ComplexAnalysis/Residue.lean
+    - source: Conway I, V.3 (argument principle)
+      lean: LeanCA.argument_principle
+      module: Challenge
+      status: proved
+      note: The argument principle on a disc, counting meromorphic zeros minus poles.
+      library_declaration: Complex.circleIntegral_logDeriv_eq_sum_divisor
+      library_file: ComplexAnalysis/ArgumentPrinciple.lean
+    - source: Conway I, V.3 (Rouché’s theorem)
+      lean: LeanCA.rouche
+      module: Challenge
+      status: proved
+      note: 'Rouché’s theorem on a disc: a strict boundary inequality preserves the total divisor.'
+      library_declaration: Complex.sum_divisor_eq_of_norm_sub_lt
+      library_file: ComplexAnalysis/Rouche.lean
+    - source: Conway I, VII.2 (Hurwitz and normal families)
+      lean: LeanCA.hurwitz_zero_free
+      module: Challenge
+      status: proved
+      note: 'Hurwitz: a locally uniform limit of nonvanishing holomorphic functions is zero or nonvanishing.'
+      library_declaration: Complex.eqOn_zero_or_forall_ne_zero_of_tendstoLocallyUniformlyOn
+      library_file: ComplexAnalysis/Hurwitz.lean
+    - source: Conway I, VII.2 (Hurwitz and normal families)
+      lean: LeanCA.hurwitz_injective
+      module: Challenge
+      status: proved
+      note: 'Hurwitz: a locally uniform limit of injective holomorphic functions is constant or injective.'
+      library_declaration: Complex.eqOn_const_or_injOn_of_tendstoLocallyUniformlyOn
+      library_file: ComplexAnalysis/Hurwitz.lean
+    - source: Conway I, V.1 (Casorati–Weierstrass)
+      lean: LeanCA.casorati_weierstrass
+      module: Challenge
+      status: proved
+      note: 'Casorati–Weierstrass: every punctured neighborhood of an essential singularity has dense
+        image.'
+      library_declaration: Complex.dense_image_of_not_meromorphicAt
+      library_file: ComplexAnalysis/EssentialSingularity.lean
+    - source: Conway I, V.1 (isolated singularities)
+      lean: LeanCA.isolated_singularity
+      module: Challenge
+      status: proved
+      note: An isolated singularity is removable, a pole, or has dense image on each punctured neighborhood.
+      library_declaration: Complex.isolatedSingularity_trichotomy
+      library_file: ComplexAnalysis/EssentialSingularity.lean
+    - source: Simon, 3.4.1; Conway I, IV.7.4
+      lean: LeanCA.local_mapping
+      module: Challenge
+      status: proved
+      note: 'Local mapping with multiplicity: nearby noncritical values have exactly `m` simple preimages.'
+      library_declaration: Complex.exists_forall_ncard_preimage_eq
+      library_file: ComplexAnalysis/LocalMapping.lean
+    - source: Conway I, VII.2 (Montel)
+      lean: LeanCA.montel
+      module: Challenge
+      status: proved
+      note: 'Montel: compact-local boundedness gives a holomorphic subsequential limit; finite-dimensional
+        values.'
+      library_declaration: Complex.exists_subseq_tendstoLocallyUniformlyOn_of_bounded_on_compacts
+      library_file: ComplexAnalysis/Montel.lean
+    - source: Burckel, VII.2; Gamelin, Chapter XII (Vitali convergence)
+      lean: LeanCA.vitali
+      module: Challenge
+      status: proved
+      note: 'Vitali–Porter: convergence on a set with an interior accumulation point implies local
+        uniform convergence.'
+      library_declaration: Complex.exists_tendstoLocallyUniformlyOn_of_forall_exists_tendsto
+      library_file: ComplexAnalysis/Vitali.lean
+    - source: Conway I, VII.1–2 (convergence of derivatives)
+      lean: LeanCA.derivative_convergence
+      module: Challenge
+      status: proved
+      note: Locally uniform convergence of holomorphic functions implies pointwise convergence of
+        every derivative.
+      library_declaration: Complex.tendsto_iteratedDeriv_of_tendstoLocallyUniformlyOn
+      library_file: ComplexAnalysis/LocallyUniform.lean
+    - source: Conway I, VIII.1.7; Simon, 4.7.1
+      lean: LeanCA.runge
+      module: Challenge
+      status: proved
+      note: Runge approximation with poles in a set meeting every bounded complementary component.
+      library_declaration: Complex.runge
+      library_file: ComplexAnalysis/Runge/Theorem.lean
+    - source: Conway I, VIII.1.8; Simon, 4.7.3
+      lean: LeanCA.runge_polynomial
+      module: Challenge
+      status: proved
+      note: Polynomial Runge approximation on a compact set with connected complement.
+      library_declaration: Complex.exists_polynomial_approx_of_isPreconnected_compl
+      library_file: ComplexAnalysis/Runge/Theorem.lean
+    - source: Conway I, VIII.3 (Mittag–Leffler)
+      lean: LeanCA.mittag_leffler
+      module: Challenge
+      status: proved
+      note: Mittag–Leffler on an arbitrary open set for a relatively discrete closed set of singularities.
+      library_declaration: Complex.mittagLeffler
+      library_file: ComplexAnalysis/MittagLeffler.lean
+    - source: Hörmander, Chapter I (Cauchy–Pompeiu formula)
+      lean: LeanCA.cauchy_pompeiu
+      module: Challenge
+      status: proved
+      note: The compact-support C¹ Cauchy–Pompeiu identity; Banach-valued.
+      library_declaration: Complex.integral_inv_smul_dbarAlong_fderiv
+      library_file: ComplexAnalysis/CauchyPompeiu.lean
+    - source: Conway I, VII.5.12–14 (Weierstrass products)
+      lean: LeanCA.weierstrass_product
+      module: Challenge
+      status: proved
+      note: The Weierstrass product is entire and has precisely the prescribed zeros, with multiplicities.
+      library_declaration: Complex.analyticOrderAt_weierstrassProduct
+      library_file: ComplexAnalysis/WeierstrassProduct.lean
+    - source: Conway I, VII.5.12–14 (Weierstrass factorization)
+      lean: LeanCA.weierstrass_factorization
+      module: Challenge
+      status: proved
+      note: Weierstrass factorization for a nonzero zero sequence tending to infinity, counted with
+        multiplicity.
+      library_declaration: Complex.exists_exp_mul_weierstrassProduct
+      library_file: ComplexAnalysis/WeierstrassProduct.lean
+    - source: Lang, XIII.3; Conway I, XI.3.4; Stein–Shakarchi, Chapter 5 (Hadamard)
+      lean: LeanCA.hadamard
+      module: Challenge
+      status: proved
+      note: Hadamard factorization under an explicit growth bound, with polynomial degree at most
+        the genus.
+      library_declaration: Complex.exists_hadamard_factorization
+      library_file: ComplexAnalysis/Hadamard.lean
+    - source: Simon, 9.9; Conway II, 20.2 (Blaschke condition)
+      lean: LeanCA.blaschke_condition
+      module: Challenge
+      status: proved
+      note: The multiplicity-weighted Blaschke condition for nonzero zeros of a bounded nontrivial
+        holomorphic function.
+      library_declaration: Complex.summable_analyticOrderAt_toNat_mul_one_sub_norm_of_bounded
+      library_file: ComplexAnalysis/RieszFactorization.lean
+    - source: Conway II, 20.2.6; Simon, 9.9 (Riesz factorization)
+      lean: LeanCA.riesz_factorization
+      module: Challenge
+      status: proved
+      note: Riesz factorization into an origin power, a Blaschke product and a zero-free bounded holomorphic
+        factor.
+      library_declaration: Complex.exists_rieszFactorization
+      library_file: ComplexAnalysis/RieszFactorization.lean
+    - source: Conway I, VII.4.2; Gamelin, XI.4; Simon, 8.1.1
+      lean: LeanCA.riemann_mapping
+      module: Challenge
+      status: proved
+      note: The normalized Riemann mapping theorem for a proper simply connected open subset of the
+        plane.
+      library_declaration: Complex.exists_riemannMap
+      library_file: ComplexAnalysis/RiemannMapping.lean
+    - source: Conway I, VII.4.2 (normalized uniqueness)
+      lean: LeanCA.riemann_mapping_unique
+      module: Challenge
+      status: proved
+      note: Uniqueness of the Riemann map normalized by its value and a positive real derivative.
+      library_declaration: Complex.eqOn_of_riemannMap
+      library_file: ComplexAnalysis/DiscAutomorphism.lean
+    - source: Gamelin, IX.3; Simon, 7.4 (Schwarz–Pick)
+      lean: LeanCA.schwarz_pick
+      module: Challenge
+      status: proved
+      note: Schwarz–Pick contraction of the pseudohyperbolic distance on the unit disc.
+      library_declaration: Complex.norm_discMobius_apply_apply_le
+      library_file: ComplexAnalysis/SchwarzPick.lean
+    - source: Gamelin, IX.3; Simon, 7.4 (Schwarz–Pick)
+      lean: LeanCA.schwarz_pick_derivative
+      module: Challenge
+      status: proved
+      note: The differential Schwarz–Pick inequality on the unit disc.
+      library_declaration: Complex.norm_deriv_div_one_sub_normSq_le
+      library_file: ComplexAnalysis/SchwarzPick.lean
+    - source: Conway II, 14.7 (Koebe quarter theorem)
+      lean: LeanCA.koebe_quarter
+      module: Challenge
+      status: proved
+      note: Koebe’s quarter theorem for a normalized univalent function.
+      library_declaration: Complex.ball_subset_image_of_injOn
+      library_file: ComplexAnalysis/Koebe.lean
+    - source: Conway II, 14.7 (Koebe distortion)
+      lean: LeanCA.koebe_distortion
+      module: Challenge
+      status: proved
+      note: The two-sided Koebe distortion bound for the derivative of a univalent function.
+      library_declaration: Complex.distortion_le_of_class_S
+      library_file: ComplexAnalysis/KoebeGrowth.lean
+    - source: Conway II, 14.7 (upper growth bound)
+      lean: LeanCA.koebe_growth
+      module: Challenge
+      status: proved
+      note: The upper Koebe growth bound for a normalized univalent function.
+      library_declaration: Complex.norm_le_div_one_sub_sq_of_class_S
+      library_file: ComplexAnalysis/KoebeGrowth.lean
+    - source: Conway I, X.2.4; Gamelin, X.1; Simon, 5.3
+      lean: LeanCA.dirichlet_disc
+      module: Challenge
+      status: proved
+      note: The Dirichlet problem on a disc with arbitrary continuous boundary data.
+      library_declaration: Complex.exists_harmonicContOnCl_eqOn_sphere
+      library_file: ComplexAnalysis/DirichletDisc.lean
+    - source: Conway I, X.2.9; Gamelin, X.1
+      lean: LeanCA.harnack
+      module: Challenge
+      status: proved
+      note: The two-sided Harnack inequality for a harmonic function nonnegative on the boundary circle.
+      library_declaration: Complex.harnack
+      library_file: ComplexAnalysis/Harnack.lean
+    - source: Conway I, X.2.10–11 (Harnack convergence)
+      lean: LeanCA.harnack_convergence
+      module: Challenge
+      status: proved
+      note: Harnack convergence for an increasing harmonic sequence bounded above at one point.
+      library_declaration: Complex.exists_harmonicOnNhd_tendstoLocallyUniformlyOn_of_monotone
+      library_file: ComplexAnalysis/HarmonicLimit.lean
+    - source: Conway I, X.3; Conway II, 19.4 (subharmonic maximum principle)
+      lean: LeanCA.subharmonic_maximum
+      module: Challenge
+      status: proved
+      note: The strong maximum principle for real-valued subharmonic functions.
+      library_declaration: Complex.SubharmonicOn.eqOn_const_of_isMaxOn
+      library_file: ComplexAnalysis/Subharmonic/Basic.lean
+    - source: Conway I, X.3; Hörmander, Chapter I (subharmonicity and the Laplacian)
+      lean: LeanCA.subharmonic_laplacian
+      module: Challenge
+      status: proved
+      note: A C² function with nonnegative Laplacian is subharmonic.
+      library_declaration: Complex.subharmonicOn_of_laplacian_nonneg
+      library_file: ComplexAnalysis/Subharmonic/SmoothCriterion.lean
+    - source: Conway I, X.4; Gamelin, XV.4 (Perron and barriers)
+      lean: LeanCA.dirichlet_exterior_disc
+      module: Challenge
+      status: proved
+      note: The Dirichlet problem on bounded open sets satisfying an exterior-disc condition at every
+        boundary point.
+      library_declaration: Complex.exists_harmonicOnNhd_tendsto_of_exteriorDisc
+      library_file: ComplexAnalysis/Perron/Barrier.lean
+    - source: Gamelin, XV.2–3; Conway II, 19.7–19.9 (Green functions)
+      lean: LeanCA.green_function
+      module: Challenge
+      status: proved
+      note: A nonnegative Green function with logarithmic singularity and zero boundary limits on
+        such a domain.
+      library_declaration: Complex.exists_greenFunction
+      library_file: ComplexAnalysis/GreenFunction.lean
+    - source: Conway I, IX.1; Stein–Shakarchi, 2.5.4 (Schwarz reflection)
+      lean: LeanCA.schwarz_reflection
+      module: Challenge
+      status: proved
+      note: Schwarz reflection across the real axis on a conjugation-invariant open set.
+      library_declaration: Complex.analyticOnNhd_schwarzReflection
+      library_file: ComplexAnalysis/Reflection.lean
+    - source: Conway I, IX.1, exercises (natural boundaries)
+      lean: LeanCA.natural_boundary
+      module: Challenge
+      status: proved
+      note: The lacunary series with exponents `2 ^ n` has no continuous extension across any point
+        of the unit circle.
+      library_declaration: Complex.not_exists_continuousOn_extension_lacunary
+      library_file: ComplexAnalysis/NaturalBoundary.lean
+    - source: Burckel, V.6 (removability; countable-set and Banach-valued generalization)
+      lean: LeanCA.removability
+      module: Challenge
+      status: proved
+      note: Removability of a countable exceptional set for a continuous, otherwise holomorphic Banach-valued
+        function.
+      library_declaration: Complex.analyticOnNhd_of_continuousOn_off_countable
+      library_file: ComplexAnalysis/RemovableSingularity.lean
+
+acknowledgements: >-
+  This formalization builds on Mathlib and its contributors. Related formalizations by Vincent Beffara,
+  Yury Kudryashov, Roman Kvasnytskyi, Matteo Cipollina, Will (Ziang) Li, Stefan Kebekus, Geoffrey
+  Irving, Junyan Xu, JJYYY-JJY and ajirving, Jeremy Tan, the PNT+ and phasetr/ising-model contributors,
+  and others are credited above and in CREDITS.md. That review, dated 24 September 2026, records source-level
+  comparisons and pinned revisions. The relationship “other” identifies mathematical overlap without
+  asserting copying or independent provenance; similarity alone does not establish either. External
+  sources were inspected, not build-validated. The existing theorem docstrings carry brief credits.
+  These acknowledgments do not imply endorsement by source authors.

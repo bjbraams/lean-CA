@@ -1,0 +1,312 @@
+/-
+Copyright (c) 2026 Bastiaan J Braams. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Bastiaan J Braams
+-/
+module
+
+public import ComplexAnalysis.AreaTheorem
+public import ComplexAnalysis.BranchLog
+
+/-!
+# Bieberbach's coefficient bound and the Koebe one-quarter theorem
+
+Let `f` be holomorphic and injective on the unit disc with `f 0 = 0` and `f' 0 = 1` (the class
+`S`), and write `f z = z + a₂ z² + ⋯`. **Bieberbach's theorem** states `‖a₂‖ ≤ 2`: the square-root
+transform `F z = z √(f (z²) / z²)` is odd, injective and normalized, so `1 / F` belongs to the
+class `Σ` of the area theorem with first coefficient `-a₂ / 2`, and the area theorem gives
+`‖a₂ / 2‖ ≤ 1`. **The Koebe one-quarter theorem** follows: if `w` is omitted by `f`, the
+function `f / (1 - f / w)` is again in the class `S` with second coefficient `a₂ + 1 / w`, so
+`‖1 / w‖ ≤ 4`. Hence the image of the unit disc contains the disc of radius `1 / 4`.
+
+## Main results
+
+* `Complex.norm_taylorCoeff_two_le`: **Bieberbach's theorem** `‖a₂‖ ≤ 2`.
+* `Complex.norm_iteratedDeriv_two_le`: the same bound as `‖f'' 0‖ ≤ 4`.
+* `Complex.ball_subset_image_of_injOn`: **the Koebe one-quarter theorem**.
+
+## References
+
+* J. B. Conway, *Functions of One Complex Variable II*, Chapter 14, §7.
+* P. L. Duren, *Univalent Functions*, Chapter 2, §2–3.
+-/
+
+public noncomputable section
+
+open Set Metric Filter Real
+open scoped Topology
+
+namespace Complex
+
+variable {f : ℂ → ℂ}
+
+/-- The unit disc is simply connected. -/
+theorem isSimplyConnected_ball_zero_one : IsSimplyConnected (ball (0 : ℂ) 1) := by
+  let : ContractibleSpace (ball (0 : ℂ) 1) :=
+    (convex_ball (0 : ℂ) 1).contractibleSpace (nonempty_ball.mpr one_pos)
+  exact (inferInstance : SimplyConnectedSpace (ball (0 : ℂ) 1))
+
+/-- The divided difference `f z / z` of a normalized injective map is holomorphic and
+nonvanishing on the disc. -/
+theorem dslope_ne_zero_of_injOn_zero
+    (hinj : InjOn f (ball 0 1)) (hf0 : f 0 = 0) (hf1 : deriv f 0 = 1) {z : ℂ}
+    (hz : z ∈ ball (0 : ℂ) 1) : dslope f 0 z ≠ 0 := by
+  by_cases hz0 : z = 0
+  · subst hz0
+    rw [dslope_same, hf1]
+    exact one_ne_zero
+  · rw [dslope_of_ne _ hz0, slope_def_field, sub_zero, hf0, sub_zero]
+    refine div_ne_zero (fun h => hz0 ?_) hz0
+    exact hinj hz (mem_ball_self one_pos) (h.trans hf0.symm)
+
+/-- **Bieberbach's theorem**: for `f` holomorphic and injective on the unit disc with `f 0 = 0`
+and `f' 0 = 1`, the second Taylor coefficient satisfies `‖a₂‖ ≤ 2`. -/
+theorem norm_taylorCoeff_two_le (hf : DifferentiableOn ℂ f (ball 0 1)) (hinj : InjOn f (ball 0 1))
+    (hf0 : f 0 = 0) (hf1 : deriv f 0 = 1) : ‖taylorCoeff f 2‖ ≤ 2 := by
+  have h0 : (0 : ℂ) ∈ ball (0 : ℂ) 1 := mem_ball_self one_pos
+  have hU : ball (0 : ℂ) 1 ∈ 𝓝 (0 : ℂ) := isOpen_ball.mem_nhds h0
+  -- the divided difference and its holomorphic square root
+  set p : ℂ → ℂ := dslope f 0 with hp_def
+  have hpd : DifferentiableOn ℂ p (ball 0 1) := (differentiableOn_dslope hU).mpr hf
+  have hp0 : ∀ z ∈ ball (0 : ℂ) 1, p z ≠ 0 := fun z hz =>
+    dslope_ne_zero_of_injOn_zero hinj hf0 hf1 hz
+  have hp00 : p 0 = 1 := by rw [hp_def, dslope_same, hf1]
+  obtain ⟨q₀, hq₀, hq₀sq⟩ := exists_analyticOnNhd_root isOpen_ball isSimplyConnected_ball_zero_one
+    hpd hp0 two_ne_zero
+  -- normalize the root so that `q 0 = 1`
+  have hq₀0 : q₀ 0 ^ 2 = 1 := by rw [hq₀sq 0 h0, hp00]
+  set q : ℂ → ℂ := fun z => q₀ 0 * q₀ z with hq_def
+  have hqd : DifferentiableOn ℂ q (ball 0 1) :=
+    (differentiableOn_const _).mul hq₀.differentiableOn
+  have hqsq : ∀ z ∈ ball (0 : ℂ) 1, q z ^ 2 = p z := fun z hz => by
+    rw [hq_def]
+    simp only
+    rw [mul_pow, hq₀0, one_mul, hq₀sq z hz]
+  have hq0 : q 0 = 1 := by
+    rw [hq_def]
+    simp only
+    rw [← sq, hq₀0]
+  have hqne : ∀ z ∈ ball (0 : ℂ) 1, q z ≠ 0 := fun z hz h => by
+    have := hqsq z hz
+    rw [h, zero_pow two_ne_zero] at this
+    exact hp0 z hz this.symm
+  -- the square-root transform `F z = z q (z²)`
+  have hsq : ∀ z ∈ ball (0 : ℂ) 1, z ^ 2 ∈ ball (0 : ℂ) 1 := fun z hz => by
+    rw [mem_ball_zero_iff, norm_pow]
+    have := mem_ball_zero_iff.mp hz
+    nlinarith [norm_nonneg z]
+  set F : ℂ → ℂ := fun z => z * q (z ^ 2) with hF_def
+  have hFd : DifferentiableOn ℂ F (ball 0 1) :=
+    differentiableOn_id.mul (hqd.comp (differentiableOn_pow 2) hsq)
+  have hFsq : ∀ z ∈ ball (0 : ℂ) 1, F z ^ 2 = f (z ^ 2) := fun z hz => by
+    rw [hF_def]
+    simp only
+    rw [mul_pow, hqsq _ (hsq z hz), hp_def]
+    by_cases hz0 : z = 0
+    · rw [hz0]
+      simp [hf0]
+    · rw [dslope_of_ne _ (pow_ne_zero 2 hz0), slope_def_field, sub_zero, hf0, sub_zero,
+        mul_div_cancel₀ _ (pow_ne_zero 2 hz0)]
+  have hFne : ∀ z ∈ ball (0 : ℂ) 1, z ≠ 0 → F z ≠ 0 := fun z hz hz0 =>
+    mul_ne_zero hz0 (hqne _ (hsq z hz))
+  have hFinj : InjOn F (ball 0 1) := by
+    intro z₁ hz₁ z₂ hz₂ he
+    have h1 : f (z₁ ^ 2) = f (z₂ ^ 2) := by rw [← hFsq z₁ hz₁, ← hFsq z₂ hz₂, he]
+    have h2 : z₁ ^ 2 = z₂ ^ 2 := hinj (hsq z₁ hz₁) (hsq z₂ hz₂) h1
+    rcases sq_eq_sq_iff_eq_or_eq_neg.mp h2 with h | h
+    · exact h
+    · -- `F` is odd, so `F z₂ = -F z₂`
+      have hodd : F z₁ = -F z₂ := by
+        rw [hF_def]
+        simp only
+        rw [h, neg_sq, neg_mul]
+      rw [hodd] at he
+      have hz₂0 : F z₂ = 0 := by
+        have : (2 : ℂ) * F z₂ = 0 := by linear_combination -he
+        exact (mul_eq_zero.mp this).resolve_left two_ne_zero
+      have hz₂' : z₂ = 0 := by
+        by_contra hne
+        exact hFne z₂ hz₂ hne hz₂0
+      rw [h, hz₂', neg_zero]
+  -- the reciprocal `g = 1 / F` as a map of class `Σ`
+  set u : ℂ → ℂ := fun w => (q w)⁻¹ - 1 with hu_def
+  have hud : DifferentiableOn ℂ u (ball 0 1) := (hqd.inv hqne).sub (differentiableOn_const _)
+  have hu0 : u 0 = 0 := by
+    rw [hu_def]
+    simp only
+    rw [hq0, inv_one, sub_self]
+  set D : ℂ → ℂ := dslope u 0 with hD_def
+  have hDd : DifferentiableOn ℂ D (ball 0 1) := (differentiableOn_dslope hU).mpr hud
+  set h : ℂ → ℂ := fun z => z * D (z ^ 2) with hh_def
+  have hhd : DifferentiableOn ℂ h (ball 0 1) :=
+    differentiableOn_id.mul (hDd.comp (differentiableOn_pow 2) hsq)
+  have hg : ∀ z ∈ ball (0 : ℂ) 1, z ≠ 0 → z⁻¹ + h z = (F z)⁻¹ := by
+    intro z hz hz0
+    have hq' := hqne _ (hsq z hz)
+    rw [hh_def, hF_def]
+    simp only
+    rw [hD_def, dslope_of_ne _ (pow_ne_zero 2 hz0), slope_def_field, sub_zero, hu0, sub_zero,
+      hu_def]
+    simp only
+    field_simp
+    ring
+  have hinj' : InjOn (fun z => z⁻¹ + h z) (ball 0 1 \ {0}) := by
+    intro z₁ hz₁ z₂ hz₂ he
+    simp only at he
+    rw [hg z₁ hz₁.1 hz₁.2, hg z₂ hz₂.1 hz₂.2, inv_inj] at he
+    exact hFinj hz₁.1 hz₂.1 he
+  -- the first coefficient of `h`
+  have hh1 : taylorCoeff h 1 = deriv u 0 := by
+    rw [taylorCoeff_one]
+    have hDa : HasDerivAt D (deriv D 0) 0 := ((hDd 0 h0).differentiableAt hU).hasDerivAt
+    have hD0 : HasDerivAt (fun z : ℂ => D (z ^ 2))
+        (deriv D 0 * ((2 : ℕ) * (0 : ℂ) ^ (2 - 1))) 0 :=
+      hDa.comp_of_eq 0 (hasDerivAt_pow 2 0) (by simp)
+    have hmul : HasDerivAt (fun z : ℂ => z * D (z ^ 2))
+        (1 * D (0 ^ 2) + 0 * (deriv D 0 * ((2 : ℕ) * (0 : ℂ) ^ (2 - 1)))) 0 :=
+      (hasDerivAt_id' 0).mul hD0
+    rw [hh_def, hmul.deriv, hD_def]
+    simp [dslope_same]
+  have hu' : deriv u 0 = -deriv q 0 := by
+    have hqa : HasDerivAt q (deriv q 0) 0 := ((hqd 0 h0).differentiableAt hU).hasDerivAt
+    have hinv : HasDerivAt (fun w => (q w)⁻¹ - 1) (-(deriv q 0) / q 0 ^ 2) 0 :=
+      (hqa.inv (hqne 0 h0)).sub_const 1
+    rw [hu_def, hinv.deriv, hq0]
+    simp
+  have hq' : deriv q 0 = taylorCoeff f 2 / 2 := by
+    have hqa : HasDerivAt q (deriv q 0) 0 := ((hqd 0 h0).differentiableAt hU).hasDerivAt
+    have h1 : deriv (fun z => q z ^ 2) 0 = 2 * q 0 * deriv q 0 := by
+      have hpow : HasDerivAt (fun z => q z ^ 2) ((2 : ℕ) * q 0 ^ (2 - 1) * deriv q 0) 0 :=
+        hqa.pow 2
+      rw [hpow.deriv]
+      norm_num
+    have h2 : deriv (fun z => q z ^ 2) 0 = deriv p 0 := by
+      refine Filter.EventuallyEq.deriv_eq ?_
+      filter_upwards [hU] with z hz
+      exact hqsq z hz
+    have h3 : deriv p 0 = taylorCoeff f 2 := by
+      rw [← taylorCoeff_one, hp_def, taylorCoeff_dslope_zero hf one_pos 1]
+    rw [h2, h3, hq0, mul_one] at h1
+    rw [h1]
+    ring
+  -- the area theorem
+  have harea := tsum_mul_norm_taylorCoeff_sq_le hhd hinj'
+  have hsum := summable_mul_norm_taylorCoeff_sq hhd hinj'
+  have h1 : (1 : ℝ) * ‖taylorCoeff h 1‖ ^ 2 ≤ 1 := by
+    have := hsum.le_tsum 1 (fun j _ => by positivity)
+    simp only [Nat.cast_one] at this
+    linarith
+  rw [hh1, hu', hq', norm_neg, norm_div, one_mul] at h1
+  simp only [norm_ofNat] at h1
+  have h2 : ‖taylorCoeff f 2‖ / 2 ≤ 1 := by
+    by_contra hlt
+    push Not at hlt
+    nlinarith
+  linarith
+
+/-- **Bieberbach's theorem** in terms of the second derivative: `‖f'' 0‖ ≤ 4`. -/
+theorem norm_iteratedDeriv_two_le (hf : DifferentiableOn ℂ f (ball 0 1))
+    (hinj : InjOn f (ball 0 1)) (hf0 : f 0 = 0) (hf1 : deriv f 0 = 1) :
+    ‖iteratedDeriv 2 f 0‖ ≤ 4 := by
+  have := norm_taylorCoeff_two_le hf hinj hf0 hf1
+  rw [taylorCoeff, norm_mul, norm_inv, norm_natCast, Nat.factorial_two, Nat.cast_ofNat] at this
+  linarith
+
+/-- **The Koebe one-quarter theorem**: the image of the unit disc under a holomorphic injective
+map `f` with `f 0 = 0` and `f' 0 = 1` contains the disc of radius `1 / 4`. -/
+theorem ball_subset_image_of_injOn (hf : DifferentiableOn ℂ f (ball 0 1))
+    (hinj : InjOn f (ball 0 1)) (hf0 : f 0 = 0) (hf1 : deriv f 0 = 1) :
+    ball (0 : ℂ) (1 / 4) ⊆ f '' ball 0 1 := by
+  intro w hw
+  by_contra hwf
+  have h0 : (0 : ℂ) ∈ ball (0 : ℂ) 1 := mem_ball_self one_pos
+  have hU : ball (0 : ℂ) 1 ∈ 𝓝 (0 : ℂ) := isOpen_ball.mem_nhds h0
+  have hw0 : w ≠ 0 := fun h => hwf ⟨0, h0, by rw [hf0, h]⟩
+  have hfw : ∀ z ∈ ball (0 : ℂ) 1, f z ≠ w := fun z hz h => hwf ⟨z, hz, h⟩
+  -- the transformed map `F = f / (1 - f / w) = f + f² v / w`
+  set v : ℂ → ℂ := fun z => (1 - f z / w)⁻¹ with hv_def
+  have hvne : ∀ z ∈ ball (0 : ℂ) 1, 1 - f z / w ≠ 0 := fun z hz h => by
+    apply hfw z hz
+    have : f z / w = 1 := by linear_combination -h
+    rwa [div_eq_one_iff_eq hw0] at this
+  have hvd : DifferentiableOn ℂ v (ball 0 1) :=
+    ((differentiableOn_const _).sub (hf.div_const w)).inv hvne
+  have hv0 : v 0 = 1 := by
+    rw [hv_def]
+    simp [hf0]
+  set G : ℂ → ℂ := fun z => f z ^ 2 * v z / w with hG_def
+  set F : ℂ → ℂ := fun z => f z + G z with hF_def
+  have hGd : DifferentiableOn ℂ G (ball 0 1) := ((hf.pow 2).mul hvd).div_const w
+  have hFd : DifferentiableOn ℂ F (ball 0 1) := hf.add hGd
+  have hFmul : ∀ z ∈ ball (0 : ℂ) 1, F z = f z * v z := by
+    intro z hz
+    have hv1 : (1 - f z / w)⁻¹ * (1 - f z / w) = 1 := inv_mul_cancel₀ (hvne z hz)
+    simp only [hF_def, hG_def, hv_def]
+    linear_combination (-(f z)) * hv1
+  have hF0 : F 0 = 0 := by rw [hFmul 0 h0, hf0, zero_mul]
+  have hF1 : deriv F 0 = 1 := by
+    have hev : F =ᶠ[𝓝 0] fun z => f z * v z := by
+      filter_upwards [hU] with z hz
+      exact hFmul z hz
+    rw [hev.deriv_eq]
+    have hfa : HasDerivAt f (deriv f 0) 0 := ((hf 0 h0).differentiableAt hU).hasDerivAt
+    have hva : HasDerivAt v (deriv v 0) 0 := ((hvd 0 h0).differentiableAt hU).hasDerivAt
+    have hmul : HasDerivAt (fun z => f z * v z) (deriv f 0 * v 0 + f 0 * deriv v 0) 0 :=
+      hfa.mul hva
+    rw [hmul.deriv, hf0, hv0, hf1]
+    ring
+  have hFinj : InjOn F (ball 0 1) := by
+    intro z₁ hz₁ z₂ hz₂ he
+    rw [hFmul z₁ hz₁, hFmul z₂ hz₂] at he
+    have h1 := hvne z₁ hz₁
+    have h2 := hvne z₂ hz₂
+    have key : f z₁ * (1 - f z₂ / w) = f z₂ * (1 - f z₁ / w) := by
+      calc f z₁ * (1 - f z₂ / w)
+          = f z₁ * (1 - f z₁ / w)⁻¹ * ((1 - f z₁ / w) * (1 - f z₂ / w)) := by
+            rw [mul_assoc, ← mul_assoc (1 - f z₁ / w)⁻¹, inv_mul_cancel₀ h1, one_mul]
+        _ = f z₂ * (1 - f z₂ / w)⁻¹ * ((1 - f z₁ / w) * (1 - f z₂ / w)) := by rw [he]
+        _ = f z₂ * (1 - f z₁ / w) := by
+            rw [mul_assoc, mul_comm (1 - f z₁ / w), ← mul_assoc (1 - f z₂ / w)⁻¹,
+              inv_mul_cancel₀ h2, one_mul]
+    exact hinj hz₁ hz₂ (by linear_combination key)
+  -- the second coefficient of `F` is `a₂ + 1 / w`
+  have hG2 : taylorCoeff G 2 = 1 / w := by
+    set K : ℂ → ℂ := fun z => dslope f 0 z ^ 2 * v z / w with hK_def
+    have hKd : DifferentiableOn ℂ K (ball 0 1) :=
+      ((((differentiableOn_dslope hU).mpr hf).pow 2).mul hvd).div_const w
+    have hGK : G = fun z => z ^ 2 * K z := by
+      funext z
+      have hz : f z = z * dslope f 0 z := by
+        have := sub_smul_dslope f 0 z
+        rw [sub_zero, hf0, sub_zero, smul_eq_mul] at this
+        exact this.symm
+      simp only [hG_def, hK_def]
+      rw [hz]
+      ring
+    have := taylorCoeff_pow_mul hKd one_pos 2 0
+    rw [zero_add, taylorCoeff_zero] at this
+    rw [hGK, this, hK_def]
+    simp only
+    rw [dslope_same, hf1, hv0]
+    ring
+  have hF2 : taylorCoeff F 2 = taylorCoeff f 2 + 1 / w := by
+    rw [hF_def, taylorCoeff_add hf hGd one_pos 2, hG2]
+  -- Bieberbach's bound for `F` and for `f`
+  have hB := norm_taylorCoeff_two_le hFd hFinj hF0 hF1
+  have hA := norm_taylorCoeff_two_le hf hinj hf0 hf1
+  rw [hF2] at hB
+  have h4 : ‖1 / w‖ ≤ 4 := by
+    have := norm_sub_le (taylorCoeff f 2 + 1 / w) (taylorCoeff f 2)
+    rw [add_sub_cancel_left] at this
+    linarith
+  rw [norm_div, norm_one, one_div] at h4
+  have hwpos : 0 < ‖w‖ := norm_pos_iff.mpr hw0
+  have hw' : ‖w‖ < 1 / 4 := mem_ball_zero_iff.mp hw
+  have h5 : (1 : ℝ) ≤ ‖w‖ * 4 := by
+    calc (1 : ℝ) = ‖w‖ * ‖w‖⁻¹ := (mul_inv_cancel₀ hwpos.ne').symm
+      _ ≤ ‖w‖ * 4 := by gcongr
+  linarith
+
+end Complex
+
+end

@@ -1,0 +1,10 @@
+/.lake
+*.olean
+/References/
+# Ignore markdown files except as listed
+*.md
+!/AGENTS.md
+!/README.md
+!/CREDITS.md
+!/STRUCTURE.md
+!/SYNOPSIS.md
