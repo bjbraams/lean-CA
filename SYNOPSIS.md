@@ -38,7 +38,7 @@ proves the homological Cauchy theorem and formula. The corresponding residue the
 
 $$
 \int_\Gamma f(z)\,dz
-=2\pi i\sum_{a\in S} n(\Gamma,a)\operatorname{Res}(f,a),
+=2\pi i\sum_{a\in S} n(\Gamma,a)\mathrm{Res}(f,a),
 $$
 
 where $S$ is a finite set of isolated singularities and the contour avoids $S$. Essential

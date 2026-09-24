@@ -1,6 +1,6 @@
 /.lake
 *.olean
-/References/
+References/
 # Ignore markdown files except as listed
 *.md
 !/AGENTS.md
