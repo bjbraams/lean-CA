@@ -25,16 +25,8 @@ repository:
   role: substantive-development
 
 classification:
-  arxiv:
-    - math.CV
-  msc2020:
-    - 30C35
-    - 30C55
-    - 30D15
-    - 30D45
-    - 30E10
-    - 30E20
-    - 31A05
+  arxiv: ["math.CV"]
+  msc2020: ["30C35", "30C55", "30D15", "30D45", "30E10", "30E20", "31A05"]
 
 sources:
   - title: Functions of One Complex Variable I (second edition)
