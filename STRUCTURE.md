@@ -118,13 +118,10 @@ The following distinctions matter when reusing results or preparing an upstream 
 
 ## Relationship to Mathlib and documentation
 
+The mathematical account is [SYNOPSIS.md](SYNOPSIS.md).
 Mathlib supplies the basic analytic and meromorphic APIs, local Cauchy theory, identity and
 maximum principles, Liouville, Schwarz, locally uniform holomorphic limits, Jensen,
 Borel–Carathéodory, Poisson representation, and Phragmén–Lindelöf. The project builds its global
 contour, approximation, factorization, and mapping results on those foundations. These are
 potential Mathlib contributions; inclusion here is not a claim that every auxiliary lemma is
 absent from Mathlib.
-
-The public mathematical account is [SYNOPSIS.md](SYNOPSIS.md). The bibliography at the start of
-[COVERAGE.md](COVERAGE.md) identifies the comparison texts; its later historical coverage
-notes and [REMINDERS.md](REMINDERS.md) are working records, not an authoritative inventory.

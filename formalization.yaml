@@ -28,7 +28,6 @@ classification:
   arxiv:
     - math.CV
   msc2020:
-    - 30-04
     - 30C35
     - 30C55
     - 30D15
@@ -266,9 +265,9 @@ automation:
   notes: >-
     Human-directed development using GPT and Claude through terminal coding agents. The listed identifiers
     record the latest models used; historical model versions and costs have not been reconstructed.
-    Coding agents assisted mathematical development, Lean proof writing, debugging, documentation
-    and review, using terminal builds under AGENTS.md. No exhaustive human line-by-line proof review
-    is claimed. Challenge.lean gives independent statements over Mathlib and explicit supporting definitions;
+    Coding agents assisted mathematical development, Lean code design, debugging, documentation and
+    review, using terminal builds under AGENTS.md. Lean proofs were produced by AI/LLM exclusively.
+    Challenge.lean gives independent statements over Mathlib and explicit supporting definitions;
     Solution.lean proves them using the substantive library in this repository.
 
 fidelity:

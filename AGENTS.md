@@ -19,7 +19,36 @@
 ## Project
 
 This is a collection of Lean 4 projects using Mathlib and written with the intent to form a
-contribution to Mathlib.
+contribution to Mathlib. The objective (as it has developed over time) is to formalize core
+results in complex analysis of one variable, building on Lean Mathlib and following Mathlib
+conventions for mathematical generality, namespaces and names. The following references are
+a guide to the desired coverage.
+
+* [APP] Agarwal, Perera, Pinelas, *An Introduction to Complex Analysis* (2011), Lectures 25–44.
+* [BN] Bak, Newman, *Complex Analysis*, 3rd ed. (2010), Chapters 4–18.
+* [Bu] Burckel, *Classical Analysis in the Complex Plane* (2021), Chapters II–VIII.
+* [C1] Conway, *Functions of One Complex Variable I* (1978), Chapters IV–XII.
+* [C2] Conway, *Functions of One Complex Variable II* (1995), Chapters 13–15, 20, 21.
+* [Ga] Gamelin, *Complex Analysis* (2001), Chapters II–VII.
+* [He] Heins, *Complex Function Theory* (1968), Chapters IV–VIII.
+* [La] Lang, *Complex Analysis*, 4th ed. (1999), Chapters I–XIII.
+* [Re] Remmert, *Theory of Complex Functions* (1991), Chapters 6–8.
+* [Si] Simon, *A Comprehensive Course in Analysis*, Part 2A (2015), Chapters 2–4.
+* [SS] Stein, Shakarchi, *Complex Analysis* (2003), Chapters 2–3.
+
+PDF files of these references are available to the Agent, except for [Si] for which we
+have only the ToC in PDF.
+
+The following are concerns to be kept in mind and addressed throughout the development process.
+- Are theorems stated in the most general appropriate setting?
+- Does the code adhere to Mathlib naming conventions for defs, theorems, lemmas and structures
+  both in sentence structure and in capitalization and use of underscores?
+- Does every def, theorem, lemma, structure and structure field have a formal docstring and is
+  the docstring appropriate?
+- Are the Namespaces appropriate?
+- Is every file a module? Does each file have a module docstring and does it properly summarize
+  the mathematical scope, notation, and main results?
+- Can long proofs be simplified or broken up, perhaps with use of helper theorems?
 
 ## Proof requirements
 
@@ -72,7 +101,8 @@ Such files should go into the main project directory at the top level.
 This includes Markdown files that provide a review of project updates or that describe
 planned work.
 
-Files README.md and STRUCTURE.md are intended as public documentation, with README.md as
-the entry point for the reader and STRUCTURE.md for more detailed description.
+Files README.md and STRUCTURE.md and SYNOPSIS.md are intended as public documentation, with
+README.md as the entry point for the reader. STRUCTURE.md is for more detailed description
+for developers and SYNOPSIS.md is content description for mathematicians.
 
 File REMINDERS.md is intended for private documentation for the owner or other editors.
