@@ -1,7 +1,7 @@
 # Complex analysis of one variable
 
-A Lean 4 formalization of fundamental complex analysis of one variable. The project builds
-on Mathlib and is written as a potential Mathlib contribution.
+A Lean 4 formalization of fundamental complex analysis of one variable. The project builds on
+Mathlib and is written as a potential Mathlib contribution.
 
 ## Organization
 

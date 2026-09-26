@@ -5,16 +5,17 @@ version: v0.4
 project:
   name: 'lean-CA: foundations of complex analysis of one variable in Lean 4'
   description: >-
-    A Lean 4 formalization, built on Mathlib, of classical complex analysis of one variable. The 45
-    compared results cover global primitives and logarithms, Cauchy and residue theory for cycles,
-    Laurent expansions, the argument principle and Rouché, Hurwitz and local mapping, Montel and Vitali,
-    Runge approximation and Mittag–Leffler, Cauchy–Pompeiu, Weierstrass and Hadamard factorization,
-    Blaschke and Riesz factorization, normalized Riemann mapping, Schwarz–Pick and Koebe estimates,
-    harmonic and subharmonic functions, the Dirichlet problem and Green functions under an exterior-disc
-    condition, reflection, natural boundaries and removability. Several integral and local results
-    allow complex Banach-space values. These are source-based classical results; no new mathematical
-    theorem is claimed. The project grew out of work on Carlson’s approach to special functions and
-    now provides a separate complex-analysis library.
+    A Lean 4 formalization, built on Mathlib, of classical complex analysis of one variable.
+    The 45 compared results cover global primitives and logarithms, Cauchy and residue theory
+    for cycles, Laurent expansions, the argument principle and Rouché, Hurwitz and local mapping,
+    Montel and Vitali, Runge approximation and Mittag–Leffler, Cauchy–Pompeiu, Weierstrass and
+    Hadamard factorization, Blaschke and Riesz factorization, normalized Riemann mapping,
+    Schwarz–Pick and Koebe estimates, harmonic and subharmonic functions, the Dirichlet problem
+    and Green functions under an exterior-disc condition, reflection, natural boundaries and
+    removability. Several integral and local results allow complex Banach-space values. These
+    are source-based classical results; no new mathematical theorem is claimed. The expected
+    utility of the project to mathematicians is in the formalization of widely-used fundamental
+    theory.
   authors:
     - Bastiaan J. Braams
   license: Apache-2.0
@@ -36,9 +37,9 @@ sources:
     type: book
     relationship: formalizes
     note: >-
-      Conway I: selected results of Chapters IV–XI, especially Cauchy and residue theory, normal families,
-      Runge, Mittag–Leffler, products, mapping and potential theory. The alignment below records the
-      compared results, not complete coverage of these chapters.
+      Conway I: selected results of Chapters IV–XI, especially Cauchy and residue theory, normal
+      families, Runge, Mittag–Leffler, products, mapping and potential theory. The alignment
+      below records the compared results, not complete coverage of these chapters.
   - title: Functions of One Complex Variable II
     authors:
       - John B. Conway
@@ -46,8 +47,8 @@ sources:
     type: book
     relationship: formalizes
     note: >-
-      Conway II: selected univalent-function results in Chapter 14, potential theory in Chapter 19,
-      and Blaschke and Riesz factorization in Chapter 20.
+      Conway II: selected univalent-function results in Chapter 14, potential theory in Chapter
+      19, and Blaschke and Riesz factorization in Chapter 20.
   - title: Complex Analysis (fourth edition)
     authors:
       - Serge Lang
@@ -55,8 +56,8 @@ sources:
     type: book
     relationship: formalizes
     note: >-
-      Lang: classical one-variable theory, particularly Chapter XIII §3 for finite-order entire functions
-      and Hadamard factorization; see COVERAGE.md for the wider comparison.
+      Lang: classical one-variable theory, particularly Chapter XIII §3 for finite-order entire 
+      functions and Hadamard factorization; see COVERAGE.md for the wider comparison.
   - title: Complex Analysis
     authors:
       - Theodore W. Gamelin
@@ -64,8 +65,8 @@ sources:
     type: book
     relationship: formalizes
     note: >-
-      Gamelin: Schwarz–Pick, Riemann mapping, normal families, harmonic functions and the Dirichlet
-      problem; chapter and section references are in the alignment.
+      Gamelin: Schwarz–Pick, Riemann mapping, normal families, harmonic functions and the
+      Dirichlet problem; chapter and section references are in the alignment.
   - title: Complex Analysis
     authors:
       - Elias M. Stein
@@ -74,8 +75,8 @@ sources:
     type: book
     relationship: formalizes
     note: >-
-      Stein–Shakarchi: selected Cauchy, residue and reflection results and Chapter 5 on entire functions
-      and Hadamard factorization.
+      Stein–Shakarchi: selected Cauchy, residue and reflection results and Chapter 5 on entire
+      functions and Hadamard factorization.
   - title: 'Basic Complex Analysis: A Comprehensive Course in Analysis, Part 2A'
     authors:
       - Barry Simon
@@ -83,8 +84,8 @@ sources:
     type: book
     relationship: formalizes
     note: >-
-      Simon: selected integral, approximation, mapping and factorization results, as cited in module
-      headers and the alignment; no claim of full coverage.
+      Simon: selected integral, approximation, mapping and factorization results, as cited in
+      module headers and the alignment; no claim of full coverage.
   - title: Classical Analysis in the Complex Plane
     authors:
       - Robert B. Burckel
@@ -92,8 +93,8 @@ sources:
     type: book
     relationship: formalizes
     note: >-
-      Burckel: selected removability, normal-family and approximation results; also a reference for
-      the library coverage review.
+      Burckel: selected removability, normal-family and approximation results; also a reference
+      for the library coverage review.
   - title: An Introduction to Complex Analysis in Several Variables (second edition)
     authors:
       - Lars Hörmander
@@ -101,8 +102,8 @@ sources:
     type: book
     relationship: formalizes
     note: >-
-      Only the one-variable Cauchy–Pompeiu and subharmonic material of Chapter I, cited by the corresponding
-      module headers; no several-variable theorem is included in the challenge.
+      Only the one-variable Cauchy–Pompeiu and subharmonic material of Chapter I, cited by the
+      corresponding module headers; no several-variable theorem is included in the challenge.
   - title: An Introduction to Complex Analysis
     authors:
       - Ravi P. Agarwal
@@ -126,14 +127,16 @@ sources:
     location: Academic Press, 1968
     type: book
     relationship: background
-    note: Companion reference for integral theory, approximation, entire functions and conformal mapping.
+    note: Companion reference for integral theory, approximation, entire functions and conformal
+      mapping.
   - title: Theory of Complex Functions
     authors:
       - Reinhold Remmert
     location: Graduate Texts in Mathematics 122, Springer, 1991
     type: book
     relationship: background
-    note: Companion reference for local holomorphic theory, Cauchy formulas, convergence and continuation.
+    note: Companion reference for local holomorphic theory, Cauchy formulas, convergence and
+      continuation.
 
 related_formalizations:
   - id: https://github.com/leanprover-community/mathlib4
@@ -158,7 +161,8 @@ related_formalizations:
     relationship: other
     note: >-
       JJYYY-JJY, with credited coauthor ajirving: higher Cauchy formulas at an interior point of a
-      disc, including Banach-valued versions. Closely related to the compared cauchy_derivatives statement.
+      disc, including Banach-valued versions. Closely related to the compared cauchy_derivatives
+      statement.
   - id: https://github.com/leanprover-community/mathlib4/pull/29588
     relationship: other
     note: >-
@@ -167,22 +171,24 @@ related_formalizations:
   - id: https://github.com/leanprover-community/mathlib4/pull/39232
     relationship: other
     note: >-
-      Submitted by jerwaynejones; the source credits Jeremy Tan. A rectangular contour residue formula
-      for specified simple poles and a holomorphic remainder, overlapping a special case of cycle
-      residue theory.
+      Submitted by jerwaynejones; the source credits Jeremy Tan. A rectangular contour residue
+      formula for specified simple poles and a holomorphic remainder, overlapping a special case
+      of cycle residue theory.
   - id: https://github.com/leibniz-rs/PrimeNumberTheoremAnd/tree/8dc50485d7166be58b05ee0d54216c06a4b3aef9
     relationship: other
     note: >-
-      Matteo Cipollina: Weierstrass elementary factors, the same small-disc factor estimate, finite-order
-      zero counting and Hadamard factorization. The Hadamard theorem is a close mathematical match
-      with different growth and genus conventions. The fork also contains the PNT+ contributors’ rectangular
-      simple-pole residue theorem. Inspected source was not rebuilt in the attribution review.
+      Matteo Cipollina: Weierstrass elementary factors, the same small-disc factor estimate,
+      finite-order zero counting and Hadamard factorization. The Hadamard theorem is a close
+      mathematical match with different growth and genus conventions. The fork also contains the
+      PNT+ contributors’ rectangular simple-pole residue theorem. Inspected source was not rebuilt
+      in the attribution review.
   - id: https://github.com/will1491/RiemannDynamics/tree/b3fa37cc0f18a23ea66b654ea3f73eb472129010
     relationship: other
     note: >-
-      Will (Ziang) Li: compact-support Cauchy–Pompeiu, differentiating the Cauchy transform and solving
-      the antiholomorphic derivative equation. These overlap the scalar case of the project’s Banach-valued,
-      parameter-dependent theory. Its Montel theorem imports Beffara’s result.
+      Will (Ziang) Li: compact-support Cauchy–Pompeiu, differentiating the Cauchy transform and
+      solving the antiholomorphic derivative equation. These overlap the scalar case of the
+      project’s Banach-valued, parameter-dependent theory. Its Montel theorem imports Beffara’s
+      result.
   - id: https://github.com/leanprover-community/mathlib4/pull/42630
     relationship: other
     note: 'Will (Ziang) Li: Wirtinger derivatives and the Cauchy–Riemann characterization, related
@@ -196,8 +202,9 @@ related_formalizations:
   - id: https://github.com/phasetr/ising-model/tree/bb1a2dd19c8b70f33201daf130729ddb4790b66f
     relationship: other
     note: >-
-      The phasetr/ising-model contributors: scalar Montel extraction and Vitali–Porter with an interior
-      accumulation point, close matches to the selected finite-dimensional-valued statements.
+      The phasetr/ising-model contributors: scalar Montel extraction and Vitali–Porter with an
+      interior accumulation point, close matches to the selected finite-dimensional-valued
+      statements.
   - id: https://github.com/girving/ray/tree/753f7131cf96f4651294de4398368abf136c34de
     relationship: other
     note: >-
@@ -207,9 +214,9 @@ related_formalizations:
   - id: https://github.com/vbeffara/Curvint/tree/00b0bf1cfa3106fa92329f5f52e449186db0c9d3
     relationship: other
     note: >-
-      Vincent Beffara: covering spaces of local primitives, contour integration by lifting and primitives
-      on star-convex domains. Related infrastructure, not a claim that the selected simply connected
-      primitive theorem is present there.
+      Vincent Beffara: covering spaces of local primitives, contour integration by lifting and
+      primitives on star-convex domains. Related infrastructure, not a claim that the selected
+      simply connected primitive theorem is present there.
   - id: https://github.com/leanprover-community/mathlib4/pull/26950
     relationship: other
     note: >-
@@ -219,23 +226,23 @@ related_formalizations:
   - id: https://github.com/leanprover-community/mathlib4/pull/33368
     relationship: other
     note: >-
-      Yury Kudryashov: unit-disc shifts, agreeing with discMobius after changing the parameter’s sign.
-      PR #33381 contains related Schwarz estimates.
+      Yury Kudryashov: unit-disc shifts, agreeing with discMobius after changing the parameter’s
+      sign. PR #33381 contains related Schwarz estimates.
   - id: https://github.com/leanprover-community/mathlib4/pull/26479
     relationship: other
     note: >-
-      thefundamentaltheor3m: Cauchy–Goursat for unbounded rectangles, related to the broader library’s
-      improper contour theory, outside the selected challenge.
+      thefundamentaltheor3m: Cauchy–Goursat for unbounded rectangles, related to the broader
+      library’s improper contour theory, outside the selected challenge.
 
 status:
   scope: >-
-    The submission selects 45 principal results from ComplexAnalysis; supporting Analysis and Topology
-    modules are used by the proofs but contribute no separately selected theorem. The library contains
-    further contour, approximation, continuation and growth theory described in SYNOPSIS.md. This
-    is not a complete formalization of the cited books. Full Picard theory, general boundary extension
-    of conformal maps and a full Hardy-space inner–outer theory are outside the submission. The counts
-    below concern the substantive library and Solution.lean; Challenge.lean intentionally has 45 theorem-proof
-    holes and no definition holes.
+    The submission selects 45 principal results from ComplexAnalysis; supporting Analysis and
+    Topology modules are used by the proofs but contribute no separately selected theorem. The
+    library contains further contour, approximation, continuation and growth theory described in
+    SYNOPSIS.md. This is not a complete formalization of the cited books. Full Picard theory,
+    general boundary extension of conformal maps and a full Hardy-space inner–outer theory are
+    outside the submission. The counts below concern the substantive library and Solution.lean;
+    Challenge.lean intentionally has 45 theorem-proof holes and no definition holes.
   sorry_count: 0
   sorry_in_definitions: 0
   axioms: []
@@ -255,39 +262,44 @@ automation:
         - claude-fable-5-1
         - claude-opus-5-5
   notes: >-
-    Human-directed development using GPT and Claude through terminal coding agents. The listed identifiers
-    record the latest models used; historical model versions and costs have not been reconstructed.
-    Coding agents assisted mathematical development, Lean code design, debugging, documentation and
-    review, using terminal builds under AGENTS.md. Lean proofs were produced by AI/LLM exclusively.
-    Challenge.lean gives independent statements over Mathlib and explicit supporting definitions;
-    Solution.lean proves them using the substantive library in this repository.
+    Human-directed development using GPT and Claude through terminal coding agents. The listed
+    identifiers record the latest models used; historical model versions and costs have not been
+    reconstructed. Coding agents assisted mathematical development, Lean code design, debugging,
+    documentation and review, using terminal builds under AGENTS.md. Lean proofs were produced by
+    AI/LLM exclusively. Challenge.lean gives independent statements over Mathlib and explicit
+    supporting definitions; Solution.lean proves them using the substantive library in this
+    repository.
 
 fidelity:
   divergences: >-
-    The comparison preserves the library hypotheses. Runge disjointness is written as A ∩ K = ∅. Cauchy
-    and residue cycles are finite families of closed C¹ paths with vanishing index outside the domain;
-    the cycle residue theorem allows isolated singularities of any type, with finitely many specified
-    exceptional points. The Laurent theorem uses a closed annulus on which the function is holomorphic
-    on a neighborhood. Montel and Vitali allow finite-dimensional complex Banach targets; the iterated-derivative
-    convergence statement is pointwise. Mittag–Leffler takes principal parts holomorphic on the whole
-    punctured plane at each specified singularity. The sequential Weierstrass factorization uses nonzero
-    zeros tending to infinity, with multiplicities; Hadamard uses an intrinsic countable index type,
-    including finite and empty cases. HasOrderLE is the explicit bound A exp(B |z|^ρ); the genus k
-    satisfies ρ < k + 1 and the polynomial degree is at most k, rather than defining the order by
-    a limsup. The Blaschke condition counts multiplicities at nonzero zeros. Riesz factorization gives
-    a zero-free bounded factor and is not a complete Hardy-space inner–outer factorization. Koebe
-    growth is the upper bound; distortion has both bounds. Subharmonic functions are real-valued;
-    the selected C² Laplacian result is the sufficient direction. The general Dirichlet and Green
-    results assume bounded open sets with an exterior closed disc touching the closure only at each
-    boundary point; the Green function is asserted nonnegative off its pole. Countable-set removability
-    and several integral statements generalize scalar textbook formulations. In the two Weierstrass
-    challenge statements finite-set cardinality is written as Set.ncard; the product statement also
-    includes its proved entire-function property.
+    The comparison preserves the library hypotheses. Runge disjointness is written as A ∩ K = ∅.
+    Cauchy and residue cycles are finite families of closed C¹ paths with vanishing index outside
+    the domain; the cycle residue theorem allows isolated singularities of any type, with finitely
+    many specified exceptional points. The Laurent theorem uses a closed annulus on which the
+    function is holomorphic on a neighborhood. Montel and Vitali allow finite-dimensional complex
+    Banach targets; the iterated-derivative convergence statement is pointwise. Mittag–Leffler
+    takes principal parts holomorphic on the whole punctured plane at each specified singularity;
+    the singularity set S ⊆ U is described by the explicit condition that every z ∈ U has a
+    positive distance from S \ {z}, which Complex.compl_mem_codiscreteWithin_iff proves equivalent
+    to Mathlib's Sᶜ ∈ codiscreteWithin U used by the library theorem Complex.mittagLeffler.
+    The sequential Weierstrass factorization uses nonzero zeros tending to infinity, with
+    multiplicities; Hadamard uses an intrinsic countable index type, including finite and empty
+    cases. HasOrderLE is the explicit bound A exp(B |z|^ρ); the genus k satisfies ρ < k + 1 and
+    the polynomial degree is at most k, rather than defining the order by a limsup.
+    The Blaschke condition counts multiplicities at nonzero zeros. Riesz factorization gives
+    a zero-free bounded factor and is not a complete Hardy-space inner–outer factorization.
+    Koebe growth is the upper bound; distortion has both bounds. Subharmonic functions are
+    real-valued; the selected C² Laplacian result is the sufficient direction.
+    The general Dirichlet and Green results assume bounded open sets with an exterior closed disc
+    touching the closure only at each boundary point; the Green function is asserted nonnegative
+    off its pole. Countable-set removability and several integral statements generalize scalar
+    textbook formulations. In the two Weierstrass challenge statements finite-set cardinality is
+    written as Set.ncard; the product statement also includes its proved entire-function property.
 
 review:
   status: agent-reviewed
   notes: >-
-    Validated on 24 September 2026 with Lean and Mathlib v4.35.0-rc2. The library passes lake build;
+    Validated on 26 September 2026 with Lean and Mathlib v4.35.0-rc2. The library passes lake build;
     the submission passes lake build Challenge Solution and lake env lean on each new Lean file. The
     only proof holes are the 45 deliberate Challenge theorem bodies; the library and Solution contain
     none. The metadata passes the v0.4 schema. All 45 solution theorems use only propext, Classical.choice
@@ -459,8 +471,9 @@ alignment:
       lean: LeanCA.mittag_leffler
       module: Challenge
       status: proved
-      note: Mittag–Leffler on an arbitrary open set for a relatively discrete closed set of singularities.
-      library_declaration: Complex.mittagLeffler
+      note: Mittag–Leffler on an arbitrary open set for a set of singularities with no accumulation
+        point in the open set, stated by an explicit distance condition.
+      library_declaration: Complex.mittagLeffler_of_forall_le_dist
       library_file: ComplexAnalysis/MittagLeffler.lean
     - source: Hörmander, Chapter I (Cauchy–Pompeiu formula)
       lean: LeanCA.cauchy_pompeiu

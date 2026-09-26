@@ -3,8 +3,7 @@
 This library formalizes foundations of complex analysis of one variable in Lean 4. Its main
 results include global Cauchy and residue theory, Runge approximation and Mittag-Leffler,
 normal families and the Riemann mapping theorem, entire-function factorization, and selected
-parts of univalent-function and potential theory. It grew out of work on Carlson's special
-functions and is now an independent library intended for contribution to Mathlib.
+parts of univalent-function and potential theory.
 
 The account below describes the current theorem statements. [STRUCTURE.md](STRUCTURE.md)
 gives the Lean interfaces and module map. The reference comparison at the end indicates

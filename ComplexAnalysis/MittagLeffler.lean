@@ -25,6 +25,9 @@ uniformly on `U` minus the poles.
 ## Main results
 
 * `Complex.mittagLeffler`: existence of a meromorphic function with prescribed principal parts.
+* `Complex.compl_mem_codiscreteWithin_iff`, `Complex.mittagLeffler_of_forall_le_dist`: the
+  hypothesis `Sᶜ ∈ codiscreteWithin U` as an explicit metric condition, and the theorem in
+  that form.
 * `Complex.differentiableOn_of_mem_adjoin_rungeGenerators`: rational functions with poles
   outside `U` are holomorphic on `U`.
 
@@ -267,6 +270,32 @@ theorem mittagLeffler {U : Set ℂ} (hU : IsOpen U) {S : Set ℂ} (hSU : S ⊆ U
     rw [(hsummable k z hk).tsum_eq_add_tsum_ite m]
     simp only [t, t', ← Finset.add_sum_erase _ _ haT]
     ring
+
+/-- For `S ⊆ U`, the condition `Sᶜ ∈ codiscreteWithin U` says exactly that no point of `U` is
+an accumulation point of `S`: every `z ∈ U` has a positive distance from `S \ {z}`. -/
+theorem compl_mem_codiscreteWithin_iff {U S : Set ℂ} (hSU : S ⊆ U) :
+    Sᶜ ∈ codiscreteWithin U ↔ ∀ z ∈ U, ∃ ε > 0, ∀ w ∈ S, w ≠ z → ε ≤ dist w z := by
+  rw [mem_codiscreteWithin]
+  refine forall₂_congr fun z _ ↦ ?_
+  rw [disjoint_principal_right, Metric.mem_nhdsWithin_iff]
+  constructor
+  · rintro ⟨ε, hε, h⟩
+    refine ⟨ε, hε, fun w hwS hwz ↦ not_lt.mp fun hlt ↦ ?_⟩
+    exact h ⟨mem_ball.mpr hlt, hwz⟩ ⟨hSU hwS, not_not.mpr hwS⟩
+  · rintro ⟨ε, hε, h⟩
+    refine ⟨ε, hε, fun w ⟨hwb, hwz⟩ ⟨_, hwS⟩ ↦ ?_⟩
+    exact (h w (not_not.mp hwS) hwz).not_gt (mem_ball.mp hwb)
+
+/-- **The Mittag-Leffler theorem**, with the singularity set described metrically. For a set
+`S ⊆ U` with no accumulation point in the open set `U` (every `z ∈ U` has a positive distance
+from `S \ {z}`) and principal parts `P a` holomorphic off `a`, there is a function holomorphic on
+`U \ S` whose difference with `P a` extends holomorphically over each `a ∈ S`. -/
+theorem mittagLeffler_of_forall_le_dist {U : Set ℂ} (hU : IsOpen U) {S : Set ℂ} (hSU : S ⊆ U)
+    (hS : ∀ z ∈ U, ∃ ε > 0, ∀ w ∈ S, w ≠ z → ε ≤ dist w z) {P : ℂ → ℂ → ℂ}
+    (hP : ∀ a ∈ S, DifferentiableOn ℂ (P a) {a}ᶜ) :
+    ∃ f : ℂ → ℂ, DifferentiableOn ℂ f (U \ S) ∧
+      ∀ a ∈ S, ∃ g : ℂ → ℂ, AnalyticAt ℂ g a ∧ f =ᶠ[𝓝[≠] a] fun z ↦ P a z + g z :=
+  mittagLeffler hU hSU ((compl_mem_codiscreteWithin_iff hSU).mpr hS) hP
 
 end Complex
 

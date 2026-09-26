@@ -30,7 +30,7 @@ attribute [-instance] instCommCStarAlgebraComplex
 
 /-- Reset auxiliary proof sharing at the boundaries of the copied library modules. -/
 elab "clear_aux_lemma_cache" : command =>
-  Lean.modifyEnv fun env => Lean.Meta.auxLemmasExt.modifyState env fun _ => {}
+  Lean.modifyEnv fun env ↦ Lean.Meta.auxLemmasExt.modifyState env fun _ ↦ {}
 
 namespace Complex
 
@@ -40,7 +40,7 @@ attribute [local instance 2000] IsModuleTopology.toContinuousSMul
 /-- The normalized Cauchy-kernel integral of a closed curve. -/
 def curveIndex {a : ℂ} (γ : Path a a) (w : ℂ) : ℂ :=
   (2 * (Real.pi : ℂ) * Complex.I)⁻¹ *
-    curveIntegral (fun z => ContinuousLinearMap.toSpanSingleton ℂ ((z - w)⁻¹)) γ
+    curveIntegral (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ ((z - w)⁻¹)) γ
 
 end
 
@@ -79,7 +79,7 @@ clear_aux_lemma_cache
 /-- Residue as the limit of normalized circle integrals over shrinking positive radii.
 Related scalar definition: Roman Kvasnytskyi's PR #29588; see CREDITS.md. -/
 def residue (f : ℂ → F) (c : ℂ) : F :=
-  limUnder (𝓝[>] (0 : ℝ)) (fun r => (2 * Real.pi * Complex.I : ℂ)⁻¹ • ∮ z in C(c, r), f z)
+  limUnder (𝓝[>] (0 : ℝ)) (fun r ↦ (2 * Real.pi * Complex.I : ℂ)⁻¹ • ∮ z in C(c, r), f z)
 
 clear_aux_lemma_cache
 
@@ -94,7 +94,7 @@ def UniformApproxOn (K : Set ℂ) (S : Set (ℂ → ℂ)) (h : ℂ → ℂ) : Pr
 
 /-- Generators for rational functions with poles in `A`, including polynomials. -/
 def rungeGenerators (A : Set ℂ) : Set (ℂ → ℂ) :=
-  insert (fun z => z) ((fun a => fun z : ℂ => (a - z)⁻¹) '' A)
+  insert (fun z ↦ z) ((fun a ↦ fun z : ℂ ↦ (a - z)⁻¹) '' A)
 
 clear_aux_lemma_cache
 
@@ -210,7 +210,7 @@ theorem cauchy_theorem :
     Γ.range ⊆ U →
     (∀ w ∉ U, Γ.index w = 0) →
     ∀ {f : ℂ → F},
-    DifferentiableOn ℂ f U → (Γ.integral fun (w : ℂ) => ContinuousLinearMap.toSpanSingleton ℂ (f
+    DifferentiableOn ℂ f U → (Γ.integral fun (w : ℂ) ↦ ContinuousLinearMap.toSpanSingleton ℂ (f
     w)) = 0 := by sorry
 
 /-- 6. The index-weighted Cauchy formula for cycles homologous to zero; Banach-valued.
@@ -227,7 +227,7 @@ theorem cauchy_formula :
     ∀ {z : ℂ},
     z ∈ U →
     z ∉ Γ.range →
-    (Γ.integral fun (w : ℂ) => ContinuousLinearMap.toSpanSingleton ℂ ((w - z)⁻¹ • f w)) =
+    (Γ.integral fun (w : ℂ) ↦ ContinuousLinearMap.toSpanSingleton ℂ ((w - z)⁻¹ • f w)) =
     (2 * ↑Real.pi * Complex.I * Γ.index z) • f z := by sorry
 
 /-- 7. The residue theorem for a cycle and finitely many isolated singularities of any type.
@@ -244,7 +244,7 @@ theorem residue_theorem :
     (∀ w ∉ U, Γ.index w = 0) →
     ∀ {f : ℂ → F},
     DifferentiableOn ℂ f (U \ ↑S) →
-    (Γ.integral fun (w : ℂ) => ContinuousLinearMap.toSpanSingleton ℂ (f w)) =
+    (Γ.integral fun (w : ℂ) ↦ ContinuousLinearMap.toSpanSingleton ℂ (f w)) =
     ∑ a ∈ S, (2 * ↑Real.pi * Complex.I * Γ.index a) • Complex.residue f a := by sorry
 
 /-- 8. The bilateral Laurent expansion on an annulus; Banach-valued.
@@ -257,7 +257,7 @@ theorem laurent_expansion :
     r < ‖z‖ →
     ‖z‖ < R →
     AnalyticOnNhd ℂ f (Metric.closedBall 0 R \ Metric.ball 0 r) →
-    HasSum (fun (k : ℤ) => z ^ k • Complex.circleLaurentCoeff f r k) (f z) := by sorry
+    HasSum (fun (k : ℤ) ↦ z ^ k • Complex.circleLaurentCoeff f r k) (f z) := by sorry
 
 /-- 9. The residue of a holomorphic numerator divided by an arbitrary positive power.
 Related simple-pole theorem: Roman Kvasnytskyi (PR #29588). See CREDITS.md.
@@ -266,7 +266,7 @@ theorem residue_higher_pole :
     ∀ {F : Type u_1} [NormedAddCommGroup F] [NormedSpace ℂ F]
     [CompleteSpace F] {f : ℂ → F} {c : ℂ},
     AnalyticAt ℂ f c →
-    ∀ (n : ℕ), Complex.residue (fun (z : ℂ) => (z - c) ^ (-((n : ℤ) + 1)) • f z) c = (n.factorial : ℂ)⁻¹ •
+    ∀ (n : ℕ), Complex.residue (fun (z : ℂ) ↦ (z - c) ^ (-((n : ℤ) + 1)) • f z) c = (n.factorial : ℂ)⁻¹ •
     iteratedDeriv n f c := by sorry
 
 /-- 10. The argument principle on a disc, counting meromorphic zeros minus poles.
@@ -316,7 +316,7 @@ theorem hurwitz_injective :
     IsPreconnected U →
     (∀ᶠ (n : ι) in l, DifferentiableOn ℂ (F n) U) →
     (∀ᶠ (n : ι) in l, Set.InjOn (F n) U) →
-    TendstoLocallyUniformlyOn F f l U → (∃ (v : ℂ), Set.EqOn f (fun (_x : ℂ) => v) U) ∨ Set.InjOn f
+    TendstoLocallyUniformlyOn F f l U → (∃ (v : ℂ), Set.EqOn f (fun (_x : ℂ) ↦ v) U) ∨ Set.InjOn f
     U := by sorry
 
 /-- 14. Casorati–Weierstrass: every punctured neighborhood of an essential singularity has dense
@@ -334,7 +334,7 @@ theorem isolated_singularity :
     ∀ {f : ℂ → ℂ} {c : ℂ},
     (∀ᶠ (z : ℂ) in nhdsWithin c {c}ᶜ, AnalyticAt ℂ f z) →
     (∃ (g : ℂ → ℂ), AnalyticAt ℂ g c ∧ f =ᶠ[nhdsWithin c {c}ᶜ] g) ∨
-    Filter.Tendsto (fun (z : ℂ) => ‖f z‖) (nhdsWithin c {c}ᶜ) Filter.atTop ∨ ∀ s ∈ nhdsWithin c
+    Filter.Tendsto (fun (z : ℂ) ↦ ‖f z‖) (nhdsWithin c {c}ᶜ) Filter.atTop ∨ ∀ s ∈ nhdsWithin c
     {c}ᶜ, Dense (f '' s) := by sorry
 
 /-- 16. Local mapping with multiplicity: nearby noncritical values have exactly `m` simple
@@ -344,7 +344,7 @@ theorem local_mapping :
     ∀ {f : ℂ → ℂ} {a : ℂ},
     AnalyticAt ℂ f a →
     ∀ {m : ℕ},
-    analyticOrderAt (fun (z : ℂ) => f z - f a) a = ↑m →
+    analyticOrderAt (fun (z : ℂ) ↦ f z - f a) a = ↑m →
     ∃ ε₀ > 0,
     ∀ (ε : ℝ),
     0 < ε →
@@ -369,7 +369,7 @@ theorem montel :
     (∀ (n : ℕ), DifferentiableOn ℂ (f n) U) →
     (∀ K ⊆ U, IsCompact K → ∃ (M : ℝ), ∀ (n : ℕ), ∀ z ∈ K, ‖f n z‖ ≤ M) →
     ∃ (g : ℂ → F) (φ : ℕ → ℕ),
-    StrictMono φ ∧ DifferentiableOn ℂ g U ∧ TendstoLocallyUniformlyOn (fun (n : ℕ) => f (φ n)) g
+    StrictMono φ ∧ DifferentiableOn ℂ g U ∧ TendstoLocallyUniformlyOn (fun (n : ℕ) ↦ f (φ n)) g
     Filter.atTop U := by sorry
 
 /-- 18. Vitali–Porter: convergence on a set with an interior accumulation point implies local
@@ -388,7 +388,7 @@ theorem vitali :
     ∀ {a : ℂ},
     a ∈ D →
     a ∈ closure (V \ {a}) →
-    (∀ z ∈ V, ∃ (y : F), Filter.Tendsto (fun (n : ℕ) => f n z) Filter.atTop (nhds y)) →
+    (∀ z ∈ V, ∃ (y : F), Filter.Tendsto (fun (n : ℕ) ↦ f n z) Filter.atTop (nhds y)) →
     ∃ (g : ℂ → F), DifferentiableOn ℂ g D ∧ TendstoLocallyUniformlyOn f g Filter.atTop D := by sorry
 
 /-- 19. Locally uniform convergence of holomorphic functions implies pointwise convergence of every
@@ -401,7 +401,7 @@ theorem derivative_convergence :
     TendstoLocallyUniformlyOn F f' Filter.atTop V →
     (∀ (n : ℕ), DifferentiableOn ℂ (F n) V) →
     ∀ {x : ℂ},
-    x ∈ V → Filter.Tendsto (fun (n : ℕ) => iteratedDeriv j (F n) x) Filter.atTop (nhds
+    x ∈ V → Filter.Tendsto (fun (n : ℕ) ↦ iteratedDeriv j (F n) x) Filter.atTop (nhds
     (iteratedDeriv j f' x)) := by sorry
 
 /-- 20. Runge approximation with poles in a set meeting every bounded complementary component.
@@ -433,20 +433,20 @@ theorem runge_polynomial :
     DifferentiableOn ℂ f U → ∀ {ε : ℝ}, 0 < ε → ∃ (p : Polynomial ℂ), ∀ z ∈ K, ‖f z -
     Polynomial.eval z p‖ ≤ ε := by sorry
 
-/-- 22. Mittag–Leffler on an arbitrary open set for a relatively discrete closed set of
-singularities.
-Library: `Complex.mittagLeffler`. -/
+/-- 22. Mittag–Leffler on an arbitrary open set for a set of singularities with no accumulation
+point in the open set (every point of `U` has positive distance from the other singularities).
+Library: `Complex.mittagLeffler_of_forall_le_dist`. -/
 theorem mittag_leffler :
     ∀ {U : Set ℂ},
     IsOpen U →
     ∀ {S : Set ℂ},
     S ⊆ U →
-    Sᶜ ∈ Filter.codiscreteWithin U →
+    (∀ z ∈ U, ∃ ε > 0, ∀ w ∈ S, w ≠ z → ε ≤ dist w z) →
     ∀ {P : ℂ → ℂ → ℂ},
     (∀ a ∈ S, DifferentiableOn ℂ (P a) {a}ᶜ) →
     ∃ (f : ℂ → ℂ),
     DifferentiableOn ℂ f (U \ S) ∧
-    ∀ a ∈ S, ∃ (g : ℂ → ℂ), AnalyticAt ℂ g a ∧ f =ᶠ[nhdsWithin a {a}ᶜ] fun (z : ℂ) => P a z + g z := by sorry
+    ∀ a ∈ S, ∃ (g : ℂ → ℂ), AnalyticAt ℂ g a ∧ f =ᶠ[nhdsWithin a {a}ᶜ] fun (z : ℂ) ↦ P a z + g z := by sorry
 
 /-- 23. The compact-support C¹ Cauchy–Pompeiu identity; Banach-valued.
 Related scalar theorem: Will (Ziang) Li (RiemannDynamics). See CREDITS.md.
@@ -463,7 +463,7 @@ Related elementary factors: Matteo Cipollina’s Hadamard development. See CREDI
 Library: `Complex.analyticOrderAt_weierstrassProduct`. -/
 theorem weierstrass_product :
     ∀ {a : ℕ → ℂ}, (∀ n, a n ≠ 0) →
-    Filter.Tendsto (fun n => ‖a n‖) Filter.atTop Filter.atTop →
+    Filter.Tendsto (fun n ↦ ‖a n‖) Filter.atTop Filter.atTop →
     Differentiable ℂ (Complex.weierstrassProduct a) ∧
     ∀ w : ℂ, analyticOrderAt (Complex.weierstrassProduct a) w =
     ({n : ℕ | a n = w}.ncard : ℕ∞) := by sorry
@@ -473,7 +473,7 @@ multiplicity.
 Library: `Complex.exists_exp_mul_weierstrassProduct`. -/
 theorem weierstrass_factorization :
     ∀ {a : ℕ → ℂ} {f : ℂ → ℂ}, Differentiable ℂ f →
-    (∀ n, a n ≠ 0) → Filter.Tendsto (fun n => ‖a n‖) Filter.atTop Filter.atTop →
+    (∀ n, a n ≠ 0) → Filter.Tendsto (fun n ↦ ‖a n‖) Filter.atTop Filter.atTop →
     (∀ w : ℂ, analyticOrderAt f w = ({n : ℕ | a n = w}.ncard : ℕ∞)) →
     ∃ g : ℂ → ℂ, Differentiable ℂ g ∧
     ∀ z : ℂ, f z = Complex.exp (g z) * Complex.weierstrassProduct a z := by sorry
@@ -493,9 +493,9 @@ theorem hadamard :
     ρ < ↑k + 1 →
     ∃ (ι : Type) (_ : Countable ι) (a : ι → ℂ) (m : ℕ) (P : Polynomial ℂ),
     (∀ (i : ι), a i ≠ 0) ∧
-    Filter.Tendsto (fun (i : ι) => ‖a i‖) Filter.cofinite Filter.atTop ∧
+    Filter.Tendsto (fun (i : ι) ↦ ‖a i‖) Filter.cofinite Filter.atTop ∧
     (∀ (i : ι), f (a i) = 0) ∧
-    (Summable fun (i : ι) => ‖a i‖⁻¹ ^ (k + 1)) ∧
+    (Summable fun (i : ι) ↦ ‖a i‖⁻¹ ^ (k + 1)) ∧
     P.natDegree ≤ k ∧
     ∀ (z : ℂ), f z = Complex.exp (Polynomial.eval z P) * z ^ m * Complex.canonicalProduct k a z := by sorry
 
@@ -508,7 +508,7 @@ theorem blaschke_condition :
     ∀ {M : ℝ},
     (∀ z ∈ Metric.ball 0 1, ‖f z‖ ≤ M) →
     (∃ z ∈ Metric.ball 0 1, f z ≠ 0) →
-    Summable fun (w : { w : ℂ // ‖w‖ < 1 ∧ f w = 0 ∧ w ≠ 0 }) => ((analyticOrderAt f (w : ℂ)).toNat : ℝ) *
+    Summable fun (w : { w : ℂ // ‖w‖ < 1 ∧ f w = 0 ∧ w ≠ 0 }) ↦ ((analyticOrderAt f (w : ℂ)).toNat : ℝ) *
     (1 - ‖(w : ℂ)‖) := by sorry
 
 /-- 28. Riesz factorization into an origin power, a Blaschke product and a zero-free bounded
@@ -523,7 +523,7 @@ theorem riesz_factorization :
     ∃ (ι : Type) (_ : Countable ι) (a : ι → ℂ) (m : ℕ) (g : ℂ → ℂ),
     (∀ (i : ι), a i ≠ 0) ∧
     (∀ (i : ι), ‖a i‖ < 1) ∧
-    (Summable fun (i : ι) => 1 - ‖a i‖) ∧
+    (Summable fun (i : ι) ↦ 1 - ‖a i‖) ∧
     (∀ (i : ι), f (a i) = 0) ∧
     DifferentiableOn ℂ g (Metric.ball 0 1) ∧
     (∀ z ∈ Metric.ball 0 1, g z ≠ 0) ∧
@@ -635,10 +635,10 @@ theorem harnack_convergence :
     IsPreconnected U →
     ∀ {u : ℕ → ℂ → ℝ},
     (∀ (n : ℕ), InnerProductSpace.HarmonicOnNhd (u n) U) →
-    (∀ z ∈ U, Monotone fun (n : ℕ) => u n z) →
+    (∀ z ∈ U, Monotone fun (n : ℕ) ↦ u n z) →
     ∀ {z₀ : ℂ},
     z₀ ∈ U →
-    BddAbove (Set.range fun (n : ℕ) => u n z₀) →
+    BddAbove (Set.range fun (n : ℕ) ↦ u n z₀) →
     ∃ (f : ℂ → ℝ), InnerProductSpace.HarmonicOnNhd f U ∧ TendstoLocallyUniformlyOn u f
     Filter.atTop U := by sorry
 
@@ -680,7 +680,7 @@ theorem green_function :
     ∀ {w : ℂ},
     w ∈ U →
     ∃ (G : ℂ → ℝ),
-    InnerProductSpace.HarmonicOnNhd (fun (z : ℂ) => G z + Real.log ‖z - w‖) U ∧
+    InnerProductSpace.HarmonicOnNhd (fun (z : ℂ) ↦ G z + Real.log ‖z - w‖) U ∧
     (∀ ζ ∈ frontier U, Filter.Tendsto G (nhdsWithin ζ U) (nhds 0)) ∧ ∀ z ∈ U, z ≠ w → 0 ≤ G z := by sorry
 
 /-- 43. Schwarz reflection across the real axis on a conjugation-invariant open set.

@@ -84,7 +84,7 @@ theorem cauchy_theorem :
     Γ.range ⊆ U →
     (∀ w ∉ U, Γ.index w = 0) →
     ∀ {f : ℂ → F},
-    DifferentiableOn ℂ f U → (Γ.integral fun (w : ℂ) => ContinuousLinearMap.toSpanSingleton ℂ (f
+    DifferentiableOn ℂ f U → (Γ.integral fun (w : ℂ) ↦ ContinuousLinearMap.toSpanSingleton ℂ (f
     w)) = 0 := by
   exact @Complex.Cycle.integral_eq_zero
 
@@ -102,7 +102,7 @@ theorem cauchy_formula :
     ∀ {z : ℂ},
     z ∈ U →
     z ∉ Γ.range →
-    (Γ.integral fun (w : ℂ) => ContinuousLinearMap.toSpanSingleton ℂ ((w - z)⁻¹ • f w)) =
+    (Γ.integral fun (w : ℂ) ↦ ContinuousLinearMap.toSpanSingleton ℂ ((w - z)⁻¹ • f w)) =
     (2 * ↑Real.pi * Complex.I * Γ.index z) • f z := by
   exact @Complex.Cycle.integral_sub_inv_smul_eq_index_smul
 
@@ -120,7 +120,7 @@ theorem residue_theorem :
     (∀ w ∉ U, Γ.index w = 0) →
     ∀ {f : ℂ → F},
     DifferentiableOn ℂ f (U \ ↑S) →
-    (Γ.integral fun (w : ℂ) => ContinuousLinearMap.toSpanSingleton ℂ (f w)) =
+    (Γ.integral fun (w : ℂ) ↦ ContinuousLinearMap.toSpanSingleton ℂ (f w)) =
     ∑ a ∈ S, (2 * ↑Real.pi * Complex.I * Γ.index a) • Complex.residue f a := by
   exact @Complex.Cycle.integral_eq_sum_index_smul_residue
 
@@ -134,7 +134,7 @@ theorem laurent_expansion :
     r < ‖z‖ →
     ‖z‖ < R →
     AnalyticOnNhd ℂ f (Metric.closedBall 0 R \ Metric.ball 0 r) →
-    HasSum (fun (k : ℤ) => z ^ k • Complex.circleLaurentCoeff f r k) (f z) := by
+    HasSum (fun (k : ℤ) ↦ z ^ k • Complex.circleLaurentCoeff f r k) (f z) := by
   exact @Complex.hasSum_circleLaurentCoeff_annulus
 
 /-- 9. The residue of a holomorphic numerator divided by an arbitrary positive power.
@@ -144,7 +144,7 @@ theorem residue_higher_pole :
     ∀ {F : Type u_1} [NormedAddCommGroup F] [NormedSpace ℂ F]
     [CompleteSpace F] {f : ℂ → F} {c : ℂ},
     AnalyticAt ℂ f c →
-    ∀ (n : ℕ), Complex.residue (fun (z : ℂ) => (z - c) ^ (-((n : ℤ) + 1)) • f z) c = (n.factorial : ℂ)⁻¹ •
+    ∀ (n : ℕ), Complex.residue (fun (z : ℂ) ↦ (z - c) ^ (-((n : ℤ) + 1)) • f z) c = (n.factorial : ℂ)⁻¹ •
     iteratedDeriv n f c := by
   exact @Complex.residue_sub_zpow_smul
 
@@ -198,7 +198,7 @@ theorem hurwitz_injective :
     IsPreconnected U →
     (∀ᶠ (n : ι) in l, DifferentiableOn ℂ (F n) U) →
     (∀ᶠ (n : ι) in l, Set.InjOn (F n) U) →
-    TendstoLocallyUniformlyOn F f l U → (∃ (v : ℂ), Set.EqOn f (fun (_x : ℂ) => v) U) ∨ Set.InjOn f
+    TendstoLocallyUniformlyOn F f l U → (∃ (v : ℂ), Set.EqOn f (fun (_x : ℂ) ↦ v) U) ∨ Set.InjOn f
     U := by
   exact @Complex.eqOn_const_or_injOn_of_tendstoLocallyUniformlyOn
 
@@ -218,7 +218,7 @@ theorem isolated_singularity :
     ∀ {f : ℂ → ℂ} {c : ℂ},
     (∀ᶠ (z : ℂ) in nhdsWithin c {c}ᶜ, AnalyticAt ℂ f z) →
     (∃ (g : ℂ → ℂ), AnalyticAt ℂ g c ∧ f =ᶠ[nhdsWithin c {c}ᶜ] g) ∨
-    Filter.Tendsto (fun (z : ℂ) => ‖f z‖) (nhdsWithin c {c}ᶜ) Filter.atTop ∨ ∀ s ∈ nhdsWithin c
+    Filter.Tendsto (fun (z : ℂ) ↦ ‖f z‖) (nhdsWithin c {c}ᶜ) Filter.atTop ∨ ∀ s ∈ nhdsWithin c
     {c}ᶜ, Dense (f '' s) := by
   exact @Complex.isolatedSingularity_trichotomy
 
@@ -229,7 +229,7 @@ theorem local_mapping :
     ∀ {f : ℂ → ℂ} {a : ℂ},
     AnalyticAt ℂ f a →
     ∀ {m : ℕ},
-    analyticOrderAt (fun (z : ℂ) => f z - f a) a = ↑m →
+    analyticOrderAt (fun (z : ℂ) ↦ f z - f a) a = ↑m →
     ∃ ε₀ > 0,
     ∀ (ε : ℝ),
     0 < ε →
@@ -255,7 +255,7 @@ theorem montel :
     (∀ (n : ℕ), DifferentiableOn ℂ (f n) U) →
     (∀ K ⊆ U, IsCompact K → ∃ (M : ℝ), ∀ (n : ℕ), ∀ z ∈ K, ‖f n z‖ ≤ M) →
     ∃ (g : ℂ → F) (φ : ℕ → ℕ),
-    StrictMono φ ∧ DifferentiableOn ℂ g U ∧ TendstoLocallyUniformlyOn (fun (n : ℕ) => f (φ n)) g
+    StrictMono φ ∧ DifferentiableOn ℂ g U ∧ TendstoLocallyUniformlyOn (fun (n : ℕ) ↦ f (φ n)) g
     Filter.atTop U := by
   exact @Complex.exists_subseq_tendstoLocallyUniformlyOn_of_bounded_on_compacts
 
@@ -275,7 +275,7 @@ theorem vitali :
     ∀ {a : ℂ},
     a ∈ D →
     a ∈ closure (V \ {a}) →
-    (∀ z ∈ V, ∃ (y : F), Filter.Tendsto (fun (n : ℕ) => f n z) Filter.atTop (nhds y)) →
+    (∀ z ∈ V, ∃ (y : F), Filter.Tendsto (fun (n : ℕ) ↦ f n z) Filter.atTop (nhds y)) →
     ∃ (g : ℂ → F), DifferentiableOn ℂ g D ∧ TendstoLocallyUniformlyOn f g Filter.atTop D := by
   exact @Complex.exists_tendstoLocallyUniformlyOn_of_forall_exists_tendsto
 
@@ -289,7 +289,7 @@ theorem derivative_convergence :
     TendstoLocallyUniformlyOn F f' Filter.atTop V →
     (∀ (n : ℕ), DifferentiableOn ℂ (F n) V) →
     ∀ {x : ℂ},
-    x ∈ V → Filter.Tendsto (fun (n : ℕ) => iteratedDeriv j (F n) x) Filter.atTop (nhds
+    x ∈ V → Filter.Tendsto (fun (n : ℕ) ↦ iteratedDeriv j (F n) x) Filter.atTop (nhds
     (iteratedDeriv j f' x)) := by
   exact @Complex.tendsto_iteratedDeriv_of_tendstoLocallyUniformlyOn
 
@@ -325,21 +325,21 @@ theorem runge_polynomial :
     Polynomial.eval z p‖ ≤ ε := by
   exact @Complex.exists_polynomial_approx_of_isPreconnected_compl
 
-/-- 22. Mittag–Leffler on an arbitrary open set for a relatively discrete closed set of
-singularities.
-Library: `Complex.mittagLeffler`. -/
+/-- 22. Mittag–Leffler on an arbitrary open set for a set of singularities with no accumulation
+point in the open set (every point of `U` has positive distance from the other singularities).
+Library: `Complex.mittagLeffler_of_forall_le_dist`. -/
 theorem mittag_leffler :
     ∀ {U : Set ℂ},
     IsOpen U →
     ∀ {S : Set ℂ},
     S ⊆ U →
-    Sᶜ ∈ Filter.codiscreteWithin U →
+    (∀ z ∈ U, ∃ ε > 0, ∀ w ∈ S, w ≠ z → ε ≤ dist w z) →
     ∀ {P : ℂ → ℂ → ℂ},
     (∀ a ∈ S, DifferentiableOn ℂ (P a) {a}ᶜ) →
     ∃ (f : ℂ → ℂ),
     DifferentiableOn ℂ f (U \ S) ∧
-    ∀ a ∈ S, ∃ (g : ℂ → ℂ), AnalyticAt ℂ g a ∧ f =ᶠ[nhdsWithin a {a}ᶜ] fun (z : ℂ) => P a z + g z := by
-  exact @Complex.mittagLeffler
+    ∀ a ∈ S, ∃ (g : ℂ → ℂ), AnalyticAt ℂ g a ∧ f =ᶠ[nhdsWithin a {a}ᶜ] fun (z : ℂ) ↦ P a z + g z := by
+  exact @Complex.mittagLeffler_of_forall_le_dist
 
 /-- 23. The compact-support C¹ Cauchy–Pompeiu identity; Banach-valued.
 Related scalar theorem: Will (Ziang) Li (RiemannDynamics). See CREDITS.md.
@@ -357,12 +357,12 @@ Related elementary factors: Matteo Cipollina’s Hadamard development. See CREDI
 Library: `Complex.analyticOrderAt_weierstrassProduct`. -/
 theorem weierstrass_product :
     ∀ {a : ℕ → ℂ}, (∀ n, a n ≠ 0) →
-    Filter.Tendsto (fun n => ‖a n‖) Filter.atTop Filter.atTop →
+    Filter.Tendsto (fun n ↦ ‖a n‖) Filter.atTop Filter.atTop →
     Differentiable ℂ (Complex.weierstrassProduct a) ∧
     ∀ w : ℂ, analyticOrderAt (Complex.weierstrassProduct a) w =
     ({n : ℕ | a n = w}.ncard : ℕ∞) := by
   intro a ha hlim
-  refine ⟨Complex.differentiable_weierstrassProduct ha hlim, fun w => ?_⟩
+  refine ⟨Complex.differentiable_weierstrassProduct ha hlim, fun w ↦ ?_⟩
   rw [Set.ncard_eq_toFinset_card _ (Complex.finite_setOf_eq_of_tendsto hlim w)]
   exact Complex.analyticOrderAt_weierstrassProduct ha hlim w
 
@@ -371,7 +371,7 @@ multiplicity.
 Library: `Complex.exists_exp_mul_weierstrassProduct`. -/
 theorem weierstrass_factorization :
     ∀ {a : ℕ → ℂ} {f : ℂ → ℂ}, Differentiable ℂ f →
-    (∀ n, a n ≠ 0) → Filter.Tendsto (fun n => ‖a n‖) Filter.atTop Filter.atTop →
+    (∀ n, a n ≠ 0) → Filter.Tendsto (fun n ↦ ‖a n‖) Filter.atTop Filter.atTop →
     (∀ w : ℂ, analyticOrderAt f w = ({n : ℕ | a n = w}.ncard : ℕ∞)) →
     ∃ g : ℂ → ℂ, Differentiable ℂ g ∧
     ∀ z : ℂ, f z = Complex.exp (g z) * Complex.weierstrassProduct a z := by
@@ -396,9 +396,9 @@ theorem hadamard :
     ρ < ↑k + 1 →
     ∃ (ι : Type) (_ : Countable ι) (a : ι → ℂ) (m : ℕ) (P : Polynomial ℂ),
     (∀ (i : ι), a i ≠ 0) ∧
-    Filter.Tendsto (fun (i : ι) => ‖a i‖) Filter.cofinite Filter.atTop ∧
+    Filter.Tendsto (fun (i : ι) ↦ ‖a i‖) Filter.cofinite Filter.atTop ∧
     (∀ (i : ι), f (a i) = 0) ∧
-    (Summable fun (i : ι) => ‖a i‖⁻¹ ^ (k + 1)) ∧
+    (Summable fun (i : ι) ↦ ‖a i‖⁻¹ ^ (k + 1)) ∧
     P.natDegree ≤ k ∧
     ∀ (z : ℂ), f z = Complex.exp (Polynomial.eval z P) * z ^ m * Complex.canonicalProduct k a z := by
   exact @Complex.exists_hadamard_factorization
@@ -412,7 +412,7 @@ theorem blaschke_condition :
     ∀ {M : ℝ},
     (∀ z ∈ Metric.ball 0 1, ‖f z‖ ≤ M) →
     (∃ z ∈ Metric.ball 0 1, f z ≠ 0) →
-    Summable fun (w : { w : ℂ // ‖w‖ < 1 ∧ f w = 0 ∧ w ≠ 0 }) => ((analyticOrderAt f (w : ℂ)).toNat : ℝ) *
+    Summable fun (w : { w : ℂ // ‖w‖ < 1 ∧ f w = 0 ∧ w ≠ 0 }) ↦ ((analyticOrderAt f (w : ℂ)).toNat : ℝ) *
     (1 - ‖(w : ℂ)‖) := by
   exact @Complex.summable_analyticOrderAt_toNat_mul_one_sub_norm_of_bounded
 
@@ -428,7 +428,7 @@ theorem riesz_factorization :
     ∃ (ι : Type) (_ : Countable ι) (a : ι → ℂ) (m : ℕ) (g : ℂ → ℂ),
     (∀ (i : ι), a i ≠ 0) ∧
     (∀ (i : ι), ‖a i‖ < 1) ∧
-    (Summable fun (i : ι) => 1 - ‖a i‖) ∧
+    (Summable fun (i : ι) ↦ 1 - ‖a i‖) ∧
     (∀ (i : ι), f (a i) = 0) ∧
     DifferentiableOn ℂ g (Metric.ball 0 1) ∧
     (∀ z ∈ Metric.ball 0 1, g z ≠ 0) ∧
@@ -550,10 +550,10 @@ theorem harnack_convergence :
     IsPreconnected U →
     ∀ {u : ℕ → ℂ → ℝ},
     (∀ (n : ℕ), InnerProductSpace.HarmonicOnNhd (u n) U) →
-    (∀ z ∈ U, Monotone fun (n : ℕ) => u n z) →
+    (∀ z ∈ U, Monotone fun (n : ℕ) ↦ u n z) →
     ∀ {z₀ : ℂ},
     z₀ ∈ U →
-    BddAbove (Set.range fun (n : ℕ) => u n z₀) →
+    BddAbove (Set.range fun (n : ℕ) ↦ u n z₀) →
     ∃ (f : ℂ → ℝ), InnerProductSpace.HarmonicOnNhd f U ∧ TendstoLocallyUniformlyOn u f
     Filter.atTop U := by
   exact @Complex.exists_harmonicOnNhd_tendstoLocallyUniformlyOn_of_monotone
@@ -599,7 +599,7 @@ theorem green_function :
     ∀ {w : ℂ},
     w ∈ U →
     ∃ (G : ℂ → ℝ),
-    InnerProductSpace.HarmonicOnNhd (fun (z : ℂ) => G z + Real.log ‖z - w‖) U ∧
+    InnerProductSpace.HarmonicOnNhd (fun (z : ℂ) ↦ G z + Real.log ‖z - w‖) U ∧
     (∀ ζ ∈ frontier U, Filter.Tendsto G (nhdsWithin ζ U) (nhds 0)) ∧ ∀ z ∈ U, z ≠ w → 0 ≤ G z := by
   exact @Complex.exists_greenFunction
 
