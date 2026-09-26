@@ -31,8 +31,8 @@ open Set
 /-- Nonnegative multiples of upper semicontinuous functions are upper semicontinuous. -/
 theorem UpperSemicontinuousOn.const_mul {X : Type*} [TopologicalSpace X] {f : X → ℝ} {s : Set X}
     {c : ℝ} (hf : UpperSemicontinuousOn f s) (hc : 0 ≤ c) :
-    UpperSemicontinuousOn (fun x => c * f x) s := fun z hz =>
+    UpperSemicontinuousOn (fun x ↦ c * f x) s := fun z hz ↦
   (continuous_const.mul continuous_id).continuousAt.comp_upperSemicontinuousWithinAt
-    (hf z hz) (fun _ _ hxy => mul_le_mul_of_nonneg_left hxy hc)
+    (hf z hz) (fun _ _ hxy ↦ mul_le_mul_of_nonneg_left hxy hc)
 
 end

@@ -55,7 +55,7 @@ theorem exists_tendsto_of_holomorphic_bounded_on_compacts
     {V : Set ℂ} (hVU : V ⊆ U) {a : ℂ} (ha : a ∈ U)
     (hacc : a ∈ closure (V \ {a}))
     (hp : ∀ z ∈ V, ∃ y : F,
-      Tendsto (fun n => openExtension U (f n).val z) atTop (𝓝 y)) :
+      Tendsto (fun n ↦ openExtension U (f n).val z) atTop (𝓝 y)) :
     ∃ g : HolomorphicMap U F, Tendsto f atTop (𝓝 g) := by
   apply exists_tendsto_of_holomorphic_bounded_on_compacts_of_isClosed_of_unique
     (isClosed_holomorphicSubmodule U) f hb hVU _ hp
@@ -63,7 +63,7 @@ theorem exists_tendsto_of_holomorphic_bounded_on_compacts
   have heq := p.property.eqOn_of_preconnected_of_mem_closure q.property hconn ha
     (closure_mono (show V \ {a} ⊆
       {z | openExtension U p.val z = openExtension U q.val z} \ {a} from
-        fun _ hz => ⟨he hz.1, hz.2⟩) hacc)
+        fun _ hz ↦ ⟨he hz.1, hz.2⟩) hacc)
   apply Subtype.ext
   apply ContinuousMap.ext
   intro z
@@ -80,7 +80,7 @@ theorem exists_tendstoLocallyUniformlyOn_of_forall_exists_tendsto
     (hf : ∀ n, DifferentiableOn ℂ (f n) D)
     (hb : ∀ K ⊆ D, IsCompact K → ∃ M : ℝ, ∀ n, ∀ z ∈ K, ‖f n z‖ ≤ M)
     (hVD : V ⊆ D) {a : ℂ} (ha : a ∈ D) (hacc : a ∈ closure (V \ {a}))
-    (hp : ∀ z ∈ V, ∃ y : F, Tendsto (fun n => f n z) atTop (𝓝 y)) :
+    (hp : ∀ z ∈ V, ∃ y : F, Tendsto (fun n ↦ f n z) atTop (𝓝 y)) :
     ∃ g : ℂ → F, DifferentiableOn ℂ g D ∧ TendstoLocallyUniformlyOn f g atTop D := by
   let U : TopologicalSpace.Opens ℂ := ⟨D, hD⟩
   let s (n : ℕ) := holomorphicMapOfAnalyticOnNhd U (f n) ((hf n).analyticOnNhd hD)
@@ -90,11 +90,11 @@ theorem exists_tendstoLocallyUniformlyOn_of_forall_exists_tendsto
     (by
       intro K hKD hK
       obtain ⟨M, hM⟩ := hb K hKD hK
-      exact ⟨M, fun n z hz => by rw [hs n (hKD hz)]; exact hM n z hz⟩)
+      exact ⟨M, fun n z hz ↦ by rw [hs n (hKD hz)]; exact hM n z hz⟩)
     hVD ha hacc (by
       intro z hz
       simpa only [hs _ (hVD hz)] using hp z hz)
   exact ⟨openExtension U g.val, g.property.differentiableOn,
-    (holomorphicMap_tendsto_iff.mp hg).congr (fun n _ hz => hs n hz)⟩
+    (holomorphicMap_tendsto_iff.mp hg).congr (fun n _ hz ↦ hs n hz)⟩
 
 end Complex

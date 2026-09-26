@@ -44,11 +44,11 @@ private theorem circleIntegral_dslope {f : ℂ → F} {r : ℝ} (hr : 0 ≤ r)
     (∮ w in C(0, r), dslope f z w) =
       (∮ w in C(0, r), (w - z)⁻¹ • f w) -
         (∮ w in C(0, r), (w - z)⁻¹) • f z := by
-  have hk : ContinuousOn (fun w : ℂ => (w - z)⁻¹) (sphere 0 r) :=
-    (continuousOn_id.sub continuousOn_const).inv₀ fun w hw => sub_ne_zero.mpr (hz w hw)
-  have h₁ : CircleIntegrable (fun w => (w - z)⁻¹ • f w) 0 r :=
+  have hk : ContinuousOn (fun w : ℂ ↦ (w - z)⁻¹) (sphere 0 r) :=
+    (continuousOn_id.sub continuousOn_const).inv₀ fun w hw ↦ sub_ne_zero.mpr (hz w hw)
+  have h₁ : CircleIntegrable (fun w ↦ (w - z)⁻¹ • f w) 0 r :=
     (hk.smul hf).circleIntegrable hr
-  have h₂ : CircleIntegrable (fun w => (w - z)⁻¹ • f z) 0 r :=
+  have h₂ : CircleIntegrable (fun w ↦ (w - z)⁻¹ • f z) 0 r :=
     (hk.smul continuousOn_const).circleIntegrable hr
   rw [← circleIntegral.integral_smul_const, ← circleIntegral.integral_sub h₁ h₂]
   apply circleIntegral.integral_congr hr
@@ -58,7 +58,7 @@ private theorem circleIntegral_dslope {f : ℂ → F} {r : ℝ} (hr : 0 ≤ r)
 /-- The Cauchy kernel has zero integral on a circle that does not enclose its pole. -/
 theorem circleIntegral_sub_inv_eq_zero_of_lt_norm {r : ℝ} (hr : 0 ≤ r) {z : ℂ}
     (hz : r < ‖z‖) : (∮ w in C(0, r), (w - z)⁻¹) = 0 := by
-  suffices hd : DifferentiableOn ℂ (fun w : ℂ => (w - z)⁻¹) (closedBall 0 r) from
+  suffices hd : DifferentiableOn ℂ (fun w : ℂ ↦ (w - z)⁻¹) (closedBall 0 r) from
     (hd.mono closure_ball_subset_closedBall).diffContOnCl.circleIntegral_eq_zero hr
   intro w hw
   apply ((differentiableAt_id.sub_const z).inv ?_).differentiableWithinAt
@@ -90,7 +90,7 @@ theorem circleIntegral_sub_inv_smul_sub_of_analyticOnNhd_annulus
       intro w hw
       apply (differentiableAt_dslope_of_ne (by simpa using hw.2)).mpr
       exact (hf w ⟨ball_subset_closedBall hw.1.1,
-        fun hb => hw.1.2 (ball_subset_closedBall hb)⟩).differentiableAt)
+        fun hb ↦ hw.1.2 (ball_subset_closedBall hb)⟩).differentiableAt)
   have hs (t : ℝ) (ht : t = r ∨ t = R) : sphere (0 : ℂ) t ⊆ closedBall 0 R \ ball 0 r := by
     rintro w hw
     have hw' := mem_sphere_zero_iff_norm.mp hw
@@ -111,29 +111,29 @@ theorem hasSum_circleIntegral_geometric {f : ℂ → F} {g : ℂ → ℂ} {r q :
     (hr : 0 ≤ r) (hf : ContinuousOn f (sphere (0 : ℂ) r))
     (hg : ContinuousOn g (sphere (0 : ℂ) r)) (hq₀ : 0 ≤ q) (hq : q < 1)
     (hbound : ∀ w ∈ sphere (0 : ℂ) r, ‖g w‖ ≤ q) :
-    HasSum (fun n : ℕ => ∮ w in C(0, r), g w ^ n • f w)
+    HasSum (fun n : ℕ ↦ ∮ w in C(0, r), g w ^ n • f w)
       (∮ w in C(0, r), (1 - g w)⁻¹ • f w) := by
   obtain ⟨M, hM⟩ := (isCompact_sphere (0 : ℂ) r).exists_bound_of_continuousOn hf
-  have hfc : Continuous (fun θ => f (circleMap 0 r θ)) :=
+  have hfc : Continuous (fun θ ↦ f (circleMap 0 r θ)) :=
     hf.comp_continuous (continuous_circleMap _ _) (circleMap_mem_sphere _ hr)
-  have hgc : Continuous (fun θ => g (circleMap 0 r θ)) :=
+  have hgc : Continuous (fun θ ↦ g (circleMap 0 r θ)) :=
     hg.comp_continuous (continuous_circleMap _ _) (circleMap_mem_sphere _ hr)
   refine intervalIntegral.hasSum_integral_of_dominated_convergence
-    (fun n _ => r * (q ^ n * M)) (fun n => ?_) (fun n => ?_) ?_ ?_ ?_
+    (fun n _ ↦ r * (q ^ n * M)) (fun n ↦ ?_) (fun n ↦ ?_) ?_ ?_ ?_
   · apply Continuous.aestronglyMeasurable
     simp only [deriv_circleMap]
     exact ((continuous_circleMap 0 r).mul_const I).smul ((hgc.pow n).smul hfc)
-  · refine .of_forall fun θ _ => ?_
+  · refine .of_forall fun θ _ ↦ ?_
     simp only [norm_smul, norm_pow]
     have hd : ‖deriv (circleMap 0 r) θ‖ = r := by simp [deriv_circleMap, abs_of_nonneg hr]
     rw [hd]
     gcongr
     · exact hbound _ (circleMap_mem_sphere _ hr θ)
     · exact hM _ (circleMap_mem_sphere _ hr θ)
-  · exact .of_forall fun _ _ =>
+  · exact .of_forall fun _ _ ↦
       ((summable_geometric_of_lt_one hq₀ hq).mul_right M).mul_left r
   · exact intervalIntegrable_const
-  · refine .of_forall fun θ _ => ?_
+  · refine .of_forall fun θ _ ↦ ?_
     exact ((hasSum_geometric_of_norm_lt_one
       ((hbound _ (circleMap_mem_sphere _ hr θ)).trans_lt hq)).smul_const _).const_smul _
 

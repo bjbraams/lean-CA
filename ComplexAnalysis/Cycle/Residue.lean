@@ -54,7 +54,7 @@ author Jeremy Tan). See `CREDITS.md`. -/
 theorem integral_eq_sum_index_smul_residue {U : Set ℂ} (hU : IsOpen U) (S : Finset ℂ)
     (hΓ : Γ.IsC1) (hΓU : Γ.range ⊆ U \ S) (hind : ∀ w, w ∉ U → Γ.index w = 0)
     {f : ℂ → F} (hf : DifferentiableOn ℂ f (U \ S)) :
-    Γ.integral (fun w => toSpanSingleton ℂ (f w)) =
+    Γ.integral (fun w ↦ toSpanSingleton ℂ (f w)) =
       ∑ a ∈ S, (2 * (Real.pi : ℂ) * Complex.I * Γ.index a) • residue f a := by
   classical
   induction S using Finset.induction_on generalizing U Γ with
@@ -68,9 +68,9 @@ theorem integral_eq_sum_index_smul_residue {U : Set ℂ} (hU : IsOpen U) (S : Fi
     · have hset : (U \ {a}) \ (S : Set ℂ) = U \ ((insert a S : Finset ℂ) : Set ℂ) := by
         rw [Finset.coe_insert, Set.sdiff_sdiff, Set.insert_eq]
       have hU' : IsOpen (U \ {a}) := hU.sdiff isClosed_singleton
-      have haΓ : a ∉ Γ.range := fun h =>
+      have haΓ : a ∉ Γ.range := fun h ↦
         (hΓU h).2 (Finset.mem_coe.mpr (Finset.mem_insert_self a S))
-      have haS : a ∉ (S : Set ℂ) := fun h => ha (Finset.mem_coe.mp h)
+      have haS : a ∉ (S : Set ℂ) := fun h ↦ ha (Finset.mem_coe.mp h)
       obtain ⟨n, hn⟩ := Γ.exists_int_index hΓ haΓ
       have hV : IsOpen (U \ ((insert a S : Finset ℂ) : Set ℂ)) :=
         hU.sdiff (Finset.finite_toSet _).isClosed
@@ -78,7 +78,7 @@ theorem integral_eq_sum_index_smul_residue {U : Set ℂ} (hU : IsOpen U) (S : Fi
         have hmem : U \ (S : Set ℂ) ∈ 𝓝 a := (hU.sdiff hSclosed).mem_nhds ⟨haU, haS⟩
         filter_upwards [nhdsWithin_le_nhds hmem, self_mem_nhdsWithin] with z hzUS hza
         have hzV : z ∈ U \ ((insert a S : Finset ℂ) : Set ℂ) := by
-          refine ⟨hzUS.1, fun h => ?_⟩
+          refine ⟨hzUS.1, fun h ↦ ?_⟩
           rcases Finset.mem_insert.mp (Finset.mem_coe.mp h) with h | h
           · exact hza (Set.mem_singleton_iff.mpr h)
           · exact hzUS.2 (Finset.mem_coe.mpr h)
@@ -89,12 +89,12 @@ theorem integral_eq_sum_index_smul_residue {U : Set ℂ} (hU : IsOpen U) (S : Fi
         ((eventually_circleIntegral_eq_residue hfa).and (Ioo_mem_nhdsGT hε)).exists
       have hcb : closedBall a r ⊆ U ∩ (Γ.rangeᶜ ∩ (S : Set ℂ)ᶜ) :=
         (closedBall_subset_ball hrε).trans hball
-      set C : Loop := Loop.ofPath (Path.circle a r) with hC_def
+      set C : Loop := Loop.ofPath (Path.circle a r)
       have hCrange : Set.range C.2 = sphere a r := by
         change Set.range (Path.circle a r) = sphere a r
         rw [Path.range_circle, abs_of_pos hr0]
       have hC1 : ContDiffOn ℝ 1 C.2.extend I := Path.contDiffOn_circle a r
-      set Γ₁ := Γ.append (zsmulLoop (-n) C) with hΓ₁_def
+      set Γ₁ := Γ.append (zsmulLoop (-n) C)
       have hΓ₁ : Γ₁.IsC1 := append_isC1 hΓ (zsmulLoop_isC1 _ hC1)
       have hΓ₁U : Γ₁.range ⊆ (U \ {a}) \ (S : Set ℂ) := by
         rw [append_range, hset]
@@ -103,7 +103,7 @@ theorem integral_eq_sum_index_smul_residue {U : Set ℂ} (hU : IsOpen U) (S : Fi
         rw [hCrange]
         intro z hz
         have hz' := hcb (sphere_subset_closedBall hz)
-        refine ⟨hz'.1, fun hmem => ?_⟩
+        refine ⟨hz'.1, fun hmem ↦ ?_⟩
         rcases Finset.mem_insert.mp (Finset.mem_coe.mp hmem) with h | h
         · exact hr0.ne (by simpa [h] using mem_sphere.mp hz)
         · exact hz'.2.2 (Finset.mem_coe.mpr h)
@@ -121,7 +121,7 @@ theorem integral_eq_sum_index_smul_residue {U : Set ℂ} (hU : IsOpen U) (S : Fi
           ring
         · rw [hind w hwU]
           change (0 : ℂ) + (-n : ℤ) * curveIndex (Path.circle a r) w = 0
-          rw [curveIndex_circle_of_notMem_closedBall hr0.le (fun h => hwU (hcb h).1)]
+          rw [curveIndex_circle_of_notMem_closedBall hr0.le (fun h ↦ hwU (hcb h).1)]
           ring
       have hf' : DifferentiableOn ℂ f ((U \ {a}) \ (S : Set ℂ)) := by rwa [hset]
       have hih := ih (U := U \ {a}) (Γ := Γ₁) hU' hΓ₁ hΓ₁U hΓ₁ind hf'
@@ -130,11 +130,11 @@ theorem integral_eq_sum_index_smul_residue {U : Set ℂ} (hU : IsOpen U) (S : Fi
         rw [append_index, zsmulLoop_index]
         change Γ.index b + (-n : ℤ) * curveIndex (Path.circle a r) b = Γ.index b
         rw [curveIndex_circle_of_notMem_closedBall hr0.le
-          (fun h => (hcb h).2.2 (Finset.mem_coe.mpr hb))]
+          (fun h ↦ (hcb h).2.2 (Finset.mem_coe.mpr hb))]
         ring
       rw [append_integral, zsmulLoop_integral,
-        Finset.sum_congr rfl (fun b hb => by rw [hidx b hb])] at hih
-      have hcirc : curveIntegral (fun w => toSpanSingleton ℂ (f w)) C.2 =
+        Finset.sum_congr rfl (fun b hb ↦ by rw [hidx b hb])] at hih
+      have hcirc : curveIntegral (fun w ↦ toSpanSingleton ℂ (f w)) C.2 =
           (2 * Real.pi * Complex.I : ℂ) • residue f a := by
         change curveIntegral _ (Path.circle a r) = _
         rw [curveIntegral_circle, ← hres, smul_smul, mul_inv_cancel₀ two_pi_I_ne_zero,

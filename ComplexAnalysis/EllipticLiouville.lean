@@ -45,17 +45,16 @@ bounded. -/
 theorem elliptic_bounded_of_periodic {L : PeriodPair} {f : ℂ → ℂ} (hf : Continuous f)
     (hper1 : Function.Periodic f L.ω₁) (hper2 : Function.Periodic f L.ω₂) :
     Bornology.IsBounded (Set.range f) := by
-  set P : Set ℂ := (fun p : ℝ × ℝ => p.1 • L.ω₁ + p.2 • L.ω₂) '' (Icc (0 : ℝ) 1 ×ˢ Icc (0 : ℝ) 1)
-    with hP_def
+  set P : Set ℂ := (fun p : ℝ × ℝ ↦ p.1 • L.ω₁ + p.2 • L.ω₂) '' (Icc (0 : ℝ) 1 ×ˢ Icc (0 : ℝ) 1)
   have hPcompact : IsCompact P := (isCompact_Icc.prod isCompact_Icc).image (by fun_prop)
   obtain ⟨M, hM⟩ := hPcompact.exists_bound_of_continuousOn hf.continuousOn
   rw [isBounded_iff_forall_norm_le]
   refine ⟨M, ?_⟩
   rintro _ ⟨z, rfl⟩
-  set x : ℝ := L.basis.repr z 0 with hx_def
-  set y : ℝ := L.basis.repr z 1 with hy_def
-  set t1 : ℤ := ⌊x⌋ with ht1_def
-  set t2 : ℤ := ⌊y⌋ with ht2_def
+  set x : ℝ := L.basis.repr z 0
+  set y : ℝ := L.basis.repr z 1
+  set t1 : ℤ := ⌊x⌋
+  set t2 : ℤ := ⌊y⌋
   have hz : z = x • L.ω₁ + y • L.ω₂ := by
     have hrepr := L.basis.sum_repr z
     rw [Fin.sum_univ_two] at hrepr
@@ -78,7 +77,7 @@ with respect to a lattice is constant. -/
 theorem elliptic_constant_of_entire {L : PeriodPair} {f : ℂ → ℂ} (hf : Differentiable ℂ f)
     (hper1 : Function.Periodic f L.ω₁) (hper2 : Function.Periodic f L.ω₂) :
     ∃ c, ∀ z, f z = c :=
-  ⟨f 0, fun z => liouville_theorem_aux hf
+  ⟨f 0, fun z ↦ liouville_theorem_aux hf
     (elliptic_bounded_of_periodic hf.continuous hper1 hper2) z 0⟩
 
 end Complex

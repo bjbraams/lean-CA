@@ -46,7 +46,7 @@ theorem exists_zero_of_norm_lt_boundary {f : ℂ → ℂ} {r : ℝ} (hr : 0 < r)
     rcases lt_or_eq_of_le (mem_closedBall.mp hz) with hz | hz
     · exact hn z hz
     · exact norm_pos_iff.mp ((norm_nonneg _).trans_lt (hlt z hz))
-  have hi : DiffContOnCl ℂ (fun z => (f z)⁻¹) (ball 0 r) := by
+  have hi : DiffContOnCl ℂ (fun z ↦ (f z)⁻¹) (ball 0 r) := by
     refine ⟨(hf.inv hne).mono ball_subset_closedBall, ?_⟩
     rw [closure_ball (0 : ℂ) hr.ne']
     exact (hf.continuousOn.inv₀ hne)
@@ -63,14 +63,14 @@ in the initial fiber has no boundary zeros. The parameter space only needs a top
 theorem eventually_exists_zero_in_fiber {X : Type*} [TopologicalSpace X]
     {W : Set (X × ℂ)} (hW : IsOpen W) {f : X × ℂ → ℂ}
     (hf : ContinuousOn f W)
-    (hd : ∀ p ∈ W, DifferentiableAt ℂ (fun z => f (p.1, z)) p.2)
+    (hd : ∀ p ∈ W, DifferentiableAt ℂ (fun z ↦ f (p.1, z)) p.2)
     {a : X} {r : ℝ} (hr : 0 < r)
     (hdisc : ∀ z ∈ closedBall (0 : ℂ) r, (a, z) ∈ W)
     (hzero : f (a, 0) = 0) (hboundary : ∀ z ∈ sphere (0 : ℂ) r, f (a, z) ≠ 0) :
     ∀ᶠ x in 𝓝 a, ∃ z ∈ ball (0 : ℂ) r, (x, z) ∈ W ∧ f (x, z) = 0 := by
   have hcont (z : ℂ) (hz : z ∈ closedBall (0 : ℂ) r) : ContinuousAt f (a, z) :=
     hf.continuousAt (hW.mem_nhds (hdisc z hz))
-  have hscont : ContinuousOn (fun z => ‖f (a, z)‖) (sphere (0 : ℂ) r) := by
+  have hscont : ContinuousOn (fun z ↦ ‖f (a, z)‖) (sphere (0 : ℂ) r) := by
     intro z hz
     exact ((hcont z (sphere_subset_closedBall hz)).comp
       (continuousAt_const.prodMk continuousAt_id)).norm.continuousWithinAt
@@ -79,10 +79,10 @@ theorem eventually_exists_zero_in_fiber {X : Type*} [TopologicalSpace X]
   let c := ‖f (a, b)‖ / 2
   have hc : 0 < c := half_pos (norm_pos_iff.mpr (hboundary b hb))
   have hsmall : ∀ᶠ x in 𝓝 a, ‖f (x, 0)‖ < c := by
-    have hs : ContinuousAt (fun x : X => (x, (0 : ℂ))) a :=
+    have hs : ContinuousAt (fun x : X ↦ (x, (0 : ℂ))) a :=
       continuousAt_id.prodMk continuousAt_const
     apply ((hcont 0 (mem_closedBall_self hr.le)).comp
-      (f := fun x : X => (x, (0 : ℂ))) hs).norm.eventually_lt continuousAt_const
+      (f := fun x : X ↦ (x, (0 : ℂ))) hs).norm.eventually_lt continuousAt_const
     simpa [hzero] using hc
   have hlarge : ∀ᶠ x in 𝓝 a, ∀ z ∈ sphere (0 : ℂ) r, c < ‖f (x, z)‖ := by
     apply (isCompact_sphere (0 : ℂ) r).eventually_forall_of_forall_eventually
@@ -91,11 +91,11 @@ theorem eventually_exists_zero_in_fiber {X : Type*} [TopologicalSpace X]
     exact (half_lt_self (norm_pos_iff.mpr (hboundary b hb))).trans_le (hmin hz)
   have hdomain : ∀ᶠ x in 𝓝 a, ∀ z ∈ closedBall (0 : ℂ) r, (x, z) ∈ W := by
     apply (isCompact_closedBall (0 : ℂ) r).eventually_forall_of_forall_eventually
-    exact fun z hz => hW.eventually_mem (hdisc z hz)
+    exact fun z hz ↦ hW.eventually_mem (hdisc z hz)
   filter_upwards [hsmall, hlarge, hdomain] with x hxsmall hxlarge hxdomain
-  obtain ⟨z, hz, hzero⟩ := exists_zero_of_norm_lt_boundary (f := fun z => f (x, z)) hr
-    (fun z hz => (hd (x, z) (hxdomain z hz)).differentiableWithinAt)
-    (fun z hz => hxsmall.trans (hxlarge z hz))
+  obtain ⟨z, hz, hzero⟩ := exists_zero_of_norm_lt_boundary (f := fun z ↦ f (x, z)) hr
+    (fun z hz ↦ (hd (x, z) (hxdomain z hz)).differentiableWithinAt)
+    (fun z hz ↦ hxsmall.trans (hxlarge z hz))
   exact ⟨z, hz, hxdomain z (ball_subset_closedBall hz), hzero⟩
 
 end Complex

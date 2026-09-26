@@ -13,7 +13,7 @@ The three source roots have matching umbrella modules:
 
 | Root | Role | Project dependencies |
 | --- | --- | --- |
-| [Topology](Topology.lean) | Gluing, compact exhaustions, paths, frontiers, and semicontinuity | None |
+| [Topology](Topology.lean) | Gluing, frontiers, simple connectedness of convex sets, and semicontinuity | None |
 | [Analysis](Analysis.lean) | Differentiation, integration, normed-space tools, and holomorphic function spaces | None outside `Analysis` |
 | [ComplexAnalysis](ComplexAnalysis.lean) | Function theory of one complex variable | `Analysis`, `Topology` |
 
@@ -62,19 +62,18 @@ family of modules; consult its source files for the individual declarations.
 | Local theory and residues | `CauchyDerivatives`, `CauchyEstimates`, `CauchySeries`, `LaurentSeries`, `LaurentSeries/`, `Residue`, `Residue/`, `ResidueAtInfinity`, `EssentialSingularity` | Banach-valued expansions and estimates; isolated singularities, principal parts, and residues, including infinity. |
 | Zeros and convergence | `ArgumentPrinciple`, `Rouche`, `Hurwitz`, `Injective`, `ZeroPersistence`, `LocalMapping`, `LocallyUniform`, `FunctionSpace`, `Montel`, `Vitali` | Divisor counts, local multiplicity, persistence of zeros, derivative convergence, and normal families. |
 | Approximation | `CauchyPompeiu`, `CauchyTransform`, `Runge/`, `MittagLeffler` | Cauchy transforms and cutoffs feed Runge approximation; compact exhaustions give open-set approximation and prescribed principal parts. Main endpoints: `runge`, `runge_isOpen`, `mittagLeffler`. |
-| Entire functions | `InfiniteProduct`, `WeierstrassFactor`, `WeierstrassProduct`, `CanonicalProduct`, `CanonicalProduct/`, `FiniteOrder`, `Hadamard` | Product convergence and multiplicities, zero counting, lower bounds on suitable circles, and `exists_hadamard_factorization`. |
+| Entire functions | `AnalyticOrder`, `InfiniteProduct`, `WeierstrassFactor`, `WeierstrassProduct`, `CanonicalProduct`, `CanonicalProduct/`, `FiniteOrder`, `Hadamard` | Shared order and division lemmas for analytic functions on preconnected open sets; product convergence and multiplicities, zero counting, lower bounds on suitable circles, and `exists_hadamard_factorization`. |
 | Bounded disc functions | `Blaschke`, `RieszFactorization` | Blaschke products and the necessary zero condition; `exists_rieszFactorization` constructs the zero family and a bounded nonvanishing cofactor. |
 | Conformal mapping | `DiscMobius`, `Cayley`, `HolomorphicInverse`, `DiscAutomorphism`, `RiemannMapping`, `SchwarzPick`, `UnivalentDisk/` | Disc and half-plane maps, `exists_riemannMap`, normalized uniqueness, Schwarz–Pick, and contour geometry and exhaustions for univalent disc images. |
 | Univalent estimates | `Parseval`, `DiscCauchyTransform`, `AreaTheorem`, `Koebe`, `KoebeDistortion`, `KoebeGrowth` | Area theorem, second-coefficient bound, quarter theorem, pre-Schwarzian bound, both derivative distortion bounds, and upper growth bound. |
-| Potential theory | `Subharmonic/`, `Harnack`, `DirichletDisc`, `HarmonicLimit`, `Perron`, `Perron/Barrier`, `GreenFunction`, `ThreeCircles` | Submean and maximum principles, Poisson solutions, harmonic limits, Perron envelopes, boundary barriers, and Green functions. |
+| Potential theory | `Subharmonic/`, `Harnack`, `DirichletDisc`, `HarmonicLimit`, `Perron`, `Perron/Barrier`, `GreenFunction` | Submean and maximum principles, Poisson solutions, harmonic limits, Perron envelopes, boundary barriers, and Green functions. |
 | Continuation and boundary phenomena | `RemovableSingularity`, `RemovableLine`, `Reflection`, `CircleReflection`, `AnalyticContinuation`, `NaturalBoundary`, `PringsheimVivanti` | Removal and reflection, uniqueness along a fixed path, an explicit natural boundary, and the positive-coefficient boundary singularity theorem. |
-| Further interfaces | `MobiusGeometry`, `ChordalMetric`, `SphericalDerivative`, `SokhotskiPlemelj`, `PaleyWiener`, `EllipticLiouville`, `EllipticResidue` | Selected geometric, boundary-integral, Fourier-transform, and periodic-function results; scope restrictions below. |
+| Further interfaces | `ThreeCircles`, `MobiusGeometry`, `ChordalMetric`, `SphericalDerivative`, `SokhotskiPlemelj`, `PaleyWiener`, `EllipticLiouville`, `EllipticResidue` | The three-circles theorem (via Mathlib's three-lines theorem) and selected geometric, boundary-integral, Fourier-transform, and periodic-function results; scope restrictions below. |
 
-`Analysis.Integral` contains the general pullback, improper-integral, norm, and tail estimates.
+`Analysis.Integral` contains the general pullback and improper-integral endpoint formulas.
 `ExteriorPath` and `ExteriorPath/Integral` specialize these tools to complex paths escaping to
 infinity. `ParametricIntegral` and `HolomorphicIntegral` handle complex parameter integrals;
 `HalfPlane`, `Pow`, and `RealUniqueness` supply branch geometry and uniqueness tools.
-`Analysis.SpecialFunctions.Gamma` evaluates the Gamma integral with a complex Laplace parameter.
 
 ## Boundaries of the current APIs
 
@@ -90,7 +89,8 @@ The following distinctions matter when reusing results or preparing an upstream 
   with multiplicity. Its cofactor retains the bound on the original function. This is the
   bounded holomorphic case, not the full Hardy-space inner–outer factorization theory.
 - `KoebeGrowth` proves both derivative bounds and the upper growth bound. The lower growth
-  bound is absent. `ThreeCircles` assumes nonvanishing on a punctured disc.
+  bound is absent. `ThreeCircles` needs only holomorphy on the open annulus and continuity
+  on its closure.
 - Perron's envelope is harmonic for bounded boundary data on bounded open sets. Boundary
   attainment needs a barrier. The exterior-disc criterion requires
   `closedBall c R ∩ closure U = {ζ}`. `exists_greenFunction` uses this criterion at every

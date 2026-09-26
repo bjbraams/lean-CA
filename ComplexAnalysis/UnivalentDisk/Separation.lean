@@ -43,7 +43,7 @@ namespace Complex
 /-- A translated open annulus is connected. -/
 theorem isConnected_ball_sdiff_closedBall (c : ℂ) {r R : ℝ} (hr : 0 ≤ r) (hrR : r < R) :
     IsConnected (ball c R \ closedBall c r) := by
-  have he : (fun z : ℂ => z + c) '' {z : ℂ | r < ‖z‖ ∧ ‖z‖ < R} =
+  have he : (fun z : ℂ ↦ z + c) '' {z : ℂ | r < ‖z‖ ∧ ‖z‖ < R} =
       ball c R \ closedBall c r := by
     ext z
     constructor

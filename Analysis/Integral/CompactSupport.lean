@@ -46,7 +46,7 @@ theorem MeasureTheory.IntegrableOn.smul_continuousOn_of_isCompact
     [TopologicalSpace α] [BorelSpace α] [T2Space α]
     {μ : Measure α} {K : Set α} {g : α → 𝕜} {H : α → E}
     (hg : IntegrableOn g K μ) (hH : ContinuousOn H K) (hK : IsCompact K) :
-    IntegrableOn (fun t => g t • H t) K μ := by
+    IntegrableOn (fun t ↦ g t • H t) K μ := by
   obtain ⟨M, hM⟩ := hK.bddAbove_image hH.norm
   apply (hg.norm.mul_const M).mono'
     (hg.aestronglyMeasurable.smul (hH.aestronglyMeasurable_of_isCompact hK hK.measurableSet))
@@ -71,8 +71,8 @@ theorem integrableOn_Ioi_of_continuous_of_eq_zero {g : ℝ → F} (hg : Continuo
     (hz : ∀ r, R < r → g r = 0) : IntegrableOn g (Ioi 0) := by
   have h1 : IntegrableOn g (Icc 0 R) := hg.continuousOn.integrableOn_Icc
   have h2 : IntegrableOn g (Ioi R) :=
-    ((integrable_zero _ _ _).integrableOn).congr_fun (fun r hr => (hz r hr).symm) measurableSet_Ioi
-  refine (h1.union h2).mono_set fun r hr => ?_
+    ((integrable_zero _ _ _).integrableOn).congr_fun (fun r hr ↦ (hz r hr).symm) measurableSet_Ioi
+  refine (h1.union h2).mono_set fun r hr ↦ ?_
   rcases le_or_gt r R with h | h
   · exact Or.inl ⟨le_of_lt hr, h⟩
   · exact Or.inr h

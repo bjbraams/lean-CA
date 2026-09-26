@@ -39,10 +39,10 @@ theorem isClosed_holomorphicSubmodule (U : TopologicalSpace.Opens ℂ) :
     IsClosed (holomorphicSubmodule (F := F) U : Set C(U, F)) := by
   rw [isClosed_iff_forall_filter]
   intro f l hl hmem hlim
-  have hc : Tendsto (fun g : C(U, F) => g) l (𝓝 f) := hlim
+  have hc : Tendsto (fun g : C(U, F) ↦ g) l (𝓝 f) := hlim
   have ha : ∀ᶠ g in l, AnalyticOnNhd ℂ (openExtension U g) U := le_principal_iff.mp hmem
   exact ((tendsto_iff_openExtension.mp hc).differentiableOn
-    (ha.mono fun _ h => h.differentiableOn) U.isOpen).analyticOnNhd U.isOpen
+    (ha.mono fun _ h ↦ h.differentiableOn) U.isOpen).analyticOnNhd U.isOpen
 
 /-- Holomorphic maps from a planar open set to a Banach space form a complete uniform space. -/
 instance (U : TopologicalSpace.Opens ℂ) : CompleteSpace (HolomorphicMap U F) :=

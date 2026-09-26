@@ -7,7 +7,7 @@ module
 
 public import ComplexAnalysis.Injective
 public import Topology.Frontier
-public import Mathlib.Analysis.Convex.Contractible
+public import Topology.SimplyConnected
 public import Mathlib.AlgebraicTopology.FundamentalGroupoid.SimplyConnected
 
 /-!
@@ -60,12 +60,12 @@ theorem isOpen_image_of_injOn_holomorphic {U V : Set ℂ} (hU : IsOpen U)
 /-- Restricting an injective holomorphic map to its open domain gives an open embedding. -/
 theorem isOpenEmbedding_of_injOn_holomorphic {U : Set ℂ} (hU : IsOpen U)
     {f : ℂ → ℂ} (hf : DifferentiableOn ℂ f U) (hi : InjOn f U) :
-    Topology.IsOpenEmbedding (fun z : U => f z) := by
+    Topology.IsOpenEmbedding (fun z : U ↦ f z) := by
   apply Topology.IsOpenEmbedding.of_continuous_injective_isOpenMap
     (continuousOn_iff_continuous_domRestrict.mp hf.continuousOn)
-    (fun x y h => Subtype.ext (hi x.property y.property h))
+    (fun x y h ↦ Subtype.ext (hi x.property y.property h))
   intro V hV
-  change IsOpen ((fun z : U => f z) '' V)
+  change IsOpen ((fun z : U ↦ f z) '' V)
   simpa only [image_image, Function.comp_def] using
     (isOpen_image_of_injOn_holomorphic hU hf hi
       (hU.isOpenMap_subtype_val V hV) (by rintro _ ⟨z, _, rfl⟩; exact z.property))
@@ -77,20 +77,18 @@ theorem isSimplyConnected_image_of_injOn_holomorphic {U : Set ℂ} (hU : IsOpen 
   let : SimplyConnectedSpace U := hc
   let e := (isOpenEmbedding_of_injOn_holomorphic hU hf hi).isEmbedding.toHomeomorph
   have h := e.symm.toHomotopyEquiv.simplyConnectedSpace
-  have he : range (fun z : U => f z) = f '' U := by
+  have he : range (fun z : U ↦ f z) = f '' U := by
     ext z
     simp
-  change IsSimplyConnected (range (fun z : U => f z)) at h
+  change IsSimplyConnected (range (fun z : U ↦ f z)) at h
   rwa [he] at h
 
 /-- An injective holomorphic image of a nonempty disk is simply connected. -/
 theorem isSimplyConnected_image_ball_of_injOn_holomorphic {f : ℂ → ℂ}
     {c : ℂ} {R : ℝ} (hR : 0 < R) (hf : DifferentiableOn ℂ f (ball c R))
-    (hi : InjOn f (ball c R)) : IsSimplyConnected (f '' ball c R) := by
-  let : ContractibleSpace (ball c R) :=
-    (convex_ball c R).contractibleSpace (nonempty_ball.mpr hR)
-  exact isSimplyConnected_image_of_injOn_holomorphic isOpen_ball hf hi
-    (show SimplyConnectedSpace (ball c R) from inferInstance)
+    (hi : InjOn f (ball c R)) : IsSimplyConnected (f '' ball c R) :=
+  isSimplyConnected_image_of_injOn_holomorphic isOpen_ball hf hi
+    ((convex_ball c R).isSimplyConnected (nonempty_ball.mpr hR))
 
 /-- The image of a closed disk is compact when the map is holomorphic on its neighborhood. -/
 theorem isCompact_image_closedBall_of_holomorphic {U : Set ℂ} {f : ℂ → ℂ}
@@ -130,7 +128,7 @@ theorem frontier_image_ball_of_injOn_holomorphic {U : Set ℂ} (hU : IsOpen U)
   · rintro ⟨⟨x, hx, rfl⟩, hn⟩
     refine ⟨x, ?_, rfl⟩
     rw [← closedBall_sdiff_ball]
-    exact ⟨hx, fun h => hn ⟨x, h, rfl⟩⟩
+    exact ⟨hx, fun h ↦ hn ⟨x, h, rfl⟩⟩
   · rintro ⟨x, hx, rfl⟩
     refine ⟨⟨x, sphere_subset_closedBall hx, rfl⟩, ?_⟩
     rintro ⟨y, hy, he⟩
@@ -141,7 +139,7 @@ theorem frontier_image_ball_of_injOn_holomorphic {U : Set ℂ} (hU : IsOpen U)
 theorem isClosedEmbedding_sphere_of_injOn_holomorphic {U : Set ℂ}
     {f : ℂ → ℂ} (hf : DifferentiableOn ℂ f U) (hi : InjOn f U)
     {c : ℂ} {R : ℝ} (hRU : sphere c R ⊆ U) :
-    Topology.IsClosedEmbedding (fun z : sphere c R => f z) := by
+    Topology.IsClosedEmbedding (fun z : sphere c R ↦ f z) := by
   apply (continuousOn_iff_continuous_domRestrict.mp (hf.continuousOn.mono hRU)).isClosedEmbedding
   intro x y hxy
   exact Subtype.ext (hi (hRU x.property) (hRU y.property) hxy)

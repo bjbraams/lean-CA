@@ -56,9 +56,9 @@ theorem exists_locally_eq_add_of_locally_constant_sub
   let Z : FiberBundleCore ι X A :=
     { baseSet := U
       isOpen_baseSet := hU
-      indexAt := fun x => (hcover x).choose
-      mem_baseSet_at := fun x => (hcover x).choose_spec
-      coordChange := fun i j x v => v + (p i x - p j x)
+      indexAt := fun x ↦ (hcover x).choose
+      mem_baseSet_at := fun x ↦ (hcover x).choose_spec
+      coordChange := fun i j x v ↦ v + (p i x - p j x)
       coordChange_self := by intros; simp
       continuousOn_coordChange := by
         intro i j q hq
@@ -75,8 +75,8 @@ theorem exists_locally_eq_add_of_locally_constant_sub
   obtain ⟨s, ⟨hs₀, hs⟩, _⟩ := hcov.existsUnique_continuousMap_lifts
     (ContinuousMap.id X) x₀ e₀ rfl
   have hsx (x : X) : (s x).proj = x := congrFun hs x
-  let v : X → A := fun x => (s x).2
-  let P : X → A := fun x => v x + p (Z.indexAt x) x
+  let v : X → A := fun x ↦ (s x).2
+  let P : X → A := fun x ↦ v x + p (Z.indexAt x) x
   have hlocal (i : ι) (x : X) :
       P x = ((Z.localTriv i) (s x)).2 + p i x := by
     change v x + p (Z.indexAt x) x =
@@ -93,7 +93,7 @@ theorem exists_locally_eq_add_of_locally_constant_sub
       apply (Z.localTriv i).mem_source.mpr
       change (s x).proj ∈ U i
       rwa [hsx]
-    have hc : ContinuousAt (fun y => ((Z.localTriv i) (s y)).2) x :=
+    have hc : ContinuousAt (fun y ↦ ((Z.localTriv i) (s y)).2) x :=
       ((Z.localTriv i).toOpenPartialHomeomorph.continuousAt hmem).snd.comp s.continuous.continuousAt
     have he : ∀ᶠ y in 𝓝 x, ((Z.localTriv i) (s y)).2 = ((Z.localTriv i) (s x)).2 :=
       hc.eventually ((isOpen_discrete {((Z.localTriv i) (s x)).2}).mem_nhds rfl)

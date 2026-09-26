@@ -90,16 +90,16 @@ theorem exists_sq_eq_of_re_pos {z : ℂ} (hz : 0 < z.re) :
 real axis whose open disk is contained in the right half-plane. -/
 theorem exists_pos_real_center_norm_sub_lt {ι : Type*} [Fintype ι]
     {z : ι → ℂ} (hz : ∀ i, 0 < (z i).re) :
-    ∃ A : ℝ, 0 < A ∧ ‖fun i => z i - (A : ℂ)‖ < A := by
-  let d := fun i => normSq (z i) / (2 * (z i).re)
+    ∃ A : ℝ, 0 < A ∧ ‖fun i ↦ z i - (A : ℂ)‖ < A := by
+  let d := fun i ↦ normSq (z i) / (2 * (z i).re)
   have hd (i : ι) : 0 ≤ d i :=
     div_nonneg (normSq_nonneg _) (mul_nonneg (by norm_num) (hz i).le)
   let A := (∑ i, d i) + 1
   have hA : 0 < A :=
-    add_pos_of_nonneg_of_pos (Finset.sum_nonneg (fun i _ => hd i)) zero_lt_one
-  refine ⟨A, hA, (pi_norm_lt_iff hA).mpr (fun i => ?_)⟩
+    add_pos_of_nonneg_of_pos (Finset.sum_nonneg (fun i _ ↦ hd i)) zero_lt_one
+  refine ⟨A, hA, (pi_norm_lt_iff hA).mpr (fun i ↦ ?_)⟩
   have hi : d i < A := lt_of_le_of_lt
-    (Finset.single_le_sum (fun j _ => hd j) (Finset.mem_univ i)) (by dsimp [A]; linarith)
+    (Finset.single_le_sum (fun j _ ↦ hd j) (Finset.mem_univ i)) (by dsimp [A]; linarith)
   have hip : normSq (z i) < A * (2 * (z i).re) :=
     (div_lt_iff₀ (mul_pos (by norm_num) (hz i))).mp hi
   have hs : ‖z i - (A : ℂ)‖ ^ 2 = normSq (z i) + A ^ 2 - 2 * (z i).re * A := by

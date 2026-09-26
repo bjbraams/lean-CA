@@ -38,7 +38,7 @@ its frontier. This does not assert how many other components there are. -/
 theorem IsOpen.connectedComponentIn_compl_frontier {X : Type*} [TopologicalSpace X]
     {U : Set X} (hU : IsOpen U) (hc : IsPreconnected U) {x : X} (hx : x ∈ U) :
     connectedComponentIn (frontier U)ᶜ x = U := by
-  have hsub : U ⊆ (frontier U)ᶜ := fun y hy hfr => (hU.notMem_of_mem_frontier hfr) hy
+  have hsub : U ⊆ (frontier U)ᶜ := fun y hy hfr ↦ (hU.notMem_of_mem_frontier hfr) hy
   apply Set.Subset.antisymm
   · apply isPreconnected_connectedComponentIn.subset_of_closure_inter_subset hU
       ⟨x, mem_connectedComponentIn (hsub hx), hx⟩
@@ -97,7 +97,7 @@ theorem IsClosed.isPreconnected_compl_of_isPreconnected_sdiff
         (hK.isOpen_compl.inter hv) hd hwu h)
     · right
       intro x hx
-      exact (hwu hx).resolve_left (fun hxu => h ⟨x, hx, hxu⟩)
+      exact (hwu hx).resolve_left (fun hxu ↦ h ⟨x, hx, hxu⟩)
   rcases hside with h | h
   · exact not_disjoint_compl_open_cover_of_sdiff_subset hK hO hKO hu hv hcover hnu hnv h hd
   · exact not_disjoint_compl_open_cover_of_sdiff_subset hK hO hKO hv hu

@@ -47,21 +47,21 @@ theorem curveIntegral_add_curveIntegral_eq_of_homotopy
     {γ : Path a b} {δ : Path c d} (H : (γ : C(I, ℂ)).Homotopy δ)
     (hU : IsOpen U) (hf : DifferentiableOn ℂ f U) (hHU : range H ⊆ U)
     (hH : ContDiffOn ℝ 2
-      (fun p : ℝ × ℝ => IccExtend zero_le_one (H.extend p.1) p.2) (Icc 0 1)) :
-    curveIntegral (fun z => ContinuousLinearMap.toSpanSingleton ℂ (f z)) γ +
-        curveIntegral (fun z => ContinuousLinearMap.toSpanSingleton ℂ (f z)) (H.evalAt 1) =
-      curveIntegral (fun z => ContinuousLinearMap.toSpanSingleton ℂ (f z)) δ +
-        curveIntegral (fun z => ContinuousLinearMap.toSpanSingleton ℂ (f z)) (H.evalAt 0) := by
+      (fun p : ℝ × ℝ ↦ IccExtend zero_le_one (H.extend p.1) p.2) (Icc 0 1)) :
+    curveIntegral (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ (f z)) γ +
+        curveIntegral (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ (f z)) (H.evalAt 1) =
+      curveIntegral (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ (f z)) δ +
+        curveIntegral (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ (f z)) (H.evalAt 0) := by
   let : NormedSpace ℝ F := .restrictScalars ℝ ℂ F
   have hd (z : ℂ) (hz : z ∈ range H) :
-      HasFDerivAt (fun w => ContinuousLinearMap.toSpanSingleton ℂ (f w))
+      HasFDerivAt (fun w ↦ ContinuousLinearMap.toSpanSingleton ℂ (f w))
         ((ContinuousLinearMap.toSpanSingleton ℂ
           (ContinuousLinearMap.toSpanSingleton ℂ (deriv f z))).restrictScalars ℝ) z :=
     (ContinuousLinearMap.smulRightL ℂ ℂ F 1).hasFDerivAt
       |>.comp_hasDerivAt z ((hf z (hHU hz)).differentiableAt (hU.mem_nhds (hHU hz))).hasDerivAt
       |>.restrictScalars ℝ
   apply H.curveIntegral_add_curveIntegral_eq_of_hasFDerivWithinAt (t := range H)
-    (fun _ _ _ _ => mem_range_self _) (fun z hz => (hd z hz).hasFDerivWithinAt)
+    (fun _ _ _ _ ↦ mem_range_self _) (fun z hz ↦ (hd z hz).hasFDerivWithinAt)
   · rw [(isCompact_range H.continuous).isClosed.closure_eq]
     exact ((ContinuousLinearMap.toSpanSingletonLIE ℂ F).continuous.comp_continuousOn
       hf.continuousOn).mono hHU
@@ -74,9 +74,9 @@ Only the image of the homotopy must lie in the open domain of holomorphy. -/
 theorem curveIntegral_eq_of_homotopy {γ δ : Path a b} (H : γ.Homotopy δ)
     (hU : IsOpen U) (hf : DifferentiableOn ℂ f U) (hHU : range H ⊆ U)
     (hH : ContDiffOn ℝ 2
-      (fun p : ℝ × ℝ => IccExtend zero_le_one (H.toHomotopy.extend p.1) p.2) (Icc 0 1)) :
-    curveIntegral (fun z => ContinuousLinearMap.toSpanSingleton ℂ (f z)) γ =
-      curveIntegral (fun z => ContinuousLinearMap.toSpanSingleton ℂ (f z)) δ := by
+      (fun p : ℝ × ℝ ↦ IccExtend zero_le_one (H.toHomotopy.extend p.1) p.2) (Icc 0 1)) :
+    curveIntegral (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ (f z)) γ =
+      curveIntegral (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ (f z)) δ := by
   have hzero : H.toHomotopy.evalAt 0 = (Path.refl a).cast γ.source δ.source := by
     ext t
     exact H.source t

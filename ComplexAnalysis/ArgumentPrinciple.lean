@@ -53,7 +53,7 @@ theorem logDeriv_congr_codiscreteWithin_of_preperfect {f g : ℂ → ℂ} {U : S
   intro z hz
   exact (logDeriv_congr_nhdsNE
     ((hf z hz).eventuallyEq_nhdsNE_of_eventuallyEq_codiscreteWithin_preperfect
-      (hg z hz) hz hU he)).mono (fun _ h _ => h)
+      (hg z hz) hz hU he)).mono (fun _ h _ ↦ h)
 
 /-- The argument principle for a meromorphic function on a closed disk. The boundary has
 order zero, and the function is nowhere the zero meromorphic germ. The sum is finite
@@ -70,7 +70,7 @@ theorem circleIntegral_logDeriv_eq_sum_divisor {f : ℂ → ℂ} {c : ℂ} {R : 
   let φ : ℂ → ℂ := ∏ᶠ u, (· - u) ^ D u
   have hφ : MeromorphicOn φ (closedBall c R) :=
     (FactorizedRational.meromorphicNFOn D _).meromorphicOn
-  obtain ⟨g, hg, hgn, he⟩ := hf.extract_zeros_poles (fun z => hne z z.property) hD
+  obtain ⟨g, hg, hgn, he⟩ := hf.extract_zeros_poles (fun z ↦ hne z z.property) hD
   have hfg : f =ᶠ[codiscreteWithin (closedBall c R)] (φ * g) := by
     simpa only [Pi.smul_apply, smul_eq_mul] using he
   have hperfect : Preperfect (closedBall c R) := by
@@ -78,19 +78,19 @@ theorem circleIntegral_logDeriv_eq_sum_divisor {f : ℂ → ℂ} {c : ℂ} {R : 
   have hlog := logDeriv_congr_codiscreteWithin_of_preperfect hf
     (hφ.mul hg.meromorphicOn) hperfect hfg
   have hφne : ∀ z ∈ closedBall c R, meromorphicOrderAt φ z ≠ ⊤ :=
-    fun z _ => FactorizedRational.meromorphicOrderAt_ne_top D
+    fun z _ ↦ FactorizedRational.meromorphicOrderAt_ne_top D
   have hgne : ∀ z ∈ closedBall c R, meromorphicOrderAt g z ≠ ⊤ := by
     intro z hz
     rw [(hg z hz).meromorphicNFAt.meromorphicOrderAt_eq_zero_iff.mpr (hgn ⟨z, hz⟩)]
     exact WithTop.zero_ne_top
   have hprod := hφ.logDeriv_mul_eventuallyEq hg.meromorphicOn hφne hgne
   have hrat : logDeriv φ =ᶠ[codiscreteWithin (closedBall c R)]
-      (fun z => ∑ i ∈ s, (D i : ℂ) * (z - i)⁻¹) := by
+      (fun z ↦ ∑ i ∈ s, (D i : ℂ) * (z - i)⁻¹) := by
     have heq := MeromorphicOn.logDeriv_finprod_zpow_eventuallyEq
-      (U := closedBall c R) (F := fun i : ℂ => fun z => z - i) hD
-      (fun i z _ => (analyticAt_id.sub analyticAt_const).meromorphicAt)
-      (fun i z _ => by
-        rw [(show AnalyticAt ℂ (fun w : ℂ => w - i) z by fun_prop).meromorphicOrderAt_eq]
+      (U := closedBall c R) (F := fun i : ℂ ↦ fun z ↦ z - i) hD
+      (fun i z _ ↦ (analyticAt_id.sub analyticAt_const).meromorphicAt)
+      (fun i z _ ↦ by
+        rw [(show AnalyticAt ℂ (fun w : ℂ ↦ w - i) z by fun_prop).meromorphicOrderAt_eq]
         by_cases hi : z = i
         · subst z; simp
         · simp [analyticOrderAt_id_sub_const_of_ne hi])
@@ -113,7 +113,7 @@ theorem circleIntegral_logDeriv_eq_sum_divisor {f : ℂ → ℂ} {c : ℂ} {R : 
     · have hz := hb i heq
       have : D i = 0 := by simp [D, divisor_apply hf hiK, hz]
       exact False.elim (hiD this)
-  have hint : ∀ i ∈ s, CircleIntegrable (fun z => (D i : ℂ) * (z - i)⁻¹) c R := by
+  have hint : ∀ i ∈ s, CircleIntegrable (fun z ↦ (D i : ℂ) * (z - i)⁻¹) c R := by
     intro i hi
     apply ContinuousOn.circleIntegrable hR.le
     apply continuousOn_const.mul
@@ -125,12 +125,12 @@ theorem circleIntegral_logDeriv_eq_sum_divisor {f : ℂ → ℂ} {c : ℂ} {R : 
     subst z
     exact (ne_of_lt (hinside i hi)) hz
   have hlg : AnalyticOnNhd ℂ (logDeriv g) (closedBall c R) :=
-    fun z hz => (hg z hz).logDeriv (hgn ⟨z, hz⟩)
+    fun z hz ↦ (hg z hz).logDeriv (hgn ⟨z, hz⟩)
   have heint : (∮ z in C(c, R), logDeriv f z) =
       ∮ z in C(c, R), (∑ i ∈ s, (D i : ℂ) * (z - i)⁻¹) + logDeriv g z := by
     apply circleIntegral.circleIntegral_congr_codiscreteWithin _ hR.ne'
     have heall : logDeriv f =ᶠ[codiscreteWithin (closedBall c R)]
-        (fun z => (∑ i ∈ s, (D i : ℂ) * (z - i)⁻¹) + logDeriv g z) := by
+        (fun z ↦ (∑ i ∈ s, (D i : ℂ) * (z - i)⁻¹) + logDeriv g z) := by
       filter_upwards [hlog, hprod, hrat] with z hz hp hr
       exact hz.trans (hp.trans (congrArg (· + logDeriv g z) hr))
     exact heall.filter_mono (Filter.codiscreteWithin_mono (by
@@ -175,7 +175,7 @@ theorem two_pi_I_inv_mul_circleIntegral_logDeriv_of_analyticOnNhd
     (hf : AnalyticOnNhd ℂ f (closedBall c R)) (hb : ∀ z ∈ sphere c R, f z ≠ 0) :
     (2 * Real.pi * I)⁻¹ * (∮ z in C(c, R), logDeriv f z) =
       ((∑ᶠ z, divisor f (closedBall c R) z : ℤ) : ℂ) := by
-  have horder : ∀ z ∈ sphere c R, meromorphicOrderAt f z = 0 := fun z hz =>
+  have horder : ∀ z ∈ sphere c R, meromorphicOrderAt f z = 0 := fun z hz ↦
     (hf z (sphere_subset_closedBall hz)).meromorphicNFAt.meromorphicOrderAt_eq_zero_iff.mpr
       (hb z hz)
   have hw : c + (R : ℂ) ∈ sphere c R := by

@@ -132,10 +132,10 @@ end IsContinuationAlong
 path, with any positive radii keeping the discs inside the set. -/
 theorem isContinuationAlong_of_analyticOnNhd {U : Set ℂ} (hU : IsOpen U) {γ : I → ℂ}
     (hγ : Continuous γ) (hγU : ∀ t, γ t ∈ U) {F : ℂ → ℂ} (hF : AnalyticOnNhd ℂ F U) :
-    ∃ r : I → ℝ, IsContinuationAlong γ (fun _ => F) r := by
-  have hr : ∀ t, ∃ r > 0, ball (γ t) r ⊆ U := fun t => Metric.isOpen_iff.mp hU _ (hγU t)
+    ∃ r : I → ℝ, IsContinuationAlong γ (fun _ ↦ F) r := by
+  have hr : ∀ t, ∃ r > 0, ball (γ t) r ⊆ U := fun t ↦ Metric.isOpen_iff.mp hU _ (hγU t)
   choose r hr hrU using hr
-  refine ⟨r, hr, fun t => hF.mono (hrU t), fun t => ?_⟩
+  refine ⟨r, hr, fun t ↦ hF.mono (hrU t), fun t ↦ ?_⟩
   have : ∀ᶠ s in 𝓝 t, γ s ∈ ball (γ t) (r t) :=
     hγ.continuousAt.preimage_mem_nhds (isOpen_ball.mem_nhds (mem_ball_self (hr t)))
   filter_upwards [this] with s hs

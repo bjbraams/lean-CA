@@ -106,9 +106,9 @@ theorem extend_circle (c : ℂ) (R : ℝ) {t : ℝ} (ht : t ∈ I) :
 /-- The circle path is smooth on its parameter interval. -/
 theorem contDiffOn_circle (c : ℂ) (R : ℝ) {n : WithTop ℕ∞} :
     ContDiffOn ℝ n (circle c R).extend I := by
-  have h : ContDiff ℝ n (fun t : ℝ => circleMap c R (2 * Real.pi * t)) :=
+  have h : ContDiff ℝ n (fun t : ℝ ↦ circleMap c R (2 * Real.pi * t)) :=
     (contDiff_circleMap c R).comp (contDiff_const.mul contDiff_id)
-  exact h.contDiffOn.congr (fun t ht => extend_circle c R ht)
+  exact h.contDiffOn.congr (fun t ht ↦ extend_circle c R ht)
 
 /-- The derivative of the circle path includes the angle rescaling factor `2π`. -/
 theorem derivWithin_circle (c : ℂ) (R : ℝ) {t : ℝ} (ht : t ∈ I) :
@@ -116,7 +116,7 @@ theorem derivWithin_circle (c : ℂ) (R : ℝ) {t : ℝ} (ht : t ∈ I) :
       (2 * Real.pi) • deriv (circleMap c R) (2 * Real.pi * t) := by
   have h := (hasDerivAt_circleMap c R (2 * Real.pi * t)).scomp t
     ((hasDerivAt_id t).const_mul (2 * Real.pi))
-  have h' := h.hasDerivWithinAt.congr_of_mem (fun s hs => extend_circle c R hs) ht
+  have h' := h.hasDerivWithinAt.congr_of_mem (fun s hs ↦ extend_circle c R hs) ht
   simpa only [mul_one, deriv_circleMap] using h'.derivWithin (uniqueDiffOn_Icc_zero_one t ht)
 
 end Path
@@ -126,7 +126,7 @@ namespace Complex
 /-- Curve integration over the circle path agrees with circle integration. -/
 theorem curveIntegral_circle {F : Type*} [NormedAddCommGroup F] [NormedSpace ℂ F]
     (f : ℂ → F) (c : ℂ) (R : ℝ) :
-    curveIntegral (fun z => ContinuousLinearMap.toSpanSingleton ℂ (f z)) (Path.circle c R) =
+    curveIntegral (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ (f z)) (Path.circle c R) =
       circleIntegral f c R := by
   rw [curveIntegral_def]
   calc
@@ -140,7 +140,7 @@ theorem curveIntegral_circle {F : Type*} [NormedAddCommGroup F] [NormedSpace ℂ
     _ = circleIntegral f c R := by
       rw [intervalIntegral.integral_smul,
         intervalIntegral.smul_integral_comp_mul_left
-          (f := fun t => deriv (circleMap c R) t • f (circleMap c R t))]
+          (f := fun t ↦ deriv (circleMap c R) t • f (circleMap c R t))]
       simp only [mul_zero, mul_one, circleIntegral]
 
 end Complex

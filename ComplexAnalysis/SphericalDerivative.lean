@@ -51,9 +51,9 @@ theorem sphericalDeriv_nonneg (f : ℂ → ℂ) (z : ℂ) : 0 ≤ sphericalDeriv
 the chordal metric, the spherical derivative of `1/f` agrees with that of `f` wherever `f` is
 differentiable and nonzero. -/
 theorem sphericalDeriv_inv (f : ℂ → ℂ) {z : ℂ} (hd : DifferentiableAt ℂ f z) (hz : f z ≠ 0) :
-    sphericalDeriv (fun w => (f w)⁻¹) z = sphericalDeriv f z := by
+    sphericalDeriv (fun w ↦ (f w)⁻¹) z = sphericalDeriv f z := by
   have h1 : HasDerivAt f (deriv f z) z := hd.hasDerivAt
-  have h2 : HasDerivAt (fun w => (f w)⁻¹) (-deriv f z / (f z) ^ 2) z := h1.inv hz
+  have h2 : HasDerivAt (fun w ↦ (f w)⁻¹) (-deriv f z / (f z) ^ 2) z := h1.inv hz
   have hfz : (0:ℝ) < ‖f z‖ := norm_pos_iff.mpr hz
   unfold sphericalDeriv
   rw [h2.deriv, norm_div, norm_neg, norm_pow, norm_inv,

@@ -46,8 +46,8 @@ theorem exists_analyticOnNhd_extension_zeroSet_oneVariable
       ∀ z ∈ ball a r ∩ (U \ g ⁻¹' {0}), ‖f z‖ ≤ C) :
     ∃ f' : ℂ → F, AnalyticOnNhd ℂ f' U ∧ EqOn f' f (U \ g ⁻¹' {0}) := by
   classical
-  let f' : ℂ → F := fun z => if g z = 0 then limUnder (𝓝[≠] z) f else f z
-  refine ⟨f', ?_, fun z hz => by simp [f', show g z ≠ 0 from hz.2]⟩
+  let f' : ℂ → F := fun z ↦ if g z = 0 then limUnder (𝓝[≠] z) f else f z
+  refine ⟨f', ?_, fun z hz ↦ by simp [f', show g z ≠ 0 from hz.2]⟩
   intro a ha
   by_cases hga : g a = 0
   · have hnloc : ¬ g =ᶠ[𝓝 a] 0 := by
@@ -90,7 +90,7 @@ theorem analyticOnNhd_of_continuousOn_off_countable {U S : Set ℂ} {f : ℂ →
   obtain ⟨r, hr, hball⟩ := nhds_basis_closedBall.mem_iff.mp (hU.mem_nhds hx)
   exact (Complex.hasFPowerSeriesOnBall_of_differentiable_off_countable
     (R := ⟨r, hr.le⟩) hS (hc.mono hball)
-    (fun z hz => (hf z ⟨hball (ball_subset_closedBall hz.1), hz.2⟩).differentiableAt)
+    (fun z hz ↦ (hf z ⟨hball (ball_subset_closedBall hz.1), hz.2⟩).differentiableAt)
     hr).analyticAt
 
 end Complex

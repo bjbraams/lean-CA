@@ -49,10 +49,10 @@ theorem exp_integral_div_of_hasDerivAt {g g' : ℝ → ℂ} {a b : ℝ} (hab : a
     exp (∫ t in a..b, g' t / g t) = g b / g a := by
   rcases eq_or_lt_of_le hab with rfl | hab'
   · simp [h0 a ⟨le_rfl, le_rfl⟩]
-  let v : ℝ → ℂ := fun t => g' t / g t
+  let v : ℝ → ℂ := fun t ↦ g' t / g t
   have hv : ContinuousOn v (Icc a b) := hg'.div hg h0
   have hi : IntervalIntegrable v volume a b := hv.intervalIntegrable_of_Icc hab
-  let J : ℝ → ℂ := fun t => ∫ s in a..t, v s
+  let J : ℝ → ℂ := fun t ↦ ∫ s in a..t, v s
   have hJ : ContinuousOn J (Icc a b) := by
     simpa only [uIcc_of_le hab] using
       (intervalIntegral.continuousOn_primitive_interval' hi left_mem_uIcc)
@@ -62,7 +62,7 @@ theorem exp_integral_div_of_hasDerivAt {g g' : ℝ → ℂ} {a b : ℝ} (hab : a
     apply intervalIntegral.integral_hasDerivAt_right hit
     · exact (hv.mono Ioo_subset_Icc_self).stronglyMeasurableAtFilter isOpen_Ioo t ht
     · exact hv.continuousAt (Icc_mem_nhds ht.1 ht.2)
-  have haux : ∀ t ∈ Ioo a b, HasDerivAt (fun s => exp (-J s) * g s) 0 t := by
+  have haux : ∀ t ∈ Ioo a b, HasDerivAt (fun s ↦ exp (-J s) * g s) 0 t := by
     intro t ht
     have h := ((hdJ t ht).neg.cexp).mul (hd t ht)
     convert h using 1
@@ -71,7 +71,7 @@ theorem exp_integral_div_of_hasDerivAt {g g' : ℝ → ℂ} {a b : ℝ} (hab : a
     all_goals ring
   have he := intervalIntegral.integral_eq_sub_of_hasDerivAt_of_le hab
     (hJ.neg.cexp.mul hg) haux
-    (intervalIntegrable_const : IntervalIntegrable (fun _ => (0 : ℂ)) volume a b)
+    (intervalIntegrable_const : IntervalIntegrable (fun _ ↦ (0 : ℂ)) volume a b)
   have he' : exp (-J b) * g b = g a := by
     apply sub_eq_zero.mp
     simpa only [Pi.mul_apply, Pi.neg_apply, J, intervalIntegral.integral_same, neg_zero,
@@ -84,18 +84,18 @@ theorem exp_integral_div_of_hasDerivAt {g g' : ℝ → ℂ} {a b : ℝ} (hab : a
 ratio of the displaced endpoint values. -/
 theorem exp_curveIntegral_sub_inv {a b w : ℂ} (γ : Path a b)
     (hγ : ContDiffOn ℝ 1 γ.extend I) (hw : ∀ t, γ t ≠ w) :
-    exp (curveIntegral (fun z => ContinuousLinearMap.toSpanSingleton ℂ ((z - w)⁻¹)) γ) =
+    exp (curveIntegral (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ ((z - w)⁻¹)) γ) =
       (b - w) / (a - w) := by
   have h0 : ∀ t ∈ I, γ.extend t - w ≠ 0 := by
     intro t ht
     rw [γ.extend_apply ht]
     exact sub_ne_zero.mpr (hw ⟨t, ht⟩)
   have hd : ∀ t ∈ Ioo (0 : ℝ) 1,
-      HasDerivAt (fun s => γ.extend s - w) (derivWithin γ.extend I t) t := by
+      HasDerivAt (fun s ↦ γ.extend s - w) (derivWithin γ.extend I t) t := by
     intro t ht
     have h := (hγ.differentiableOn one_ne_zero t (Ioo_subset_Icc_self ht)).hasDerivWithinAt
     exact (h.hasDerivAt (Icc_mem_nhds ht.1 ht.2)).sub_const w
-  have h := exp_integral_div_of_hasDerivAt (g := fun s => γ.extend s - w) zero_le_one
+  have h := exp_integral_div_of_hasDerivAt (g := fun s ↦ γ.extend s - w) zero_le_one
     (γ.continuous_extend.continuousOn.sub continuousOn_const)
     (hγ.continuousOn_derivWithin uniqueDiffOn_Icc_zero_one le_rfl) hd h0
   simpa only [curveIntegral_def, curveIntegralFun_def, ContinuousLinearMap.toSpanSingleton_apply,
@@ -106,7 +106,7 @@ multiple of `2πi`. No simplicity assumption is needed. -/
 theorem exists_int_curveIntegral_sub_inv {a w : ℂ} (γ : Path a a)
     (hγ : ContDiffOn ℝ 1 γ.extend I) (hw : ∀ t, γ t ≠ w) :
     ∃ n : ℤ, curveIntegral
-      (fun z => ContinuousLinearMap.toSpanSingleton ℂ ((z - w)⁻¹)) γ =
+      (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ ((z - w)⁻¹)) γ =
         (n : ℂ) * (2 * (Real.pi : ℂ) * Complex.I) := by
   apply exp_eq_one_iff.mp
   rw [exp_curveIntegral_sub_inv γ hγ hw, div_self]

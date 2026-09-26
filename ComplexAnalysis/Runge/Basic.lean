@@ -46,10 +46,10 @@ theorem exists_finset_pole_approx {K U : Set ℂ} (hK : IsCompact K) (hU : IsOpe
       ∀ z ∈ K, ‖f z - ∑ i, a i * (c i - z)⁻¹‖ ≤ ε := by
   obtain ⟨Ω, g, hΩc, hΩUK, hgc, _, hrep⟩ := exists_cauchyPompeiu_representation hK hU hKU hf
   obtain ⟨C, hC⟩ := hΩc.exists_bound_of_continuousOn hgc.continuousOn
-  have hdisj : Disjoint Ω K := disjoint_left.mpr fun w hw hwK => (hΩUK hw).2 hwK
+  have hdisj : Disjoint Ω K := disjoint_left.mpr fun w hw hwK ↦ (hΩUK hw).2 hwK
   obtain ⟨n, c, a, hcΩ, happrox⟩ := exists_finset_approx_setIntegral_inv_sub hΩc hK hdisj
     (hgc.continuousOn.integrableOn_compact hΩc) hC hε
-  refine ⟨n, c, a, fun i => hΩUK (hcΩ i), fun z hz => ?_⟩
+  refine ⟨n, c, a, fun i ↦ hΩUK (hcΩ i), fun z hz ↦ ?_⟩
   rw [hrep z hz]
   exact happrox z hz
 

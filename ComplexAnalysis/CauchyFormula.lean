@@ -52,9 +52,9 @@ variable {F : Type*} [NormedAddCommGroup F] [NormedSpace ℂ F] [CompleteSpace F
 
 /-- A constant Banach-valued factor can be taken outside a scalar curve integral. -/
 theorem curveIntegral_smul_const {g : ℂ → ℂ} (v : F)
-    (hint : CurveIntegrable (fun z => ContinuousLinearMap.toSpanSingleton ℂ (g z)) γ) :
-    curveIntegral (fun z => ContinuousLinearMap.toSpanSingleton ℂ (g z • v)) γ =
-      curveIntegral (fun z => ContinuousLinearMap.toSpanSingleton ℂ (g z)) γ • v := by
+    (hint : CurveIntegrable (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ (g z)) γ) :
+    curveIntegral (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ (g z • v)) γ =
+      curveIntegral (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ (g z)) γ • v := by
   simpa only [ContinuousLinearMap.toSpanSingleton_comp_toSpanSingleton,
     ContinuousLinearMap.toSpanSingleton_apply] using
     (ContinuousLinearMap.toSpanSingleton ℂ v).curveIntegral_comp_comm hint
@@ -65,24 +65,24 @@ theorem curveIntegral_sub_inv_smul_of_isExactOn {U : Set ℂ} (hU : IsOpen U)
     {f : ℂ → F} (hf : ContinuousOn f U) {w : ℂ} (hds : IsExactOn (dslope f w) U)
     {γ : Path a a} (hγ : ContDiffOn ℝ 1 γ.extend I) (hγU : ∀ t, γ t ∈ U)
     (hγw : ∀ t, γ t ≠ w) :
-    curveIntegral (fun z => ContinuousLinearMap.toSpanSingleton ℂ ((z - w)⁻¹ • f z)) γ =
-      curveIntegral (fun z => ContinuousLinearMap.toSpanSingleton ℂ ((z - w)⁻¹)) γ • f w := by
-  have hinv : ContinuousOn (fun z : ℂ => (z - w)⁻¹) ({w}ᶜ : Set ℂ) :=
-    (continuous_id.sub continuous_const).continuousOn.inv₀ (fun z hz => sub_ne_zero.mpr hz)
-  have hpath : ∀ t, γ t ∈ U ∩ {w}ᶜ := fun t => ⟨hγU t, hγw t⟩
+    curveIntegral (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ ((z - w)⁻¹ • f z)) γ =
+      curveIntegral (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ ((z - w)⁻¹)) γ • f w := by
+  have hinv : ContinuousOn (fun z : ℂ ↦ (z - w)⁻¹) ({w}ᶜ : Set ℂ) :=
+    (continuous_id.sub continuous_const).continuousOn.inv₀ (fun z hz ↦ sub_ne_zero.mpr hz)
+  have hpath : ∀ t, γ t ∈ U ∩ {w}ᶜ := fun t ↦ ⟨hγU t, hγw t⟩
   have hA := curveIntegrable_of_continuousOn
     ((hinv.mono inter_subset_right).smul (hf.mono inter_subset_left)) hγ hpath
   have hB := curveIntegrable_of_continuousOn (hinv.smul (continuousOn_const (c := f w)))
     hγ hγw
-  change CurveIntegrable (fun z => ContinuousLinearMap.toSpanSingleton ℂ
+  change CurveIntegrable (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ
     ((z - w)⁻¹ • f z)) γ at hA
-  change CurveIntegrable (fun z => ContinuousLinearMap.toSpanSingleton ℂ
+  change CurveIntegrable (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ
     ((z - w)⁻¹ • f w)) γ at hB
   have hscalar := curveIntegrable_of_continuousOn hinv hγ hγw
   have hzero := hds.curveIntegral_eq_zero (hγ.differentiableOn one_ne_zero) hγU
     (curveIntegrable_of_continuousOn (hds.differentiableOn hU).continuousOn hγ hγU)
   have heq : curveIntegral
-      (fun z => ContinuousLinearMap.toSpanSingleton ℂ ((z - w)⁻¹ • f z) -
+      (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ ((z - w)⁻¹ • f z) -
         ContinuousLinearMap.toSpanSingleton ℂ ((z - w)⁻¹ • f w)) γ = 0 := by
     rw [← hzero]
     apply curveIntegral_congr
@@ -99,12 +99,12 @@ theorem curveIntegral_sub_inv_smul_of_convex {U : Set ℂ} (hU : IsOpen U)
     {w : ℂ} (hw : w ∈ U) {γ : Path a a}
     (hγ : ContDiffOn ℝ 1 γ.extend I) (hγU : ∀ t, γ t ∈ U)
     (hγw : ∀ t, γ t ≠ w) :
-    curveIntegral (fun z => ContinuousLinearMap.toSpanSingleton ℂ ((z - w)⁻¹ • f z)) γ =
-      curveIntegral (fun z => ContinuousLinearMap.toSpanSingleton ℂ ((z - w)⁻¹)) γ • f w := by
+    curveIntegral (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ ((z - w)⁻¹ • f z)) γ =
+      curveIntegral (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ ((z - w)⁻¹)) γ • f w := by
   have hds := (differentiableOn_dslope (hU.mem_nhds hw)).mpr hf
   obtain ⟨P, hP⟩ := hUc.exists_forall_hasDerivWithinAt hds
   exact curveIntegral_sub_inv_smul_of_isExactOn hU hf.continuousOn
-    ⟨P, fun z hz => (hP z hz).hasDerivAt (hU.mem_nhds hz)⟩ hγ hγU hγw
+    ⟨P, fun z hz ↦ (hP z hz).hasDerivAt (hU.mem_nhds hz)⟩ hγ hγU hγw
 
 /-- Cauchy's formula for a closed `C¹` curve in a simply connected open domain, with the scalar
 kernel
@@ -114,8 +114,8 @@ theorem curveIntegral_sub_inv_smul_of_isSimplyConnected {U : Set ℂ} (hU : IsOp
     {w : ℂ} (hw : w ∈ U) {γ : Path a a}
     (hγ : ContDiffOn ℝ 1 γ.extend I) (hγU : ∀ t, γ t ∈ U)
     (hγw : ∀ t, γ t ≠ w) :
-    curveIntegral (fun z => ContinuousLinearMap.toSpanSingleton ℂ ((z - w)⁻¹ • f z)) γ =
-      curveIntegral (fun z => ContinuousLinearMap.toSpanSingleton ℂ ((z - w)⁻¹)) γ • f w := by
+    curveIntegral (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ ((z - w)⁻¹ • f z)) γ =
+      curveIntegral (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ ((z - w)⁻¹)) γ • f w := by
   have hds := (differentiableOn_dslope (hU.mem_nhds hw)).mpr hf
   exact curveIntegral_sub_inv_smul_of_isExactOn hU hf.continuousOn
     (hds.isExactOn_of_isSimplyConnected hU hUc) hγ hγU hγw
@@ -127,10 +127,10 @@ theorem two_pi_I_inv_smul_curveIntegral_sub_inv_smul_of_convex
     {f : ℂ → F} (hf : DifferentiableOn ℂ f U) {w : ℂ} (hw : w ∈ U)
     {γ : Path a a} (hγ : ContDiffOn ℝ 1 γ.extend I) (hγU : ∀ t, γ t ∈ U)
     (hγw : ∀ t, γ t ≠ w)
-    (hindex : curveIntegral (fun z => ContinuousLinearMap.toSpanSingleton ℂ ((z - w)⁻¹)) γ =
+    (hindex : curveIntegral (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ ((z - w)⁻¹)) γ =
       2 * (Real.pi : ℂ) * Complex.I) :
     (2 * (Real.pi : ℂ) * Complex.I)⁻¹ •
-      curveIntegral (fun z => ContinuousLinearMap.toSpanSingleton ℂ ((z - w)⁻¹ • f z)) γ =
+      curveIntegral (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ ((z - w)⁻¹ • f z)) γ =
         f w := by
   rw [curveIntegral_sub_inv_smul_of_convex hU hUc hf hw hγ hγU hγw, hindex,
     inv_smul_smul₀ two_pi_I_ne_zero]
@@ -142,10 +142,10 @@ theorem two_pi_I_inv_smul_curveIntegral_sub_inv_smul_of_isSimplyConnected
     {f : ℂ → F} (hf : DifferentiableOn ℂ f U) {w : ℂ} (hw : w ∈ U)
     {γ : Path a a} (hγ : ContDiffOn ℝ 1 γ.extend I) (hγU : ∀ t, γ t ∈ U)
     (hγw : ∀ t, γ t ≠ w)
-    (hindex : curveIntegral (fun z => ContinuousLinearMap.toSpanSingleton ℂ ((z - w)⁻¹)) γ =
+    (hindex : curveIntegral (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ ((z - w)⁻¹)) γ =
       2 * (Real.pi : ℂ) * Complex.I) :
     (2 * (Real.pi : ℂ) * Complex.I)⁻¹ •
-      curveIntegral (fun z => ContinuousLinearMap.toSpanSingleton ℂ ((z - w)⁻¹ • f z)) γ =
+      curveIntegral (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ ((z - w)⁻¹ • f z)) γ =
         f w := by
   rw [curveIntegral_sub_inv_smul_of_isSimplyConnected hU hUc hf hw hγ hγU hγw, hindex,
     inv_smul_smul₀ two_pi_I_ne_zero]

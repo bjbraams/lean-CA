@@ -101,35 +101,35 @@ theorem hasDerivAt_paleyWienerTransform (hτ : 0 ≤ τ)
       (∫ t in (-τ : ℝ)..τ, f t * (Complex.I * t) * Complex.exp (Complex.I * z₀ * t)) z₀ := by
   have hτ' : -τ ≤ τ := by linarith
   set μ : Measure ℝ := volume.restrict (Set.Ioc (-τ) τ) with hμ_def
-  set F : ℂ → ℝ → ℂ := fun z t => f t * Complex.exp (Complex.I * z * t) with hF_def
-  set F' : ℂ → ℝ → ℂ := fun z t => f t * (Complex.I * t) * Complex.exp (Complex.I * z * t)
+  set F : ℂ → ℝ → ℂ := fun z t ↦ f t * Complex.exp (Complex.I * z * t)
+  set F' : ℂ → ℝ → ℂ := fun z t ↦ f t * (Complex.I * t) * Complex.exp (Complex.I * z * t)
     with hF'_def
   have hint_eq : ∀ g : ℝ → ℂ, (∫ t in (-τ : ℝ)..τ, g t) = ∫ t, g t ∂μ := by
     intro g
     rw [hμ_def, intervalIntegral.integral_of_le hτ']
-  have hFeq : paleyWienerTransform f τ = fun z => ∫ t, F z t ∂μ := by
+  have hFeq : paleyWienerTransform f τ = fun z ↦ ∫ t, F z t ∂μ := by
     funext z; exact hint_eq (F z)
   rw [hFeq, hint_eq (F' z₀)]
   have hfInt : Integrable f μ := by
     rw [hμ_def]; exact hf.def'.mono_set (by rw [uIoc_of_le hτ'])
   have hae_mem : ∀ᵐ t ∂μ, t ∈ Set.Ioc (-τ) τ := ae_restrict_mem measurableSet_Ioc
-  have hcont : ∀ z : ℂ, Continuous (fun t : ℝ => Complex.exp (Complex.I * z * t)) := fun z => by
+  have hcont : ∀ z : ℂ, Continuous (fun t : ℝ ↦ Complex.exp (Complex.I * z * t)) := fun z ↦ by
     fun_prop
-  have hcont' : Continuous (fun t : ℝ => Complex.I * (t : ℂ)) := by fun_prop
-  set C : ℝ := Real.exp (τ * (‖z₀‖ + 1)) with hC_def
+  have hcont' : Continuous (fun t : ℝ ↦ Complex.I * (t : ℂ)) := by fun_prop
+  set C : ℝ := Real.exp (τ * (‖z₀‖ + 1))
   have hFint : Integrable (F z₀) μ :=
     hfInt.mul_bdd (hcont z₀).aestronglyMeasurable
-      (hae_mem.mono fun t ht => norm_exp_I_mul_mul_le z₀ (mem_ball_self one_pos) ht)
+      (hae_mem.mono fun t ht ↦ norm_exp_I_mul_mul_le z₀ (mem_ball_self one_pos) ht)
   have hF'meas : AEStronglyMeasurable (F' z₀) μ :=
     (hfInt.1.mul hcont'.aestronglyMeasurable).mul (hcont z₀).aestronglyMeasurable
   have hderiv : ∀ t : ℝ, ∀ z : ℂ,
-      HasDerivAt (fun w : ℂ => f t * Complex.exp (Complex.I * w * t)) (F' z t) z := by
+      HasDerivAt (fun w : ℂ ↦ f t * Complex.exp (Complex.I * w * t)) (F' z t) z := by
     intro t z
-    have h1 : HasDerivAt (fun w : ℂ => Complex.I * w * (t : ℂ)) (Complex.I * t) z := by
+    have h1 : HasDerivAt (fun w : ℂ ↦ Complex.I * w * (t : ℂ)) (Complex.I * t) z := by
       simpa using ((hasDerivAt_id z).const_mul Complex.I).mul_const (t : ℂ)
     have h2 := (Complex.hasDerivAt_exp (Complex.I * z * t)).comp z h1
     have h3 := h2.const_mul (f t)
-    have h3' : HasDerivAt (fun w : ℂ => f t * Complex.exp (Complex.I * w * t))
+    have h3' : HasDerivAt (fun w : ℂ ↦ f t * Complex.exp (Complex.I * w * t))
         (f t * (Complex.exp (Complex.I * z * t) * (Complex.I * t))) z := h3
     rw [hF'_def]
     dsimp only
@@ -151,19 +151,19 @@ theorem hasDerivAt_paleyWienerTransform (hτ : 0 ≤ τ)
           have ht' : |t| ≤ τ := abs_le.mpr ⟨ht.1.le, ht.2⟩
           gcongr
           exact norm_exp_I_mul_mul_le z₀ hz ht
-  have hbound_int : Integrable (fun t => ‖f t‖ * τ * C) μ := (hfInt.norm.mul_const τ).mul_const C
+  have hbound_int : Integrable (fun t ↦ ‖f t‖ * τ * C) μ := (hfInt.norm.mul_const τ).mul_const C
   exact (hasDerivAt_integral_of_dominated_loc_of_deriv_le
-    (F := F) (bound := fun t => ‖f t‖ * τ * C)
+    (F := F) (bound := fun t ↦ ‖f t‖ * τ * C)
     (Metric.ball_mem_nhds z₀ one_pos)
-    (Eventually.of_forall fun z => hfInt.1.mul (hcont z).aestronglyMeasurable)
+    (Eventually.of_forall fun z ↦ hfInt.1.mul (hcont z).aestronglyMeasurable)
     hFint (F' := F') hF'meas hbound hbound_int
-    (Eventually.of_forall fun t z _ => hderiv t z)).2
+    (Eventually.of_forall fun t z _ ↦ hderiv t z)).2
 
 /-- **`paleyWienerTransform f τ` is entire.** -/
 theorem differentiable_paleyWienerTransform (hτ : 0 ≤ τ)
     (hf : IntervalIntegrable f volume (-τ) τ) :
     Differentiable ℂ (paleyWienerTransform f τ) :=
-  fun z => (hasDerivAt_paleyWienerTransform hτ hf z).differentiableAt
+  fun z ↦ (hasDerivAt_paleyWienerTransform hτ hf z).differentiableAt
 
 /-- **The exponential type bound.** `paleyWienerTransform f τ` has exponential type at most `τ`,
 with the natural constant `∫ ‖f‖`. -/
@@ -172,10 +172,10 @@ theorem norm_paleyWienerTransform_le (hτ : 0 ≤ τ)
     ‖paleyWienerTransform f τ z‖ ≤ (∫ t in (-τ : ℝ)..τ, ‖f t‖) * Real.exp (τ * ‖z‖) := by
   have hτ' : -τ ≤ τ := by linarith
   rw [paleyWienerTransform]
-  have hg : IntervalIntegrable (fun t => ‖f t‖ * Real.exp (τ * ‖z‖)) volume (-τ) τ :=
+  have hg : IntervalIntegrable (fun t ↦ ‖f t‖ * Real.exp (τ * ‖z‖)) volume (-τ) τ :=
     (hf.norm).mul_const _
   refine (intervalIntegral.norm_integral_le_of_norm_le hτ'
-    (Eventually.of_forall fun t ht => ?_) hg).trans_eq ?_
+    (Eventually.of_forall fun t ht ↦ ?_) hg).trans_eq ?_
   · rw [norm_mul]
     have h1 : ‖Complex.exp (Complex.I * z * (t : ℂ))‖ ≤ Real.exp (τ * ‖z‖) := by
       rw [Complex.norm_exp]
@@ -202,7 +202,7 @@ theorem hasExponentialTypeLE_paleyWienerTransform (hτ : 0 ≤ τ)
     (hf : IntervalIntegrable f volume (-τ) τ) :
     HasExponentialTypeLE (paleyWienerTransform f τ) τ :=
   ⟨∫ t in (-τ : ℝ)..τ, ‖f t‖,
-    intervalIntegral.integral_nonneg (by linarith) fun t _ => norm_nonneg _,
+    intervalIntegral.integral_nonneg (by linarith) fun t _ ↦ norm_nonneg _,
     norm_paleyWienerTransform_le hτ hf⟩
 
 end Complex

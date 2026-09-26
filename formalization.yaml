@@ -499,7 +499,7 @@ alignment:
       note: The multiplicity-weighted Blaschke condition for nonzero zeros of a bounded nontrivial
         holomorphic function.
       library_declaration: Complex.summable_analyticOrderAt_toNat_mul_one_sub_norm_of_bounded
-      library_file: ComplexAnalysis/RieszFactorization.lean
+      library_file: ComplexAnalysis/Blaschke.lean
     - source: Conway II, 20.2.6; Simon, 9.9 (Riesz factorization)
       lean: LeanCA.riesz_factorization
       module: Challenge

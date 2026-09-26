@@ -98,8 +98,8 @@ private theorem integral_sin_mul_cos_two_pi :
 /-- The circle integral of a real-linear form vanishes. -/
 theorem integral_clm_circleMap_zero (L : ℂ →L[ℝ] ℝ) (r : ℝ) :
     ∫ θ in (0 : ℝ)..2 * π, L (circleMap 0 r θ) = 0 := by
-  have : (fun θ => L (circleMap 0 r θ)) =
-      fun θ => (r * L 1) * Real.cos θ + (r * L I) * Real.sin θ := by
+  have : (fun θ ↦ L (circleMap 0 r θ)) =
+      fun θ ↦ (r * L 1) * Real.cos θ + (r * L I) * Real.sin θ := by
     funext θ
     rw [circleMap_zero_eq_smul, map_add, map_smul, map_smul, smul_eq_mul, smul_eq_mul]
     ring
@@ -114,8 +114,8 @@ directions `1` and `I`. -/
 theorem integral_bilinear_circleMap (B : ℂ →L[ℝ] ℂ →L[ℝ] ℝ) (r : ℝ) :
     ∫ θ in (0 : ℝ)..2 * π, B (circleMap 0 r θ) (circleMap 0 r θ) =
       π * r ^ 2 * (B 1 1 + B I I) := by
-  have : (fun θ => B (circleMap 0 r θ) (circleMap 0 r θ)) =
-      fun θ => (r ^ 2 * B 1 1) * Real.cos θ ^ 2 + (r ^ 2 * (B 1 I + B I 1)) *
+  have : (fun θ ↦ B (circleMap 0 r θ) (circleMap 0 r θ)) =
+      fun θ ↦ (r ^ 2 * B 1 1) * Real.cos θ ^ 2 + (r ^ 2 * (B 1 I + B I 1)) *
         (Real.sin θ * Real.cos θ) + (r ^ 2 * B I I) * Real.sin θ ^ 2 := by
     funext θ
     rw [circleMap_zero_eq_smul]
@@ -141,38 +141,38 @@ theorem exists_circleAverage_sub_le (hg : ContDiffAt ℝ 2 g t₀) {ε : ℝ} (h
       |circleAverage g t₀ r - g t₀ - r ^ 2 / 4 * Δ g t₀| ≤ ε * r ^ 2 := by
   obtain ⟨δ₁, hδ₁, htaylor⟩ := ContDiffAt.exists_taylor_bound hg hε
   obtain ⟨δ₂, hδ₂, hcont⟩ := Metric.mem_nhds_iff.mp (hg.eventually (by simp))
-  have hgc : ContinuousOn g (ball t₀ δ₂) := fun y hy =>
+  have hgc : ContinuousOn g (ball t₀ δ₂) := fun y hy ↦
     (show ContDiffAt ℝ 2 g y from hcont hy).continuousAt.continuousWithinAt
-  refine ⟨min δ₁ δ₂, lt_min hδ₁ hδ₂, fun r hr hrδ => ?_⟩
-  set D := fderiv ℝ g with hDdef
-  set B := fderiv ℝ (fderiv ℝ g) t₀ with hBdef
-  have hmap : ∀ θ : ℝ, circleMap t₀ r θ = t₀ + circleMap 0 r θ := fun θ => by
+  refine ⟨min δ₁ δ₂, lt_min hδ₁ hδ₂, fun r hr hrδ ↦ ?_⟩
+  set D := fderiv ℝ g
+  set B := fderiv ℝ (fderiv ℝ g) t₀
+  have hmap : ∀ θ : ℝ, circleMap t₀ r θ = t₀ + circleMap 0 r θ := fun θ ↦ by
     simp [circleMap]
-  have hnorm : ∀ θ : ℝ, ‖circleMap 0 r θ‖ = r := fun θ => by
+  have hnorm : ∀ θ : ℝ, ‖circleMap 0 r θ‖ = r := fun θ ↦ by
     simp [circleMap, abs_of_pos hr]
   have hint : CircleIntegrable g t₀ r := by
-    refine ContinuousOn.circleIntegrable hr.le (hgc.mono fun z hz => ?_)
+    refine ContinuousOn.circleIntegrable hr.le (hgc.mono fun z hz ↦ ?_)
     exact sphere_subset_closedBall.trans (closedBall_subset_ball (hrδ.trans_le (min_le_right _
       _))) hz
   refine ⟨hint, ?_⟩
   -- the remainder as a function of the angle
-  set R : ℝ → ℝ := fun θ => g (t₀ + circleMap 0 r θ) - g t₀ - D t₀ (circleMap 0 r θ) -
+  set R : ℝ → ℝ := fun θ ↦ g (t₀ + circleMap 0 r θ) - g t₀ - D t₀ (circleMap 0 r θ) -
     (1 / 2) * B (circleMap 0 r θ) (circleMap 0 r θ) with hRdef
-  have hRle : ∀ θ, |R θ| ≤ ε * r ^ 2 := fun θ => by
+  have hRle : ∀ θ, |R θ| ≤ ε * r ^ 2 := fun θ ↦ by
     have := htaylor (circleMap 0 r θ) (by rw [hnorm]; exact hrδ.trans_le (min_le_left _ _))
     rwa [hnorm] at this
   have hRint : ‖∫ θ in (0 : ℝ)..2 * π, R θ‖ ≤ ε * r ^ 2 * |2 * π - 0| :=
-    intervalIntegral.norm_integral_le_of_norm_le_const fun θ _ => by
+    intervalIntegral.norm_integral_le_of_norm_le_const fun θ _ ↦ by
       rw [Real.norm_eq_abs]; exact hRle θ
   rw [sub_zero, abs_of_pos Real.two_pi_pos, Real.norm_eq_abs] at hRint
   -- integrability of the pieces
-  have hcm : Continuous fun θ : ℝ => circleMap 0 r θ := continuous_circleMap 0 r
-  have hi₁ : IntervalIntegrable (fun θ => g (t₀ + circleMap 0 r θ)) volume 0 (2 * π) := by
+  have hcm : Continuous fun θ : ℝ ↦ circleMap 0 r θ := continuous_circleMap 0 r
+  have hi₁ : IntervalIntegrable (fun θ ↦ g (t₀ + circleMap 0 r θ)) volume 0 (2 * π) := by
     have := (circleIntegrable_def g t₀ r).mp hint
     simpa only [hmap] using this
-  have hi₂ : IntervalIntegrable (fun θ => D t₀ (circleMap 0 r θ)) volume 0 (2 * π) :=
+  have hi₂ : IntervalIntegrable (fun θ ↦ D t₀ (circleMap 0 r θ)) volume 0 (2 * π) :=
     ((D t₀).continuous.comp hcm).intervalIntegrable _ _
-  have hi₃ : IntervalIntegrable (fun θ => (1 / 2 : ℝ) * B (circleMap 0 r θ) (circleMap 0 r θ))
+  have hi₃ : IntervalIntegrable (fun θ ↦ (1 / 2 : ℝ) * B (circleMap 0 r θ) (circleMap 0 r θ))
       volume 0 (2 * π) :=
     (continuous_const.mul (B.continuous₂.comp (hcm.prodMk hcm))).intervalIntegrable _ _
   -- the integral identity
@@ -207,7 +207,7 @@ theorem eventually_lt_circleAverage_of_laplacian_pos (hg : ContDiffAt ℝ 2 g t�
     (hΔ : 0 < Δ g t₀) :
     ∀ᶠ r in 𝓝[>] (0 : ℝ), CircleIntegrable g t₀ r ∧ g t₀ < circleAverage g t₀ r := by
   obtain ⟨δ, hδ, h⟩ := exists_circleAverage_sub_le hg (ε := Δ g t₀ / 8) (by positivity)
-  refine mem_nhdsGT_iff_exists_Ioo_subset.mpr ⟨δ, hδ, fun r hr => ?_⟩
+  refine mem_nhdsGT_iff_exists_Ioo_subset.mpr ⟨δ, hδ, fun r hr ↦ ?_⟩
   obtain ⟨hint, hle⟩ := h r hr.1 hr.2
   refine ⟨hint, ?_⟩
   have := (abs_le.mp hle).1
@@ -218,7 +218,7 @@ theorem eventually_circleAverage_lt_of_laplacian_neg (hg : ContDiffAt ℝ 2 g t�
     (hΔ : Δ g t₀ < 0) :
     ∀ᶠ r in 𝓝[>] (0 : ℝ), CircleIntegrable g t₀ r ∧ circleAverage g t₀ r < g t₀ := by
   obtain ⟨δ, hδ, h⟩ := exists_circleAverage_sub_le hg (ε := -Δ g t₀ / 8) (by linarith)
-  refine mem_nhdsGT_iff_exists_Ioo_subset.mpr ⟨δ, hδ, fun r hr => ?_⟩
+  refine mem_nhdsGT_iff_exists_Ioo_subset.mpr ⟨δ, hδ, fun r hr ↦ ?_⟩
   obtain ⟨hint, hle⟩ := h r hr.1 hr.2
   refine ⟨hint, ?_⟩
   have := (abs_le.mp hle).2
@@ -227,7 +227,7 @@ theorem eventually_circleAverage_lt_of_laplacian_neg (hg : ContDiffAt ℝ 2 g t�
 /-- A `C²` function with positive Laplacian has the local submean property. -/
 theorem hasSubmeanAt_of_laplacian_pos (hg : ContDiffAt ℝ 2 g t₀) (hΔ : 0 < Δ g t₀) :
     HasSubmeanAt g t₀ :=
-  (eventually_lt_circleAverage_of_laplacian_pos hg hΔ).mono fun _ h => ⟨h.1, h.2.le⟩
+  (eventually_lt_circleAverage_of_laplacian_pos hg hΔ).mono fun _ h ↦ ⟨h.1, h.2.le⟩
 
 /-- **Necessity.** A `C²` subharmonic function has nonnegative Laplacian. -/
 theorem HasSubmeanAt.laplacian_nonneg (hg : ContDiffAt ℝ 2 g t₀) (hs : HasSubmeanAt g t₀) :
@@ -239,41 +239,41 @@ theorem HasSubmeanAt.laplacian_nonneg (hg : ContDiffAt ℝ 2 g t₀) (hs : HasSu
   linarith
 
 /-- The Laplacian of the squared distance to a point is `4`. -/
-theorem laplacian_normSq_sub (t₀ t : ℂ) : Δ (fun z : ℂ => ‖z - t₀‖ ^ 2) t = 4 := by
-  have hq : (fun z : ℂ => ‖z - t₀‖ ^ 2) = fun z => (Complex.reCLM (z - t₀)) ^ 2 +
+theorem laplacian_normSq_sub (t₀ t : ℂ) : Δ (fun z : ℂ ↦ ‖z - t₀‖ ^ 2) t = 4 := by
+  have hq : (fun z : ℂ ↦ ‖z - t₀‖ ^ 2) = fun z ↦ (Complex.reCLM (z - t₀)) ^ 2 +
       (Complex.imCLM (z - t₀)) ^ 2 := by
     funext z
     simp only [Complex.reCLM_apply, Complex.imCLM_apply, Complex.sq_norm, Complex.normSq_apply]
     ring
-  have hD : ∀ z, HasFDerivAt (fun z : ℂ => ‖z - t₀‖ ^ 2)
+  have hD : ∀ z, HasFDerivAt (fun z : ℂ ↦ ‖z - t₀‖ ^ 2)
       ((2 * (z - t₀).re) • Complex.reCLM + (2 * (z - t₀).im) • Complex.imCLM) z := by
     intro z
     rw [hq]
-    have h1 : HasFDerivAt (fun z : ℂ => Complex.reCLM (z - t₀)) Complex.reCLM z :=
+    have h1 : HasFDerivAt (fun z : ℂ ↦ Complex.reCLM (z - t₀)) Complex.reCLM z :=
       Complex.reCLM.hasFDerivAt.comp z ((hasFDerivAt_id z).sub_const t₀) |>.congr_fderiv (by simp)
-    have h2 : HasFDerivAt (fun z : ℂ => Complex.imCLM (z - t₀)) Complex.imCLM z :=
+    have h2 : HasFDerivAt (fun z : ℂ ↦ Complex.imCLM (z - t₀)) Complex.imCLM z :=
       Complex.imCLM.hasFDerivAt.comp z ((hasFDerivAt_id z).sub_const t₀) |>.congr_fderiv (by simp)
     have := (h1.pow 2).add (h2.pow 2)
     convert this using 1
     ext s
     simp [Complex.reCLM_apply, Complex.imCLM_apply]
-  have hfd : fderiv ℝ (fun z : ℂ => ‖z - t₀‖ ^ 2) =
-      fun z => (2 * (z - t₀).re) • Complex.reCLM + (2 * (z - t₀).im) • Complex.imCLM :=
-    funext fun z => (hD z).fderiv
+  have hfd : fderiv ℝ (fun z : ℂ ↦ ‖z - t₀‖ ^ 2) =
+      fun z ↦ (2 * (z - t₀).re) • Complex.reCLM + (2 * (z - t₀).im) • Complex.imCLM :=
+    funext fun z ↦ (hD z).fderiv
   -- second derivative: differentiate the coefficient functions
-  have h1 : HasFDerivAt (fun z : ℂ => 2 * (z - t₀).re) ((2 : ℝ) • Complex.reCLM) t := by
+  have h1 : HasFDerivAt (fun z : ℂ ↦ 2 * (z - t₀).re) ((2 : ℝ) • Complex.reCLM) t := by
     have h := Complex.reCLM.hasFDerivAt.comp t ((hasFDerivAt_id t).sub_const t₀)
     have := h.const_mul (2 : ℝ)
     refine this.congr_fderiv ?_
     ext s
     simp
-  have h2 : HasFDerivAt (fun z : ℂ => 2 * (z - t₀).im) ((2 : ℝ) • Complex.imCLM) t := by
+  have h2 : HasFDerivAt (fun z : ℂ ↦ 2 * (z - t₀).im) ((2 : ℝ) • Complex.imCLM) t := by
     have h := Complex.imCLM.hasFDerivAt.comp t ((hasFDerivAt_id t).sub_const t₀)
     have := h.const_mul (2 : ℝ)
     refine this.congr_fderiv ?_
     ext s
     simp
-  have hD2 : HasFDerivAt (fun z : ℂ => (2 * (z - t₀).re) • Complex.reCLM +
+  have hD2 : HasFDerivAt (fun z : ℂ ↦ (2 * (z - t₀).re) • Complex.reCLM +
       (2 * (z - t₀).im) • Complex.imCLM) _ t :=
     (h1.smul_const Complex.reCLM).add (h2.smul_const Complex.imCLM)
   rw [laplacian_eq_fderiv_fderiv, hfd, hD2.fderiv]
@@ -283,52 +283,52 @@ theorem laplacian_normSq_sub (t₀ t : ℂ) : Δ (fun z : ℂ => ‖z - t₀‖ 
 /-- **Sufficiency.** A `C²` function with nonnegative Laplacian on an open set is subharmonic. -/
 theorem subharmonicOn_of_laplacian_nonneg {U : Set ℂ} (hU : IsOpen U) (hg : ContDiffOn ℝ 2 g U)
     (hΔ : ∀ t ∈ U, 0 ≤ Δ g t) : SubharmonicOn g U := by
-  refine ⟨hg.continuousOn.upperSemicontinuousOn, fun a ha => ?_⟩
+  refine ⟨hg.continuousOn.upperSemicontinuousOn, fun a ha ↦ ?_⟩
   obtain ⟨ρ, hρ, hball⟩ := Metric.mem_nhds_iff.mp (hU.mem_nhds ha)
-  refine hasSubmeanAt_of_forall_lt hρ fun r hr hrρ => ?_
+  refine hasSubmeanAt_of_forall_lt hρ fun r hr hrρ ↦ ?_
   have hsub : closedBall a r ⊆ U := (closedBall_subset_ball hrρ).trans hball
   have hint : CircleIntegrable g a r :=
     (hg.continuousOn.mono (sphere_subset_closedBall.trans hsub)).circleIntegrable hr.le
-  refine ⟨hint, le_of_forall_pos_le_add fun ε hε => ?_⟩
+  refine ⟨hint, le_of_forall_pos_le_add fun ε hε ↦ ?_⟩
   set η : ℝ := ε / r ^ 2 with hη
   have hη0 : 0 < η := div_pos hε (by positivity)
   -- the perturbed function
-  set q : ℂ → ℝ := fun z => ‖z - a‖ ^ 2 with hqdef
+  set q : ℂ → ℝ := fun z ↦ ‖z - a‖ ^ 2 with hqdef
   have hqc : ContDiff ℝ 2 q := by
-    have : q = fun z : ℂ => (Complex.reCLM (z - a)) ^ 2 + (Complex.imCLM (z - a)) ^ 2 := by
+    have : q = fun z : ℂ ↦ (Complex.reCLM (z - a)) ^ 2 + (Complex.imCLM (z - a)) ^ 2 := by
       funext z
       simp only [hqdef, Complex.reCLM_apply, Complex.imCLM_apply, Complex.sq_norm,
         Complex.normSq_apply]
       ring
     rw [this]
     fun_prop
-  set gε : ℂ → ℝ := fun z => g z + η * q z with hgεdef
-  have hgε : ContDiffOn ℝ 2 gε U := hg.add (hqc.contDiffOn.const_smul η |>.congr fun z _ => rfl)
+  set gε : ℂ → ℝ := fun z ↦ g z + η * q z with hgεdef
+  have hgε : ContDiffOn ℝ 2 gε U := hg.add (hqc.contDiffOn.const_smul η |>.congr fun z _ ↦ rfl)
   have hΔε : ∀ t ∈ U, 0 < Δ gε t := by
     intro t ht
     have h1 : ContDiffAt ℝ 2 g t := hg.contDiffAt (hU.mem_nhds ht)
-    have h2 : ContDiffAt ℝ 2 (fun z => η * q z) t := by
+    have h2 : ContDiffAt ℝ 2 (fun z ↦ η * q z) t := by
       have := hqc.contDiffAt (x := t)
-      exact this.const_smul η |>.congr_of_eventuallyEq (Filter.Eventually.of_forall fun z => rfl)
+      exact this.const_smul η |>.congr_of_eventuallyEq (Filter.Eventually.of_forall fun z ↦ rfl)
     have hadd := ContDiffAt.laplacian_add h1 h2
-    have hsm : Δ (fun z => η * q z) t = η * Δ q t := by
+    have hsm : Δ (fun z ↦ η * q z) t = η * Δ q t := by
       have := InnerProductSpace.laplacian_smul (𝕜 := ℝ) η (hqc.contDiffAt (x := t))
       simpa [Pi.smul_def, smul_eq_mul] using this
     have hq4 : Δ q t = 4 := laplacian_normSq_sub a t
     have : Δ gε t = Δ g t + η * 4 := by
       rw [hgεdef]
-      change Δ (g + fun z => η * q z) t = _
+      change Δ (g + fun z ↦ η * q z) t = _
       rw [hadd, hsm, hq4]
     rw [this]
     linarith [hΔ t ht]
   have hsub_ε : SubharmonicOn gε U :=
-    ⟨hgε.continuousOn.upperSemicontinuousOn, fun t ht =>
+    ⟨hgε.continuousOn.upperSemicontinuousOn, fun t ht ↦
       hasSubmeanAt_of_laplacian_pos (hgε.contDiffAt (hU.mem_nhds ht)) (hΔε t ht)⟩
   have hmean := hsub_ε.le_circleAverage_of_continuousOn hgε.continuousOn hr hsub
-  have hqint : CircleIntegrable (fun z => η * q z) a r :=
+  have hqint : CircleIntegrable (fun z ↦ η * q z) a r :=
     (continuous_const.mul (hqc.continuous)).continuousOn.circleIntegrable hr.le
-  have hqavg : circleAverage (fun z => η * q z) a r = η * r ^ 2 := by
-    rw [circleAverage_congr_sphere (f₂ := fun _ => η * r ^ 2), circleAverage_const]
+  have hqavg : circleAverage (fun z ↦ η * q z) a r = η * r ^ 2 := by
+    rw [circleAverage_congr_sphere (f₂ := fun _ ↦ η * r ^ 2), circleAverage_const]
     intro z hz
     simp only [hqdef]
     rw [abs_of_pos hr] at hz

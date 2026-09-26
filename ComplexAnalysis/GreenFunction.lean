@@ -60,7 +60,7 @@ theorem mem_frontier_or_eq_of_mem_frontier_diff_singleton (hU : IsOpen U) {w ζ 
       rw [hPO.frontier_eq] at hζ
       exact hζ.2
     rw [hU.frontier_eq]
-    refine ⟨hcl', fun hζU => hnU ⟨hζU, ?_⟩⟩
+    refine ⟨hcl', fun hζU ↦ hnU ⟨hζU, ?_⟩⟩
     simpa using hζw
 
 /-- **Existence of the Green function.** On a bounded open set with the exterior disc property,
@@ -70,24 +70,24 @@ extends harmonically across `w`, vanishing at the boundary of `U`, and positive 
 theorem exists_greenFunction (hU : IsOpen U) (hUb : Bornology.IsBounded U)
     (hext : ∀ ζ ∈ frontier U, ∃ (c : ℂ) (R : ℝ), 0 < R ∧ closedBall c R ∩ closure U = {ζ})
     {w : ℂ} (hw : w ∈ U) :
-    ∃ G : ℂ → ℝ, HarmonicOnNhd (fun z => G z + Real.log ‖z - w‖) U ∧
+    ∃ G : ℂ → ℝ, HarmonicOnNhd (fun z ↦ G z + Real.log ‖z - w‖) U ∧
       (∀ ζ ∈ frontier U, Tendsto G (𝓝[U] ζ) (𝓝 0)) ∧
       (∀ z ∈ U, z ≠ w → 0 ≤ G z) := by
-  have hwU : w ∉ frontier U := by rw [hU.frontier_eq]; exact fun h => h.2 hw
-  have hgcont : ContinuousOn (fun ζ => Real.log ‖ζ - w‖) (frontier U) := by
-    refine ContinuousOn.log (by fun_prop) fun ζ hζ => ?_
-    exact norm_ne_zero_iff.mpr (sub_ne_zero.mpr fun h => hwU (h ▸ hζ))
+  have hwU : w ∉ frontier U := by rw [hU.frontier_eq]; exact fun h ↦ h.2 hw
+  have hgcont : ContinuousOn (fun ζ ↦ Real.log ‖ζ - w‖) (frontier U) := by
+    refine ContinuousOn.log (by fun_prop) fun ζ hζ ↦ ?_
+    exact norm_ne_zero_iff.mpr (sub_ne_zero.mpr fun h ↦ hwU (h ▸ hζ))
   obtain ⟨h, hharm, hbd⟩ := exists_harmonicOnNhd_tendsto_of_exteriorDisc hU hUb hext hgcont
-  set G : ℂ → ℝ := fun z => h z - Real.log ‖z - w‖ with hG_def
-  have hharmG : HarmonicOnNhd (fun z => G z + Real.log ‖z - w‖) U := by
-    have hev : (fun z => G z + Real.log ‖z - w‖) = h := by funext z; rw [hG_def]; ring
+  set G : ℂ → ℝ := fun z ↦ h z - Real.log ‖z - w‖ with hG_def
+  have hharmG : HarmonicOnNhd (fun z ↦ G z + Real.log ‖z - w‖) U := by
+    have hev : (fun z ↦ G z + Real.log ‖z - w‖) = h := by funext z; rw [hG_def]; ring
     rw [hev]; exact hharm
   -- vanishing at the boundary of `U`
   have hGvanish : ∀ ζ ∈ frontier U, Tendsto G (𝓝[U] ζ) (𝓝 0) := by
     intro ζ hζ
     have h1 : Tendsto h (𝓝[U] ζ) (𝓝 (Real.log ‖ζ - w‖)) := hbd ζ hζ
-    have hζw : ζ - w ≠ 0 := sub_ne_zero.mpr fun h => hwU (h ▸ hζ)
-    have h2 : Tendsto (fun z : ℂ => Real.log ‖z - w‖) (𝓝[U] ζ) (𝓝 (Real.log ‖ζ - w‖)) :=
+    have hζw : ζ - w ≠ 0 := sub_ne_zero.mpr fun h ↦ hwU (h ▸ hζ)
+    have h2 : Tendsto (fun z : ℂ ↦ Real.log ‖z - w‖) (𝓝[U] ζ) (𝓝 (Real.log ‖ζ - w‖)) :=
       (((continuous_norm.comp (continuous_id.sub continuous_const)).tendsto ζ).log
         (norm_ne_zero_iff.mpr hζw)).mono_left nhdsWithin_le_nhds
     have := h1.sub h2
@@ -97,20 +97,20 @@ theorem exists_greenFunction (hU : IsOpen U) (hUb : Bornology.IsBounded U)
   intro z₀ hz₀U hz₀w
   have hPO : IsOpen (U \ {w}) := hU.sdiff isClosed_singleton
   have hPb : Bornology.IsBounded (U \ {w}) := hUb.subset sdiff_subset
-  have hne : ∀ z ∈ U \ {w}, z - w ≠ 0 := fun z hz => sub_ne_zero.mpr hz.2
-  have hharmMinus : HarmonicOnNhd (fun z => -G z) (U \ {w}) := by
+  have hne : ∀ z ∈ U \ {w}, z - w ≠ 0 := fun z hz ↦ sub_ne_zero.mpr hz.2
+  have hharmMinus : HarmonicOnNhd (fun z ↦ -G z) (U \ {w}) := by
     intro z hz
-    have h1 : HarmonicAt (fun v => Real.log ‖(fun v => v - w) v‖) z :=
+    have h1 : HarmonicAt (fun v ↦ Real.log ‖(fun v ↦ v - w) v‖) z :=
       (analyticAt_id.sub analyticAt_const).harmonicAt_log_norm (hne z hz)
     have h2 : HarmonicAt h z := hharm z hz.1
-    have hev : (fun z => -G z) =ᶠ[𝓝 z]
-        (fun v => Real.log ‖(fun v => v - w) v‖) - h := by
+    have hev : (fun z ↦ -G z) =ᶠ[𝓝 z]
+        (fun v ↦ Real.log ‖(fun v ↦ v - w) v‖) - h := by
       filter_upwards with v
       simp only [Pi.sub_apply, hG_def]
       ring
     rw [harmonicAt_congr_nhds hev]
     exact h1.sub h2
-  have hsubMinus : SubharmonicOn (fun z => -G z) (U \ {w}) := hharmMinus.subharmonicOn hPO
+  have hsubMinus : SubharmonicOn (fun z ↦ -G z) (U \ {w}) := hharmMinus.subharmonicOn hPO
   have hbdP : ∀ ζ ∈ frontier (U \ {w}), ∀ ε > 0, ∀ᶠ z in 𝓝[U \ {w}] ζ, -G z ≤ 0 + ε := by
     intro ζ hζ ε hε
     rcases mem_frontier_or_eq_of_mem_frontier_diff_singleton hU hζ with hζU | hζw
@@ -124,20 +124,20 @@ theorem exists_greenFunction (hU : IsOpen U) (hUb : Bornology.IsBounded U)
     · rw [hζw]
       have hcont : ContinuousAt h w := (hharm w hw).1.continuousAt
       have h1 : ∀ᶠ z in 𝓝 w, h z > h w - 1 := hcont.eventually (lt_mem_nhds (by linarith))
-      have hcontnorm : Continuous (fun z : ℂ => ‖z - w‖) := by fun_prop
-      have h2 : Tendsto (fun z : ℂ => ‖z - w‖) (𝓝[U \ {w}] w) (𝓝[>] (0 : ℝ)) := by
+      have hcontnorm : Continuous (fun z : ℂ ↦ ‖z - w‖) := by fun_prop
+      have h2 : Tendsto (fun z : ℂ ↦ ‖z - w‖) (𝓝[U \ {w}] w) (𝓝[>] (0 : ℝ)) := by
         rw [tendsto_nhdsWithin_iff]
         refine ⟨?_, ?_⟩
         · simpa using (hcontnorm.tendsto w).mono_left nhdsWithin_le_nhds
         · filter_upwards [self_mem_nhdsWithin] with z hz
           exact norm_pos_iff.mpr (sub_ne_zero.mpr hz.2)
-      have h3 : Tendsto (fun z : ℂ => Real.log ‖z - w‖) (𝓝[U \ {w}] w) atBot :=
+      have h3 : Tendsto (fun z : ℂ ↦ Real.log ‖z - w‖) (𝓝[U \ {w}] w) atBot :=
         Real.tendsto_log_nhdsGT_zero.comp h2
       have h4 : ∀ᶠ z in 𝓝[U \ {w}] w, Real.log ‖z - w‖ < -ε + h w - 1 :=
         h3.eventually (eventually_lt_atBot _)
       filter_upwards [h4, h1.filter_mono nhdsWithin_le_nhds] with z hz4 hz1
       rw [hG_def]
-      simp only
+      dsimp only
       linarith
   have hmax := hsubMinus.le_of_frontier hPO hPb hbdP
   have hz₀mem : z₀ ∈ U \ {w} := ⟨hz₀U, hz₀w⟩

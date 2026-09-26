@@ -43,15 +43,15 @@ omit [CompleteSpace F] in
 from a bound on the closed disc. -/
 theorem norm_cauchyPowerSeries_apply_one_le {g : ℂ → F} {b : ℂ} {ρ M : ℝ} (hρ : 0 < ρ)
     (hM : ∀ w ∈ closedBall b ρ, ‖g w‖ ≤ M) (k : ℕ) :
-    ‖cauchyPowerSeries g b ρ k (fun _ => 1)‖ ≤ M * ρ⁻¹ ^ k := by
+    ‖cauchyPowerSeries g b ρ k (fun _ ↦ 1)‖ ≤ M * ρ⁻¹ ^ k := by
   have hint : ∫ θ in (0:ℝ)..2 * π, ‖g (circleMap b ρ θ)‖ ≤ M * (2 * π) := by
     have := intervalIntegral.norm_integral_le_of_norm_le_const (a := 0) (b := 2 * π)
-      (f := fun θ => ‖g (circleMap b ρ θ)‖) (C := M) (fun θ _ => by
+      (f := fun θ ↦ ‖g (circleMap b ρ θ)‖) (C := M) (fun θ _ ↦ by
         rw [Real.norm_eq_abs, abs_of_nonneg (norm_nonneg _)]
         exact hM _ (circleMap_mem_closedBall b hρ.le θ))
     rw [sub_zero, abs_of_pos Real.two_pi_pos, Real.norm_eq_abs] at this
     exact (le_abs_self _).trans this
-  calc ‖cauchyPowerSeries g b ρ k (fun _ => 1)‖
+  calc ‖cauchyPowerSeries g b ρ k (fun _ ↦ 1)‖
       ≤ ‖cauchyPowerSeries g b ρ k‖ * ∏ _i : Fin k, ‖(1 : ℂ)‖ :=
         ContinuousMultilinearMap.le_opNorm _ _
     _ = ‖cauchyPowerSeries g b ρ k‖ := by simp

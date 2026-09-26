@@ -42,20 +42,20 @@ and their derivatives vary continuously on the boundary and never vanish there. 
 theorem continuous_circleIntegral_logDeriv {X : Type*} [TopologicalSpace X]
     [FirstCountableTopology X] [LocallyCompactSpace X]
     {f : X → ℂ → ℂ} {c : ℂ} {R : ℝ} (hR : 0 ≤ R)
-    (hf : ContinuousOn (fun p : X × ℂ => f p.1 p.2) (univ ×ˢ sphere c R))
-    (hd : ContinuousOn (fun p : X × ℂ => deriv (f p.1) p.2) (univ ×ˢ sphere c R))
+    (hf : ContinuousOn (fun p : X × ℂ ↦ f p.1 p.2) (univ ×ˢ sphere c R))
+    (hd : ContinuousOn (fun p : X × ℂ ↦ deriv (f p.1) p.2) (univ ×ˢ sphere c R))
     (hne : ∀ x z, z ∈ sphere c R → f x z ≠ 0) :
-    Continuous (fun x => ∮ z in C(c, R), logDeriv (f x) z) := by
+    Continuous (fun x ↦ ∮ z in C(c, R), logDeriv (f x) z) := by
   have hmap : ∀ p : X × ℝ, (p.1, circleMap c R p.2) ∈ univ ×ˢ sphere c R :=
-    fun p => ⟨mem_univ _, circleMap_mem_sphere c hR p.2⟩
+    fun p ↦ ⟨mem_univ _, circleMap_mem_sphere c hR p.2⟩
   have hc := hf.comp_continuous (by fun_prop) hmap
   have hc' := hd.comp_continuous (by fun_prop) hmap
-  have hk : Continuous (fun p : X × ℝ => deriv (circleMap c R) p.2 *
+  have hk : Continuous (fun p : X × ℝ ↦ deriv (circleMap c R) p.2 *
       (deriv (f p.1) (circleMap c R p.2) / f p.1 (circleMap c R p.2))) := by
     apply Continuous.mul
     · simp only [deriv_circleMap]
       fun_prop
-    · exact hc'.div hc (fun p => hne p.1 _ (circleMap_mem_sphere c hR p.2))
+    · exact hc'.div hc (fun p ↦ hne p.1 _ (circleMap_mem_sphere c hR p.2))
   simpa only [circleIntegral_def_Icc, logDeriv_apply, smul_eq_mul] using
     (continuous_parametric_integral_of_continuous (μ := volume) hk
       (isCompact_Icc : IsCompact (Icc (0 : ℝ) (2 * Real.pi))))
@@ -67,7 +67,7 @@ theorem sum_divisor_eq_of_norm_sub_lt {f g : ℂ → ℂ} {c : ℂ} {R : ℝ}
     (hg : AnalyticOnNhd ℂ g (closedBall c R))
     (hb : ∀ z ∈ sphere c R, ‖g z - f z‖ < ‖f z‖) :
     (∑ᶠ z, divisor f (closedBall c R) z) = ∑ᶠ z, divisor g (closedBall c R) z := by
-  let q : I → ℂ → ℂ := fun t z => f z + (t : ℂ) * (g z - f z)
+  let q : I → ℂ → ℂ := fun t z ↦ f z + (t : ℂ) * (g z - f z)
   have hq (t : I) : AnalyticOnNhd ℂ (q t) (closedBall c R) := by
     intro z hz
     exact (hf z hz).add (analyticAt_const.mul ((hg z hz).sub (hf z hz)))
@@ -87,20 +87,20 @@ theorem sum_divisor_eq_of_norm_sub_lt {f g : ℂ → ℂ} {c : ℂ} {R : ℝ}
     exact ((hf z hz).differentiableAt.hasDerivAt.add
       (((hg z hz).differentiableAt.hasDerivAt.sub
         (hf z hz).differentiableAt.hasDerivAt).const_mul (t : ℂ))).deriv
-  have hf' : ContinuousOn (fun p : I × ℂ => f p.2) (univ ×ˢ sphere c R) :=
+  have hf' : ContinuousOn (fun p : I × ℂ ↦ f p.2) (univ ×ˢ sphere c R) :=
     (hf.continuousOn.mono sphere_subset_closedBall).comp continuous_snd.continuousOn
-      (fun _ hp => hp.2)
-  have hg' : ContinuousOn (fun p : I × ℂ => g p.2) (univ ×ˢ sphere c R) :=
+      (fun _ hp ↦ hp.2)
+  have hg' : ContinuousOn (fun p : I × ℂ ↦ g p.2) (univ ×ˢ sphere c R) :=
     (hg.continuousOn.mono sphere_subset_closedBall).comp continuous_snd.continuousOn
-      (fun _ hp => hp.2)
-  have hdf : ContinuousOn (fun p : I × ℂ => deriv f p.2) (univ ×ˢ sphere c R) :=
+      (fun _ hp ↦ hp.2)
+  have hdf : ContinuousOn (fun p : I × ℂ ↦ deriv f p.2) (univ ×ˢ sphere c R) :=
     (hf.deriv.continuousOn.mono sphere_subset_closedBall).comp continuous_snd.continuousOn
-      (fun _ hp => hp.2)
-  have hdg : ContinuousOn (fun p : I × ℂ => deriv g p.2) (univ ×ˢ sphere c R) :=
+      (fun _ hp ↦ hp.2)
+  have hdg : ContinuousOn (fun p : I × ℂ ↦ deriv g p.2) (univ ×ˢ sphere c R) :=
     (hg.deriv.continuousOn.mono sphere_subset_closedBall).comp continuous_snd.continuousOn
-      (fun _ hp => hp.2)
-  have ht : ContinuousOn (fun p : I × ℂ => (p.1 : ℂ)) (univ ×ˢ sphere c R) := by fun_prop
-  have hc : Continuous (fun t : I => (2 * Real.pi * Complex.I)⁻¹ *
+      (fun _ hp ↦ hp.2)
+  have ht : ContinuousOn (fun p : I × ℂ ↦ (p.1 : ℂ)) (univ ×ˢ sphere c R) := by fun_prop
+  have hc : Continuous (fun t : I ↦ (2 * Real.pi * Complex.I)⁻¹ *
       (∮ z in C(c, R), logDeriv (q t) z)) := by
     apply continuous_const.mul
     apply continuous_circleIntegral_logDeriv hR.le (hf'.add (ht.mul (hg'.sub hf')))
@@ -108,7 +108,7 @@ theorem sum_divisor_eq_of_norm_sub_lt {f g : ℂ → ℂ} {c : ℂ} {R : ℝ}
     apply (hdf.add (ht.mul (hdg.sub hdf))).congr
     intro p hp
     exact hdq p.1 (sphere_subset_closedBall hp.2)
-  have hm : MapsTo (fun t : I => (2 * Real.pi * Complex.I)⁻¹ *
+  have hm : MapsTo (fun t : I ↦ (2 * Real.pi * Complex.I)⁻¹ *
       (∮ z in C(c, R), logDeriv (q t) z)) univ (range ((↑) : ℤ → ℂ)) := by
     intro t _
     exact ⟨∑ᶠ z, divisor (q t) (closedBall c R) z,

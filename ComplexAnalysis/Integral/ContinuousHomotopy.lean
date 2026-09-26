@@ -59,26 +59,26 @@ theorem curveIntegral_add_curveIntegral_eq_of_continuous_homotopy
     (hγ : DifferentiableOn ℝ γ.extend I) (hδ : DifferentiableOn ℝ δ.extend I)
     (h₀ : DifferentiableOn ℝ (H.evalAt 0).extend I)
     (h₁ : DifferentiableOn ℝ (H.evalAt 1).extend I)
-    (hiγ : CurveIntegrable (fun z => ContinuousLinearMap.toSpanSingleton ℂ (f z)) γ)
-    (hiδ : CurveIntegrable (fun z => ContinuousLinearMap.toSpanSingleton ℂ (f z)) δ)
-    (hi₀ : CurveIntegrable (fun z => ContinuousLinearMap.toSpanSingleton ℂ (f z)) (H.evalAt 0))
-    (hi₁ : CurveIntegrable (fun z => ContinuousLinearMap.toSpanSingleton ℂ (f z)) (H.evalAt 1)) :
-    curveIntegral (fun z => ContinuousLinearMap.toSpanSingleton ℂ (f z)) γ +
-        curveIntegral (fun z => ContinuousLinearMap.toSpanSingleton ℂ (f z)) (H.evalAt 1) =
-      curveIntegral (fun z => ContinuousLinearMap.toSpanSingleton ℂ (f z)) δ +
-        curveIntegral (fun z => ContinuousLinearMap.toSpanSingleton ℂ (f z)) (H.evalAt 0) := by
+    (hiγ : CurveIntegrable (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ (f z)) γ)
+    (hiδ : CurveIntegrable (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ (f z)) δ)
+    (hi₀ : CurveIntegrable (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ (f z)) (H.evalAt 0))
+    (hi₁ : CurveIntegrable (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ (f z)) (H.evalAt 1)) :
+    curveIntegral (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ (f z)) γ +
+        curveIntegral (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ (f z)) (H.evalAt 1) =
+      curveIntegral (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ (f z)) δ +
+        curveIntegral (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ (f z)) (H.evalAt 0) := by
   let : ContractibleSpace I := (convex_Icc (0 : ℝ) 1).contractibleSpace ⟨0, by simp⟩
   let : LocallyPathConnectedSpace I := (convex_Icc (0 : ℝ) 1).locallyPathConnectedSpace
   obtain ⟨Q, hQ, _, hlocal⟩ := hf.exists_continuous_primitive_pullback hU H.continuous
     hHU ((0 : I), (0 : I)) 0
   have heγ := curveIntegral_eq_sub_of_locally_primitive H.continuous hQ hlocal
-    (r := fun t : I => ((0 : I), t)) (by fun_prop) (fun t => H.apply_zero t) hγ hiγ
+    (r := fun t : I ↦ ((0 : I), t)) (by fun_prop) (fun t ↦ H.apply_zero t) hγ hiγ
   have heδ := curveIntegral_eq_sub_of_locally_primitive H.continuous hQ hlocal
-    (r := fun t : I => ((1 : I), t)) (by fun_prop) (fun t => H.apply_one t) hδ hiδ
+    (r := fun t : I ↦ ((1 : I), t)) (by fun_prop) (fun t ↦ H.apply_one t) hδ hiδ
   have he₀ := curveIntegral_eq_sub_of_locally_primitive H.continuous hQ hlocal
-    (r := fun t : I => (t, (0 : I))) (by fun_prop) (fun _ => rfl) h₀ hi₀
+    (r := fun t : I ↦ (t, (0 : I))) (by fun_prop) (fun _ ↦ rfl) h₀ hi₀
   have he₁ := curveIntegral_eq_sub_of_locally_primitive H.continuous hQ hlocal
-    (r := fun t : I => (t, (1 : I))) (by fun_prop) (fun _ => rfl) h₁ hi₁
+    (r := fun t : I ↦ (t, (1 : I))) (by fun_prop) (fun _ ↦ rfl) h₁ hi₁
   rw [heγ, heδ, he₀, he₁]
   abel
 
@@ -91,19 +91,19 @@ theorem curveIntegral_add_curveIntegral_eq_of_continuous_homotopy_of_contDiffOn
     (hγ : ContDiffOn ℝ 1 γ.extend I) (hδ : ContDiffOn ℝ 1 δ.extend I)
     (h₀ : ContDiffOn ℝ 1 (H.evalAt 0).extend I)
     (h₁ : ContDiffOn ℝ 1 (H.evalAt 1).extend I) :
-    curveIntegral (fun z => ContinuousLinearMap.toSpanSingleton ℂ (f z)) γ +
-        curveIntegral (fun z => ContinuousLinearMap.toSpanSingleton ℂ (f z)) (H.evalAt 1) =
-      curveIntegral (fun z => ContinuousLinearMap.toSpanSingleton ℂ (f z)) δ +
-        curveIntegral (fun z => ContinuousLinearMap.toSpanSingleton ℂ (f z)) (H.evalAt 0) :=
+    curveIntegral (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ (f z)) γ +
+        curveIntegral (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ (f z)) (H.evalAt 1) =
+      curveIntegral (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ (f z)) δ +
+        curveIntegral (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ (f z)) (H.evalAt 0) :=
   curveIntegral_add_curveIntegral_eq_of_continuous_homotopy H hU hf hHU
     (hγ.differentiableOn one_ne_zero) (hδ.differentiableOn one_ne_zero)
     (h₀.differentiableOn one_ne_zero) (h₁.differentiableOn one_ne_zero)
     (curveIntegrable_of_continuousOn hf.continuousOn hγ
-      (fun t => hHU ⟨(0, t), H.apply_zero t⟩))
+      (fun t ↦ hHU ⟨(0, t), H.apply_zero t⟩))
     (curveIntegrable_of_continuousOn hf.continuousOn hδ
-      (fun t => hHU ⟨(1, t), H.apply_one t⟩))
-    (curveIntegrable_of_continuousOn hf.continuousOn h₀ (fun t => hHU ⟨(t, 0), rfl⟩))
-    (curveIntegrable_of_continuousOn hf.continuousOn h₁ (fun t => hHU ⟨(t, 1), rfl⟩))
+      (fun t ↦ hHU ⟨(1, t), H.apply_one t⟩))
+    (curveIntegrable_of_continuousOn hf.continuousOn h₀ (fun t ↦ hHU ⟨(t, 0), rfl⟩))
+    (curveIntegrable_of_continuousOn hf.continuousOn h₁ (fun t ↦ hHU ⟨(t, 1), rfl⟩))
 
 /-- Holomorphic curve integrals agree under a continuous homotopy fixing endpoints.
 Only the two boundary paths must be differentiable and curve integrable. -/
@@ -112,21 +112,21 @@ theorem curveIntegral_eq_of_continuous_homotopy
     {U : Set ℂ} {f : ℂ → F} {a b : ℂ} {γ δ : Path a b} (H : γ.Homotopy δ)
     (hU : IsOpen U) (hf : DifferentiableOn ℂ f U) (hHU : range H ⊆ U)
     (hγ : DifferentiableOn ℝ γ.extend I) (hδ : DifferentiableOn ℝ δ.extend I)
-    (hγint : CurveIntegrable (fun z => ContinuousLinearMap.toSpanSingleton ℂ (f z)) γ)
-    (hδint : CurveIntegrable (fun z => ContinuousLinearMap.toSpanSingleton ℂ (f z)) δ) :
-    curveIntegral (fun z => ContinuousLinearMap.toSpanSingleton ℂ (f z)) γ =
-      curveIntegral (fun z => ContinuousLinearMap.toSpanSingleton ℂ (f z)) δ := by
+    (hγint : CurveIntegrable (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ (f z)) γ)
+    (hδint : CurveIntegrable (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ (f z)) δ) :
+    curveIntegral (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ (f z)) γ =
+      curveIntegral (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ (f z)) δ := by
   let : ContractibleSpace I := (convex_Icc (0 : ℝ) 1).contractibleSpace ⟨0, by simp⟩
   let : LocallyPathConnectedSpace I := (convex_Icc (0 : ℝ) 1).locallyPathConnectedSpace
   obtain ⟨Q, hQ, _, hlocal⟩ := hf.exists_continuous_primitive_pullback hU H.continuous
     hHU ((0 : I), (0 : I)) 0
   have hedge (t : I) (ht : ∀ s, H (s, t) = H (0, t)) : ∀ s, Q (s, t) = Q (0, t) := by
-    suffices hc : IsLocallyConstant (fun s : I => Q (s, t)) from
-      fun s => hc.apply_eq_of_preconnectedSpace s 0
+    suffices hc : IsLocallyConstant (fun s : I ↦ Q (s, t)) from
+      fun s ↦ hc.apply_eq_of_preconnectedSpace s 0
     apply (IsLocallyConstant.iff_eventually_eq _).mpr
     intro s
     obtain ⟨P, _, he⟩ := hlocal (s, t)
-    have hc : ContinuousAt (fun r : I => (r, t)) s := by fun_prop
+    have hc : ContinuousAt (fun r : I ↦ (r, t)) s := by fun_prop
     filter_upwards [hc.eventually he] with r hr
     simpa only [ht r, ht s, sub_self, add_zero] using hr
   let η (s : I) : Path (s, (0 : I)) (s, (1 : I)) := (Path.refl s).prod Path.id
@@ -135,8 +135,8 @@ theorem curveIntegral_eq_of_continuous_homotopy
     ext t
     rfl
   have hrow (s : I) (hs : DifferentiableOn ℝ (H.eval s).extend I)
-      (hint : CurveIntegrable (fun z => ContinuousLinearMap.toSpanSingleton ℂ (f z)) (H.eval s)) :
-      curveIntegral (fun z => ContinuousLinearMap.toSpanSingleton ℂ (f z)) (H.eval s) =
+      (hint : CurveIntegrable (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ (f z)) (H.eval s)) :
+      curveIntegral (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ (f z)) (H.eval s) =
         Q (s, 1) - Q (s, 0) := by
     have h := curveIntegral_map_eq_sub_of_locally_primitive H.continuous hQ hlocal (η s)
       (by simpa only [hmap, Path.extend_cast] using hs)
@@ -154,14 +154,14 @@ theorem curveIntegral_eq_of_continuous_homotopy_of_contDiffOn
     {U : Set ℂ} {f : ℂ → F} {a b : ℂ} {γ δ : Path a b} (H : γ.Homotopy δ)
     (hU : IsOpen U) (hf : DifferentiableOn ℂ f U) (hHU : range H ⊆ U)
     (hγ : ContDiffOn ℝ 1 γ.extend I) (hδ : ContDiffOn ℝ 1 δ.extend I) :
-    curveIntegral (fun z => ContinuousLinearMap.toSpanSingleton ℂ (f z)) γ =
-      curveIntegral (fun z => ContinuousLinearMap.toSpanSingleton ℂ (f z)) δ :=
+    curveIntegral (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ (f z)) γ =
+      curveIntegral (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ (f z)) δ :=
   curveIntegral_eq_of_continuous_homotopy H hU hf hHU
     (hγ.differentiableOn one_ne_zero) (hδ.differentiableOn one_ne_zero)
     (curveIntegrable_of_continuousOn hf.continuousOn hγ
-      (fun t => hHU ⟨(0, t), by simp⟩))
+      (fun t ↦ hHU ⟨(0, t), by simp⟩))
     (curveIntegrable_of_continuousOn hf.continuousOn hδ
-      (fun t => hHU ⟨(1, t), by simp⟩))
+      (fun t ↦ hHU ⟨(1, t), by simp⟩))
 
 /-- Deformation preserves a limit of finite curve integrals when the integrals along
 both endpoint tracks vanish. This applies to improper contours via their finite truncations. -/
@@ -175,17 +175,17 @@ theorem tendsto_curveIntegral_of_continuous_homotopy
     (h₀ : ∀ i, ContDiffOn ℝ 1 ((H i).evalAt 0).extend I)
     (h₁ : ∀ i, ContDiffOn ℝ 1 ((H i).evalAt 1).extend I)
     {v : F}
-    (hlim : Tendsto (fun i => curveIntegral
-      (fun z => ContinuousLinearMap.toSpanSingleton ℂ (f z)) (γ i)) ℱ (𝓝 v))
-    (hstart : Tendsto (fun i => curveIntegral
-      (fun z => ContinuousLinearMap.toSpanSingleton ℂ (f z)) ((H i).evalAt 0)) ℱ (𝓝 0))
-    (hend : Tendsto (fun i => curveIntegral
-      (fun z => ContinuousLinearMap.toSpanSingleton ℂ (f z)) ((H i).evalAt 1)) ℱ (𝓝 0)) :
-    Tendsto (fun i => curveIntegral
-      (fun z => ContinuousLinearMap.toSpanSingleton ℂ (f z)) (δ i)) ℱ (𝓝 v) := by
+    (hlim : Tendsto (fun i ↦ curveIntegral
+      (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ (f z)) (γ i)) ℱ (𝓝 v))
+    (hstart : Tendsto (fun i ↦ curveIntegral
+      (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ (f z)) ((H i).evalAt 0)) ℱ (𝓝 0))
+    (hend : Tendsto (fun i ↦ curveIntegral
+      (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ (f z)) ((H i).evalAt 1)) ℱ (𝓝 0)) :
+    Tendsto (fun i ↦ curveIntegral
+      (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ (f z)) (δ i)) ℱ (𝓝 v) := by
   have he i := curveIntegral_add_curveIntegral_eq_of_continuous_homotopy_of_contDiffOn
     (H i) hU hf (hHU i) (hγ i) (hδ i) (h₀ i) (h₁ i)
   simpa only [add_zero, sub_zero] using
-    ((hlim.add hend).sub hstart).congr (fun i => (eq_sub_of_add_eq (he i).symm).symm)
+    ((hlim.add hend).sub hstart).congr (fun i ↦ (eq_sub_of_add_eq (he i).symm).symm)
 
 end Complex

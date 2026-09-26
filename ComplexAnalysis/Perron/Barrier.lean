@@ -90,9 +90,9 @@ theorem tendsto_perronFunction_of_isBarrier (hU : IsOpen U) (hUb : Bornology.IsB
   -- lower bound: the member `g ζ - ε / 2 + K β`
   have hlower : ∀ z ∈ U, g ζ - ε / 2 + K * β z ≤ perronFunction U g z := by
     intro z hz
-    have hmem : IsPerronMember U g fun z => g ζ - ε / 2 + K * β z := by
+    have hmem : IsPerronMember U g fun z ↦ g ζ - ε / 2 + K * β z := by
       refine ⟨(subharmonicOn_const _ _).add (hβ.subharmonicOn.const_mul hK0),
-        continuousOn_const.add (continuousOn_const.mul hβ.continuousOn), fun ξ hξ ε' hε' => ?_⟩
+        continuousOn_const.add (continuousOn_const.mul hβ.continuousOn), fun ξ hξ ε' hε' ↦ ?_⟩
       by_cases hξζ : dist ξ ζ < δ
       · have h1 := hδg hξ hξζ
         rw [Real.dist_eq, abs_lt] at h1
@@ -111,10 +111,10 @@ theorem tendsto_perronFunction_of_isBarrier (hU : IsOpen U) (hUb : Bornology.IsB
   have hupper : ∀ z ∈ U, perronFunction U g z ≤ g ζ + ε / 2 - K * β z := by
     intro z hz
     have : Nonempty {v : ℂ → ℝ // IsPerronMember U g v} := ⟨⟨_, isPerronMember_const hm⟩⟩
-    refine ciSup_le fun v => ?_
-    have hsub : SubharmonicOn (fun z => v.1 z + K * β z + (-(g ζ + ε / 2))) U :=
+    refine ciSup_le fun v ↦ ?_
+    have hsub : SubharmonicOn (fun z ↦ v.1 z + K * β z + (-(g ζ + ε / 2))) U :=
       (v.2.subharmonicOn.add (hβ.subharmonicOn.const_mul hK0)).add (subharmonicOn_const _ _)
-    have hle := hsub.le_of_frontier hU hUb (M := 0) fun ξ hξ ε' hε' => ?_
+    have hle := hsub.le_of_frontier hU hUb (M := 0) fun ξ hξ ε' hε' ↦ ?_
     · have := hle z hz
       linarith
     · by_cases hξζ : dist ξ ζ < δ
@@ -143,7 +143,7 @@ theorem tendsto_perronFunction_of_isBarrier (hU : IsOpen U) (hUb : Bornology.IsB
         _ < ε / 2 := mul_lt_of_lt_one_right (half_pos hε) h2
     linarith
   obtain ⟨δ', hδ', hδ'β⟩ := Metric.mem_nhdsWithin_iff.mp hβsmall
-  refine ⟨δ', hδ', fun z hz hzζ => ?_⟩
+  refine ⟨δ', hδ', fun z hz hzζ ↦ ?_⟩
   have h1 := hlower z hz
   have h2 := hupper z hz
   have h3 : -(ε / 2) < K * β z := hδ'β ⟨mem_ball.mpr hzζ, hz⟩
@@ -155,7 +155,7 @@ boundary point `ζ`, then `log (R / ‖z - c‖)` is a barrier at `ζ`. -/
 theorem isBarrier_log_of_exteriorDisc (hU : IsOpen U) (hUb : Bornology.IsBounded U)
     (hζ : ζ ∈ frontier U) {c : ℂ} {R : ℝ} (hR : 0 < R)
     (hdisc : closedBall c R ∩ closure U = {ζ}) :
-    IsBarrier U ζ fun z => Real.log (R / ‖z - c‖) := by
+    IsBarrier U ζ fun z ↦ Real.log (R / ‖z - c‖) := by
   have hζU : ζ ∉ U := by
     rw [hU.frontier_eq] at hζ
     exact hζ.2
@@ -172,8 +172,8 @@ theorem isBarrier_log_of_exteriorDisc (hU : IsOpen U) (hUb : Bornology.IsBounded
     have : z ∈ closedBall c R ∩ closure U := ⟨mem_closedBall_iff_norm.mpr h, hz⟩
     rw [hdisc, mem_singleton_iff] at this
     exact hzζ this
-  have hout : ∀ z ∈ U, R < ‖z - c‖ := fun z hz =>
-    hout' z (subset_closure hz) fun h => hζU (h ▸ hz)
+  have hout : ∀ z ∈ U, R < ‖z - c‖ := fun z hz ↦
+    hout' z (subset_closure hz) fun h ↦ hζU (h ▸ hz)
   have hζR : ‖ζ - c‖ = R := by
     refine le_antisymm hζc ?_
     by_contra hlt
@@ -181,57 +181,57 @@ theorem isBarrier_log_of_exteriorDisc (hU : IsOpen U) (hUb : Bornology.IsBounded
     have hmem : ball c R ∈ 𝓝 ζ := isOpen_ball.mem_nhds (mem_ball_iff_norm.mpr hlt)
     obtain ⟨z, hzb, hzU⟩ := mem_closure_iff_nhds.mp hζcl _ hmem
     exact absurd (mem_ball_iff_norm.mp hzb) (not_lt.mpr (hout z hzU).le)
-  have hne : ∀ z ∈ U, z - c ≠ 0 := fun z hz h => by
+  have hne : ∀ z ∈ U, z - c ≠ 0 := fun z hz h ↦ by
     have := hout z hz
     rw [h, norm_zero] at this
     linarith
   -- harmonicity
-  have hharm : HarmonicOnNhd (fun z => Real.log (R / ‖z - c‖)) U := by
+  have hharm : HarmonicOnNhd (fun z ↦ Real.log (R / ‖z - c‖)) U := by
     intro z hz
-    have h1 : HarmonicAt (fun w => Real.log ‖(fun w => w - c) w‖) z :=
+    have h1 : HarmonicAt (fun w ↦ Real.log ‖(fun w ↦ w - c) w‖) z :=
       (analyticAt_id.sub analyticAt_const).harmonicAt_log_norm (hne z hz)
-    have hev : (fun z => Real.log (R / ‖z - c‖)) =ᶠ[𝓝 z]
-        (fun _ => Real.log R) - fun w => Real.log ‖(fun w => w - c) w‖ := by
+    have hev : (fun z ↦ Real.log (R / ‖z - c‖)) =ᶠ[𝓝 z]
+        (fun _ ↦ Real.log R) - fun w ↦ Real.log ‖(fun w ↦ w - c) w‖ := by
       have hopen : IsOpen {w : ℂ | w - c ≠ 0} := isOpen_ne_fun (by fun_prop) continuous_const
       filter_upwards [hopen.mem_nhds (hne z hz)] with w hw
       simp only [Pi.sub_apply]
       rw [Real.log_div hR.ne' (norm_ne_zero_iff.mpr hw)]
     rw [harmonicAt_congr_nhds hev]
     exact (harmonicAt_const _).sub h1
-  refine ⟨hharm.subharmonicOn hU, ?_, fun z hz => ?_, ?_, fun δ hδ => ?_⟩
+  refine ⟨hharm.subharmonicOn hU, ?_, fun z hz ↦ ?_, ?_, fun δ hδ ↦ ?_⟩
   · -- continuity
-    refine ContinuousOn.log (continuousOn_const.div (by fun_prop) fun z hz =>
-      norm_ne_zero_iff.mpr (hne z hz)) fun z hz => ?_
+    refine ContinuousOn.log (continuousOn_const.div (by fun_prop) fun z hz ↦
+      norm_ne_zero_iff.mpr (hne z hz)) fun z hz ↦ ?_
     exact div_ne_zero hR.ne' (norm_ne_zero_iff.mpr (hne z hz))
   · -- negativity
     have := hout z hz
     exact Real.log_neg (div_pos hR (by linarith)) ((div_lt_one (by linarith)).mpr this)
   · -- the limit at `ζ`
-    have h1 : Tendsto (fun z => R / ‖z - c‖) (𝓝[U] ζ) (𝓝 (R / ‖ζ - c‖)) :=
+    have h1 : Tendsto (fun z ↦ R / ‖z - c‖) (𝓝[U] ζ) (𝓝 (R / ‖ζ - c‖)) :=
       (tendsto_const_nhds.div ((continuous_norm.comp (continuous_id.sub continuous_const)).tendsto
         ζ) (by simp only [Function.comp_apply, Pi.sub_apply, id]; rw [hζR]; exact hR.ne')).mono_left
         nhdsWithin_le_nhds
     have h2 := h1.log (by rw [hζR]; exact (div_pos hR hR).ne')
     rwa [hζR, div_self hR.ne', Real.log_one] at h2
   · -- bounded away from zero far from `ζ`
-    set Kset : Set ℂ := closure U \ ball ζ δ with hK_def
+    set Kset : Set ℂ := closure U \ ball ζ δ
     have hcomp : IsCompact (closure U) := by
       obtain ⟨R', hR'⟩ := hUb.subset_closedBall 0
       exact (isCompact_closedBall 0 R').of_isClosed_subset isClosed_closure
         (isClosed_closedBall.closure_subset_iff.mpr hR')
     have hKc : IsCompact Kset := hcomp.diff isOpen_ball
     rcases Kset.eq_empty_or_nonempty with hKe | hKne
-    · refine ⟨1, one_pos, fun z hz hzδ => ?_⟩
+    · refine ⟨1, one_pos, fun z hz hzδ ↦ ?_⟩
       exfalso
-      have : z ∈ Kset := ⟨subset_closure hz, fun h => absurd (mem_ball.mp h) (not_lt.mpr hzδ)⟩
+      have : z ∈ Kset := ⟨subset_closure hz, fun h ↦ absurd (mem_ball.mp h) (not_lt.mpr hzδ)⟩
       rw [hKe] at this
       exact this
     · obtain ⟨z₀, hz₀, hmin⟩ := hKc.exists_isMinOn hKne
         (continuous_norm.comp (continuous_id.sub continuous_const)).continuousOn
-      have hz₀ζ : z₀ ≠ ζ := fun h => hz₀.2 (h ▸ mem_ball_self hδ)
+      have hz₀ζ : z₀ ≠ ζ := fun h ↦ hz₀.2 (h ▸ mem_ball_self hδ)
       have hz₀R : R < ‖z₀ - c‖ := hout' z₀ hz₀.1 hz₀ζ
-      refine ⟨Real.log (‖z₀ - c‖ / R), Real.log_pos ((one_lt_div hR).mpr hz₀R), fun z hz hzδ => ?_⟩
-      have hzK : z ∈ Kset := ⟨subset_closure hz, fun h => absurd (mem_ball.mp h) (not_lt.mpr hzδ)⟩
+      refine ⟨Real.log (‖z₀ - c‖ / R), Real.log_pos ((one_lt_div hR).mpr hz₀R), fun z hz hzδ ↦ ?_⟩
+      have hzK : z ∈ Kset := ⟨subset_closure hz, fun h ↦ absurd (mem_ball.mp h) (not_lt.mpr hzδ)⟩
       have h1 : ‖z₀ - c‖ ≤ ‖z - c‖ := hmin hzK
       rw [← Real.log_inv, inv_div]
       exact Real.log_le_log (div_pos hR (by linarith))
@@ -252,15 +252,15 @@ theorem exists_harmonicOnNhd_tendsto_of_exteriorDisc (hU : IsOpen U)
   have hfr : IsCompact (frontier U) := hcomp.of_isClosed_subset isClosed_frontier
     frontier_subset_closure
   obtain ⟨C, hC⟩ := hfr.exists_bound_of_continuousOn hg
-  have hm : ∀ ζ ∈ frontier U, -C ≤ g ζ := fun ζ hζ => by
+  have hm : ∀ ζ ∈ frontier U, -C ≤ g ζ := fun ζ hζ ↦ by
     have := hC ζ hζ
     rw [Real.norm_eq_abs, abs_le] at this
     exact this.1
-  have hM : ∀ ζ ∈ frontier U, g ζ ≤ C := fun ζ hζ => by
+  have hM : ∀ ζ ∈ frontier U, g ζ ≤ C := fun ζ hζ ↦ by
     have := hC ζ hζ
     rw [Real.norm_eq_abs, abs_le] at this
     exact this.2
-  refine ⟨perronFunction U g, harmonicOnNhd_perronFunction hU hUb hm hM, fun ζ hζ => ?_⟩
+  refine ⟨perronFunction U g, harmonicOnNhd_perronFunction hU hUb hm hM, fun ζ hζ ↦ ?_⟩
   obtain ⟨c, R, hR, hdisc⟩ := hext ζ hζ
   exact tendsto_perronFunction_of_isBarrier hU hUb hm hM hζ (hg ζ hζ)
     (isBarrier_log_of_exteriorDisc hU hUb hζ hR hdisc)

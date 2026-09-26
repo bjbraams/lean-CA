@@ -51,9 +51,9 @@ theorem poissonKernel_nonneg (hz : z ∈ sphere c R) (hw : w ∈ ball c R) :
 theorem continuousOn_poissonKernel_sphere (hw : w ∈ ball c R) :
     ContinuousOn (poissonKernel c w) (sphere c R) := by
   refine ContinuousOn.congr
-    (f := fun z => (‖z - c‖ ^ 2 - ‖w - c‖ ^ 2) / ‖(z - c) - (w - c)‖ ^ 2) ?_
-    fun z _ => poissonKernel_def c w z
-  refine ContinuousOn.div (by fun_prop) (by fun_prop) fun z hz => ?_
+    (f := fun z ↦ (‖z - c‖ ^ 2 - ‖w - c‖ ^ 2) / ‖(z - c) - (w - c)‖ ^ 2) ?_
+    fun z _ ↦ poissonKernel_def c w z
+  refine ContinuousOn.div (by fun_prop) (by fun_prop) fun z hz ↦ ?_
   rw [mem_sphere_iff_norm] at hz
   rw [mem_ball_iff_norm] at hw
   have hne : z - c - (w - c) ≠ 0 := by
@@ -102,11 +102,11 @@ theorem harnack (hR : 0 < R) {u : ℂ → ℝ} (hu : HarmonicContOnCl u (ball c 
     hu.circleAverage_poissonKernel_smul hw
   constructor
   · rw [← hpoisson, ← hmean, ← smul_eq_mul, ← circleAverage_fun_smul]
-    refine circleAverage_mono (by fun_prop) hkint fun z hz => ?_
+    refine circleAverage_mono (by fun_prop) hkint fun z hz ↦ ?_
     rw [hR'] at hz
     exact mul_le_mul_of_nonneg_right (le_poissonKernel hz hw) (hpos z hz)
   · rw [← hpoisson, ← hmean, ← smul_eq_mul, ← circleAverage_fun_smul]
-    refine circleAverage_mono hkint (by fun_prop) fun z hz => ?_
+    refine circleAverage_mono hkint (by fun_prop) fun z hz ↦ ?_
     rw [hR'] at hz
     exact mul_le_mul_of_nonneg_right (poissonKernel_le hz hw) (hpos z hz)
 

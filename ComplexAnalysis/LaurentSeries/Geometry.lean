@@ -41,8 +41,8 @@ namespace Complex
 theorem isConnected_complex_annulus {a b : ℝ} (ha : 0 ≤ a) (hab : a < b) :
     IsConnected {z : ℂ | a < ‖z‖ ∧ ‖z‖ < b} := by
   have hc := (isConnected_Ioo hab).prod (isConnected_univ : IsConnected (univ : Set ℝ))
-  have hcont : Continuous (fun p : ℝ × ℝ => (p.1 : ℂ) * exp (p.2 * I)) := by fun_prop
-  have he : (fun p : ℝ × ℝ => (p.1 : ℂ) * exp (p.2 * I)) '' (Ioo a b ×ˢ univ) =
+  have hcont : Continuous (fun p : ℝ × ℝ ↦ (p.1 : ℂ) * exp (p.2 * I)) := by fun_prop
+  have he : (fun p : ℝ × ℝ ↦ (p.1 : ℂ) * exp (p.2 * I)) '' (Ioo a b ×ˢ univ) =
       {z : ℂ | a < ‖z‖ ∧ ‖z‖ < b} := by
     ext z
     constructor
@@ -97,6 +97,6 @@ theorem exists_circular_radii_bounds {V : Set ℂ} (ho : IsOpen V)
     refine ⟨a, b, (a + ‖z‖) / 2, (‖z‖ + b) / 2,
       (le_max_left _ _).trans_lt ha, by linarith, by linarith, by linarith,
       hsub ⟨(le_max_right _ _).trans_lt ha, haz.trans hlu.2⟩,
-      hsub ⟨hlu.1.trans hzb, hb⟩, by linarith, fun _ => by linarith⟩
+      hsub ⟨hlu.1.trans hzb, hb⟩, by linarith, fun _ ↦ by linarith⟩
 
 end Complex

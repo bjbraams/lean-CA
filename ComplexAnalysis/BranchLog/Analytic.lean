@@ -61,7 +61,7 @@ theorem analyticAt_logBranch {g L : E → ℂ} {x : E}
     (heq : exp ∘ L =ᶠ[𝓝 x] g) : AnalyticAt ℂ L x := by
   have hx : exp (L x) = g x := heq.self_of_nhds
   have hg0 : g x ≠ 0 := hx ▸ exp_ne_zero (L x)
-  have ha : AnalyticAt ℂ (fun y => L x + log (g y / g x)) x :=
+  have ha : AnalyticAt ℂ (fun y ↦ L x + log (g y / g x)) x :=
     analyticAt_const.add ((hg.div_const (c := g x)).clog (by simp [hg0]))
   apply ha.congr
   have hband : ∀ᶠ y in 𝓝 x, (L y - L x).im ∈ Ioo (-Real.pi) Real.pi := by
@@ -103,7 +103,7 @@ theorem exists_analyticOnNhd_logBranch_zero_section
       ∀ p : E, L (p, 0) = 0 := by
   obtain ⟨L, hL, he⟩ := exists_analyticOnNhd_logBranch_of_analyticOnNhd hW hWc hg hg0
   change ∀ p ∈ W, exp (L p) = g p at he
-  refine ⟨fun p => L p - L (p.1, 0), ?_, ?_, fun _ => sub_self _⟩
+  refine ⟨fun p ↦ L p - L (p.1, 0), ?_, ?_, fun _ ↦ sub_self _⟩
   · apply hL.sub
     intro p hp
     exact (hL _ (hsection p hp)).comp_of_eq

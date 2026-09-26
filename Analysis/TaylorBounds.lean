@@ -101,8 +101,8 @@ theorem exists_taylor_bound {G : Type*} [NormedAddCommGroup G] [NormedSpace ℝ 
     ∃ δ > 0, ∀ h : G, ‖h‖ < δ →
       |g (t₀ + h) - g t₀ - fderiv ℝ g t₀ h - (1 / 2) * fderiv ℝ (fderiv ℝ g) t₀ h h|
         ≤ ε * ‖h‖ ^ 2 := by
-  set D := fderiv ℝ g with hDdef
-  set B := fderiv ℝ (fderiv ℝ g) t₀ with hBdef
+  set D := fderiv ℝ g
+  set B := fderiv ℝ (fderiv ℝ g) t₀
   have hD : HasFDerivAt D B t₀ :=
     ((hg.fderiv_right (m := 1) (by norm_num)).differentiableAt (by norm_num)).hasFDerivAt
   have hev : ∀ᶠ y in 𝓝 t₀, HasFDerivAt g (D y) y := by
@@ -113,17 +113,17 @@ theorem exists_taylor_bound {G : Type*} [NormedAddCommGroup G] [NormedSpace ℝ 
     (hasFDerivAt_iff_isLittleO_nhds_zero.mp hD).def hε
   obtain ⟨δ₁, hδ₁, hball₁⟩ := Metric.mem_nhds_iff.mp hlo
   obtain ⟨δ₂, hδ₂, hball₂⟩ := Metric.mem_nhds_iff.mp hev
-  refine ⟨min δ₁ δ₂, lt_min hδ₁ hδ₂, fun h hh => ?_⟩
-  set φ : G → ℝ := fun k => g (t₀ + k) - g t₀ - D t₀ k - (1 / 2) * B k k with hφdef
+  refine ⟨min δ₁ δ₂, lt_min hδ₁ hδ₂, fun h hh ↦ ?_⟩
+  set φ : G → ℝ := fun k ↦ g (t₀ + k) - g t₀ - D t₀ k - (1 / 2) * B k k with hφdef
   have hφ' : ∀ k : G, ‖k‖ < min δ₁ δ₂ → HasFDerivAt φ (D (t₀ + k) - D t₀ - B k) k := by
     intro k hk
     have hk₂ : t₀ + k ∈ ball t₀ δ₂ := by
       simpa [dist_eq_norm] using hk.trans_le (min_le_right _ _)
-    have h1 : HasFDerivAt (fun k => g (t₀ + k)) (D (t₀ + k)) k :=
+    have h1 : HasFDerivAt (fun k ↦ g (t₀ + k)) (D (t₀ + k)) k :=
       ((hball₂ hk₂).comp k ((hasFDerivAt_id k).const_add t₀)).congr_fderiv
         (ContinuousLinearMap.comp_id _)
-    have h2 : HasFDerivAt (fun k => D t₀ k) (D t₀) k := (D t₀).hasFDerivAt
-    have h3 : HasFDerivAt (fun k => (1 / 2 : ℝ) * B k k) (B k) k := by
+    have h2 : HasFDerivAt (fun k ↦ D t₀ k) (D t₀) k := (D t₀).hasFDerivAt
+    have h3 : HasFDerivAt (fun k ↦ (1 / 2 : ℝ) * B k k) (B k) k := by
       have hb := (B.hasFDerivAt (x := k)).clm_apply (hasFDerivAt_id k)
       have := hb.const_mul (1 / 2 : ℝ)
       refine this.congr_fderiv ?_
@@ -139,8 +139,8 @@ theorem exists_taylor_bound {G : Type*} [NormedAddCommGroup G] [NormedSpace ℝ 
       simpa using hk'.trans_lt (hh.trans_le (min_le_left _ _))
     exact (hball₁ hk₁).trans (mul_le_mul_of_nonneg_left hk' hε.le)
   have hmvt := Convex.norm_image_sub_le_of_norm_hasFDerivWithin_le
-    (f := φ) (f' := fun k => D (t₀ + k) - D t₀ - B k) (s := closedBall (0 : G) ‖h‖)
-    (fun k hk => (hφ' k (by
+    (f := φ) (f' := fun k ↦ D (t₀ + k) - D t₀ - B k) (s := closedBall (0 : G) ‖h‖)
+    (fun k hk ↦ (hφ' k (by
       have hk' : ‖k‖ ≤ ‖h‖ := by simpa using hk
       exact hk'.trans_lt hh)).hasFDerivWithinAt)
     hbound (convex_closedBall _ _) (mem_closedBall_self (norm_nonneg h))

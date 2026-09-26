@@ -55,7 +55,7 @@ theorem continuousOn_invFunOn_of_injOn (hU : IsOpen U) (hf : DifferentiableOn �
   rintro _ ⟨a, ha, rfl⟩
   apply ContinuousAt.continuousWithinAt
   have hleft : (invFunOn f U ∘ f) =ᶠ[𝓝 a] id :=
-    Filter.mem_of_superset (hU.mem_nhds ha) fun _ hz => hi.leftInvOn_invFunOn hz
+    Filter.mem_of_superset (hU.mem_nhds ha) fun _ hz ↦ hi.leftInvOn_invFunOn hz
   rw [ContinuousAt, hi.leftInvOn_invFunOn ha]
   have ht : Tendsto (invFunOn f U ∘ f) (𝓝 a) (𝓝 a) := tendsto_id.congr' hleft.symm
   change map (invFunOn f U ∘ f) (𝓝 a) ≤ 𝓝 a at ht
@@ -85,7 +85,7 @@ theorem differentiableOn_invFunOn_of_injOn (hU : IsOpen U) (hf : DifferentiableO
 /-- A left inverse of a holomorphic function on an open set is holomorphic on the image. -/
 theorem differentiableOn_of_leftInverse (hU : IsOpen U) (hf : DifferentiableOn ℂ f U)
     {g : ℂ → ℂ} (hg : ∀ z ∈ U, g (f z) = z) : DifferentiableOn ℂ g (f '' U) := by
-  have hi : InjOn f U := fun a ha b hb h => by rw [← hg a ha, h, hg b hb]
+  have hi : InjOn f U := fun a ha b hb h ↦ by rw [← hg a ha, h, hg b hb]
   refine (differentiableOn_invFunOn_of_injOn hU hf hi).congr ?_
   rintro _ ⟨a, ha, rfl⟩
   rw [hg a ha, hi.leftInvOn_invFunOn ha]

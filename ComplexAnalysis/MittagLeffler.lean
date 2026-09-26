@@ -49,8 +49,8 @@ theorem differentiableOn_of_mem_adjoin_rungeGenerators {U : Set ℂ} {r : ℂ �
   | mem g hg =>
     rcases hg with rfl | ⟨a, ha, rfl⟩
     · exact differentiableOn_id
-    · exact ((differentiableOn_const a).sub differentiableOn_id).inv fun z hz =>
-        sub_ne_zero.mpr fun h => ha ((show a = z from h).symm ▸ hz)
+    · exact ((differentiableOn_const a).sub differentiableOn_id).inv fun z hz ↦
+        sub_ne_zero.mpr fun h ↦ ha ((show a = z from h).symm ▸ hz)
   | algebraMap c => exact differentiableOn_const _
   | add x y _ _ hx hy => exact hx.add hy
   | mul x y _ _ hx hy => exact hx.mul hy
@@ -87,7 +87,7 @@ theorem mlHull_subset_interior (U : Set ℂ) (n : ℕ) :
     ring
   filter_upwards [ball_mem_nhds z hρ] with z' hz'
   rw [mem_ball, dist_eq_norm] at hz'
-  refine Set.mem_inter ?_ fun u hu => ?_
+  refine Set.mem_inter ?_ fun u hu ↦ ?_
   · rw [mem_closedBall, dist_zero_right]
     have h1 : ‖z‖ ≤ n := by simpa using hz.1
     have h2 : ‖z'‖ ≤ ‖z‖ + ‖z' - z‖ := norm_le_norm_add_norm_sub' z' z
@@ -113,27 +113,39 @@ private theorem differentiableOn_tsum_of_tail_bound (s : ℕ → ℂ → ℂ) {V
     (hV : IsOpen V) (hdiff : ∀ n, DifferentiableOn ℂ (s n) V)
     {u : ℕ → ℝ} (hu : Summable u) (m : ℕ)
     (hbound : ∀ n z, z ∈ V → m ≤ n → ‖s n z‖ ≤ u n) :
-    DifferentiableOn ℂ (fun z => ∑' n, s n z) V := by
-  have hsum : ∀ z ∈ V, Summable fun n => s n z := by
-    intro z hz
-    refine Summable.of_norm_bounded_eventually hu ?_
-    rw [Nat.cofinite_eq_atTop]
-    filter_upwards [eventually_ge_atTop m] with n hn
-    exact hbound n z hz hn
-  have htail : DifferentiableOn ℂ (fun z => ∑' n, s (n + m) z) V := by
-    refine Complex.differentiableOn_tsum_of_summable_norm
-      (u := fun n => u (n + m)) ?_ (fun n => hdiff (n + m)) hV ?_
-    · exact (hu.comp_injective (add_left_injective m))
-    · intro n z hz
-      exact hbound (n + m) z hz (by omega)
-  have hhead : DifferentiableOn ℂ (fun z => ∑ n ∈ Finset.range m, s n z) V := by
-    have : (fun z => ∑ n ∈ Finset.range m, s n z) = ∑ n ∈ Finset.range m, s n := by
-      ext z
-      simp [Finset.sum_apply]
-    rw [this]
-    exact DifferentiableOn.sum fun n _ => hdiff n
-  refine (hhead.add htail).congr fun z hz => ?_
-  exact ((hsum z hz).sum_add_tsum_nat_add m).symm
+    DifferentiableOn ℂ (fun z ↦ ∑' n, s n z) V := by
+  have hsum : ∀ z ∈ V, Summable fun n ↦ s n z := fun z hz ↦
+    hu.of_norm_bounded_eventually <| by
+      rw [Nat.cofinite_eq_atTop]
+      filter_upwards [eventually_ge_atTop m] with n hn using hbound n z hz hn
+  have htail : DifferentiableOn ℂ (fun z ↦ ∑' n, s (n + m) z) V :=
+    Complex.differentiableOn_tsum_of_summable_norm (u := fun n ↦ u (n + m))
+      (hu.comp_injective (add_left_injective m)) (fun n ↦ hdiff (n + m)) hV
+      fun n z hz ↦ hbound (n + m) z hz (by omega)
+  have hhead : DifferentiableOn ℂ (fun z ↦ ∑ n ∈ Finset.range m, s n z) V :=
+    .fun_sum fun n _ ↦ hdiff n
+  exact (hhead.add htail).congr fun z hz ↦ ((hsum z hz).sum_add_tsum_nat_add m).symm
+
+/-- Removing from an open set `U` any subset of a set `S` without accumulation points in `U`
+leaves an open set. -/
+private theorem isOpen_sdiff_of_subset {U S T : Set ℂ} (hU : IsOpen U)
+    (hS : Sᶜ ∈ codiscreteWithin U) (hTS : T ⊆ S) : IsOpen (U \ T) := by
+  rw [isOpen_iff_mem_nhds]
+  rintro z ⟨hzU, hzT⟩
+  rw [mem_codiscreteWithin] at hS
+  filter_upwards [eventually_nhdsWithin_iff.mp (disjoint_principal_right.mp (hS z hzU)),
+    hU.mem_nhds hzU] with w hw hwU
+  refine ⟨hwU, fun hwT ↦ ?_⟩
+  by_cases hwz : w = z
+  · exact hzT (hwz ▸ hwT)
+  · exact hw hwz ⟨hwU, fun h ↦ h (hTS hwT)⟩
+
+/-- A finite sum of principal parts is holomorphic off its poles. -/
+private theorem differentiableOn_sum_principalParts {S : Set ℂ} {P : ℂ → ℂ → ℂ}
+    (hP : ∀ a ∈ S, DifferentiableOn ℂ (P a) {a}ᶜ) {F : Finset ℂ} (hF : (F : Set ℂ) ⊆ S) :
+    DifferentiableOn ℂ (fun z ↦ ∑ a ∈ F, P a z) (F : Set ℂ)ᶜ :=
+  .fun_sum fun a ha ↦ (hP a (hF ha)).mono fun z hz h ↦ hz (by
+    rw [Set.mem_singleton_iff.mp h]; exact ha)
 
 /-- A relatively discrete set is partitioned into finite layers according to the first
 compact exhaustion set containing each point. -/
@@ -145,33 +157,53 @@ private theorem exists_mittagLeffler_layers {U S : Set ℂ} (hU : IsOpen U)
       (∀ {m n}, m ≠ n → ∀ a, a ∈ T m → a ∉ T n) ∧
       (∀ a ∈ S, ∃ m, a ∈ T m ∧ a ∈ mlHull U m) := by
   classical
-  -- the exhaustion
-  set K : ℕ → Set ℂ := mlHull U with hK_def
-  have hKc : ∀ n, IsCompact (K n) := fun n => isCompact_mlHull U n
-  have hKU : ∀ n, K n ⊆ U := fun n => mlHull_subset n
-  have hfin : ∀ n, (K n ∩ S).Finite := fun n => by
-    have := finite_diff_of_isCompact_of_mem_codiscreteWithin (hKc n) (hKU n) hS
-    rwa [Set.sdiff_compl] at this
-  -- the pieces of `S`
-  set Tset : ℕ → Set ℂ := fun n => {a | a ∈ K n ∧ a ∈ S ∧ ∀ m < n, a ∉ K m} with hTset_def
-  have hTfin : ∀ n, (Tset n).Finite := fun n => (hfin n).subset fun a ha => ⟨ha.1, ha.2.1⟩
-  set T : ℕ → Finset ℂ := fun n => (hTfin n).toFinset with hT_def
-  have hTmem : ∀ n a, a ∈ T n ↔ a ∈ K n ∧ a ∈ S ∧ ∀ m < n, a ∉ K m := fun n a => by
-    simp only [T]
-    rw [Set.Finite.mem_toFinset]
-    rfl
-  have hTS : ∀ n, (T n : Set ℂ) ⊆ S := fun n a ha => ((hTmem n a).mp ha).2.1
-  have hTK : ∀ n a, a ∈ T n → ∀ m < n, a ∉ K m := fun n a ha => ((hTmem n a).mp ha).2.2
-  have hTdisj : ∀ {m n : ℕ}, m ≠ n → ∀ a, a ∈ T m → a ∉ T n := by
-    intro m n hmn a ham han
+  have hfin : ∀ n, (mlHull U n ∩ S).Finite := fun n ↦ by
+    simpa [Set.sdiff_compl] using (isCompact_mlHull U n).finite_sdiff_of_mem_codiscreteWithin
+      (codiscreteWithin_mono (mlHull_subset n) hS)
+  set Tset : ℕ → Set ℂ := fun n ↦ {a | a ∈ mlHull U n ∧ a ∈ S ∧ ∀ m < n, a ∉ mlHull U m}
+  have hTfin : ∀ n, (Tset n).Finite := fun n ↦ (hfin n).subset fun a ha ↦ ⟨ha.1, ha.2.1⟩
+  set T : ℕ → Finset ℂ := fun n ↦ (hTfin n).toFinset
+  have hTmem : ∀ n a, a ∈ T n ↔ a ∈ mlHull U n ∧ a ∈ S ∧ ∀ m < n, a ∉ mlHull U m :=
+    fun n a ↦ Set.Finite.mem_toFinset _
+  have hTK : ∀ n a, a ∈ T n → ∀ m < n, a ∉ mlHull U m := fun n a ha ↦ ((hTmem n a).mp ha).2.2
+  refine ⟨T, fun n a ha ↦ ((hTmem n a).mp ha).2.1, hTK, ?_, fun a ha ↦ ?_⟩
+  · intro m n hmn a ham han
     rcases lt_or_gt_of_ne hmn with h | h
     · exact hTK n a han m h ((hTmem m a).mp ham).1
     · exact hTK m a ham n h ((hTmem n a).mp han).1
-  refine ⟨T, hTS, hTK, hTdisj, ?_⟩
-  intro a ha
-  have hex : ∃ n, a ∈ K n := exists_mem_mlHull hU (hSU ha)
-  refine ⟨Nat.find hex, (hTmem _ a).mpr ?_, Nat.find_spec hex⟩
-  exact ⟨Nat.find_spec hex, ha, fun k hk => Nat.find_min hex hk⟩
+  · have hex : ∃ n, a ∈ mlHull U n := exists_mem_mlHull hU (hSU ha)
+    exact ⟨Nat.find hex, (hTmem _ a).mpr ⟨Nat.find_spec hex, ha, fun k hk ↦ Nat.find_min hex hk⟩,
+      Nat.find_spec hex⟩
+
+/-- **The corrected terms of the Mittag-Leffler series.** The principal parts are grouped into
+finite layers `T n`, and the `n`-th layer is corrected by a rational function `r n` with poles
+outside `U` (Runge's theorem) so that the corrected term is at most `2⁻ⁿ` on the earlier
+hulls. -/
+private theorem exists_mittagLeffler_terms {U S : Set ℂ} (hU : IsOpen U) (hSU : S ⊆ U)
+    (hS : Sᶜ ∈ codiscreteWithin U) {P : ℂ → ℂ → ℂ}
+    (hP : ∀ a ∈ S, DifferentiableOn ℂ (P a) {a}ᶜ) :
+    ∃ (T : ℕ → Finset ℂ) (r : ℕ → ℂ → ℂ),
+      (∀ n, (T n : Set ℂ) ⊆ S) ∧ (∀ {m n}, m ≠ n → ∀ a, a ∈ T m → a ∉ T n) ∧
+      (∀ a ∈ S, ∃ m, a ∈ T m ∧ a ∈ mlHull U m) ∧ (∀ n, DifferentiableOn ℂ (r n) U) ∧
+      ∀ m n z, z ∈ mlHull U m → m + 1 ≤ n →
+        ‖∑ a ∈ T n, P a z - r n z‖ ≤ (1 / 2 : ℝ) ^ n := by
+  obtain ⟨T, hTS, hTK, hTdisj, hTcover⟩ := exists_mittagLeffler_layers hU hSU hS
+  have hcorr : ∀ n, ∃ r ∈ Algebra.adjoin ℂ (rungeGenerators Uᶜ),
+      ∀ z ∈ mlHull U n, ‖∑ a ∈ T (n + 1), P a z - r z‖ ≤ (1 / 2 : ℝ) ^ (n + 1) := fun n ↦
+    runge (isCompact_mlHull U n)
+      (disjoint_left.mpr fun a (ha : a ∈ Uᶜ) haK ↦ ha (mlHull_subset n haK))
+      (fun w hw hb ↦ exists_compl_mem_connectedComponentIn_rungeHull hw hb)
+      (T (n + 1)).finite_toSet.isClosed.isOpen_compl
+      (fun z hz hzT ↦ hTK (n + 1) z hzT n (Nat.lt_succ_self n) hz)
+      (differentiableOn_sum_principalParts hP (hTS (n + 1))) _ (by positivity)
+  choose r hr hrε using hcorr
+  refine ⟨T, fun n ↦ Nat.casesOn n (fun _ ↦ 0) r, hTS, hTdisj, hTcover, fun n ↦ ?_,
+    fun m n z hz hmn ↦ ?_⟩
+  · cases n with
+    | zero => exact differentiableOn_const _
+    | succ k => exact differentiableOn_of_mem_adjoin_rungeGenerators (hr k)
+  · obtain ⟨k, rfl⟩ := Nat.exists_eq_add_of_le' (show 1 ≤ n by omega)
+    exact hrε k z (mlHull_mono (by omega) hz)
 
 /-- **The Mittag-Leffler theorem.** For a set `S` without accumulation points in the open set
 `U` and principal parts `P a` holomorphic off `a`, there is a function holomorphic on `U \ S`
@@ -180,162 +212,61 @@ theorem mittagLeffler {U : Set ℂ} (hU : IsOpen U) {S : Set ℂ} (hSU : S ⊆ U
     (hS : Sᶜ ∈ codiscreteWithin U) {P : ℂ → ℂ → ℂ}
     (hP : ∀ a ∈ S, DifferentiableOn ℂ (P a) {a}ᶜ) :
     ∃ f : ℂ → ℂ, DifferentiableOn ℂ f (U \ S) ∧
-      ∀ a ∈ S, ∃ g : ℂ → ℂ, AnalyticAt ℂ g a ∧ f =ᶠ[𝓝[≠] a] fun z => P a z + g z := by
+      ∀ a ∈ S, ∃ g : ℂ → ℂ, AnalyticAt ℂ g a ∧ f =ᶠ[𝓝[≠] a] fun z ↦ P a z + g z := by
   classical
-  -- discreteness of `S` in `U`
-  have hSdisc : ∀ z ∈ U, ∀ᶠ w in 𝓝[≠] z, w ∉ S := by
-    intro z hz
-    rw [mem_codiscreteWithin] at hS
-    filter_upwards [disjoint_principal_right.mp (hS z hz)] with w hw hwS
-    exact hw ⟨hSU hwS, fun h => h hwS⟩
-  have hopen' : ∀ a ∈ U, IsOpen (U \ (S \ {a})) := by
-    intro a ha
-    rw [isOpen_iff_mem_nhds]
-    intro z hz
-    have h1 := hSdisc z hz.1
-    rw [eventually_nhdsWithin_iff] at h1
-    filter_upwards [h1, hU.mem_nhds hz.1] with w hw hwU
-    refine ⟨hwU, fun hwS => ?_⟩
-    by_cases hwz : w = z
-    · exact hz.2 (hwz ▸ hwS)
-    · exact hw hwz hwS.1
-  have hopenUS : IsOpen (U \ S) := by
-    rw [isOpen_iff_mem_nhds]
-    intro z hz
-    have h1 := hSdisc z hz.1
-    rw [eventually_nhdsWithin_iff] at h1
-    filter_upwards [h1, hU.mem_nhds hz.1] with w hw hwU
-    refine ⟨hwU, fun hwS => ?_⟩
-    by_cases hwz : w = z
-    · exact hz.2 (hwz ▸ hwS)
-    · exact hw hwz hwS
-  set K : ℕ → Set ℂ := mlHull U with hK_def
-  have hKc : ∀ n, IsCompact (K n) := fun n => isCompact_mlHull U n
-  have hKU : ∀ n, K n ⊆ U := fun n => mlHull_subset n
-  have hKmono : ∀ {m n : ℕ}, m ≤ n → K m ⊆ K n := fun h => mlHull_mono h
-  have hKint : ∀ n, K n ⊆ interior (K (n + 1)) := mlHull_subset_interior U
-  obtain ⟨T, hTS, hTK, hTdisj, hTcover⟩ := exists_mittagLeffler_layers hU hSU hS
-  -- the principal-part sums
-  set F : ℕ → ℂ → ℂ := fun n z => ∑ a ∈ T n, P a z with hF_def
-  have hFdiff : ∀ n, DifferentiableOn ℂ (F n) ((T n : Set ℂ))ᶜ := by
-    intro n
-    have : F n = ∑ a ∈ T n, P a := by
-      ext z
-      simp [F, Finset.sum_apply]
-    rw [this]
-    refine DifferentiableOn.sum fun a ha => (hP a (hTS n ha)).mono ?_
-    intro z hz h
-    exact hz (h ▸ ha)
-  -- Runge corrections
-  have hcorr : ∀ n, ∃ r ∈ Algebra.adjoin ℂ (rungeGenerators Uᶜ),
-      ∀ z ∈ K n, ‖F (n + 1) z - r z‖ ≤ (1 / 2 : ℝ) ^ (n + 1) := by
-    intro n
-    have hopenT : IsOpen ((T (n + 1) : Set ℂ))ᶜ := (T (n + 1)).finite_toSet.isClosed.isOpen_compl
-    have hKT : K n ⊆ ((T (n + 1) : Set ℂ))ᶜ := fun z hz hzT =>
-      hTK (n + 1) z hzT n (Nat.lt_succ_self n) hz
-    have hAK : Disjoint Uᶜ (K n) := disjoint_left.mpr fun a ha haK => ha (hKU n haK)
-    have hA : ∀ w ∉ K n, Bornology.IsBounded (connectedComponentIn (K n)ᶜ w) →
-        ∃ a ∈ Uᶜ, a ∈ connectedComponentIn (K n)ᶜ w := fun w hw hb =>
-      exists_compl_mem_connectedComponentIn_rungeHull hw hb
-    exact runge (hKc n) hAK hA hopenT hKT (hFdiff (n + 1)) _ (by positivity)
-  choose r hr hrε using hcorr
-  -- the terms of the series
-  set r' : ℕ → ℂ → ℂ := fun n => Nat.casesOn n (fun _ => 0) (fun k => r k) with hr'_def
-  have hr'0 : r' 0 = fun _ => 0 := rfl
-  have hr'succ : ∀ k, r' (k + 1) = r k := fun k => rfl
-  have hr'diff : ∀ n, DifferentiableOn ℂ (r' n) U := by
-    intro n
-    cases n with
-    | zero => exact differentiableOn_const _
-    | succ k => exact differentiableOn_of_mem_adjoin_rungeGenerators (hr k)
-  set t : ℕ → ℂ → ℂ := fun n z => F n z - r' n z with ht_def
-  have htdiff : ∀ n, DifferentiableOn ℂ (t n) (U \ (T n : Set ℂ)) := fun n =>
-    ((hFdiff n).mono fun z hz => hz.2).sub ((hr'diff n).mono fun z hz => hz.1)
-  have htbound : ∀ n z, n ≠ 0 → z ∈ K (n - 1) → ‖t n z‖ ≤ (1 / 2 : ℝ) ^ n := by
-    intro n z hn hz
-    obtain ⟨m, rfl⟩ := Nat.exists_eq_succ_of_ne_zero hn
-    exact hrε m z hz
-  have htbound' : ∀ m n z, z ∈ K m → m + 1 ≤ n → ‖t n z‖ ≤ (1 / 2 : ℝ) ^ n := by
-    intro m n z hz hmn
-    refine htbound n z (by omega) (hKmono ?_ hz)
-    omega
-  have hsummable : ∀ m z, z ∈ K m → Summable fun n => t n z := by
-    intro m z hz
-    refine Summable.of_norm_bounded_eventually summable_geometric_two ?_
-    rw [Nat.cofinite_eq_atTop]
-    filter_upwards [eventually_ge_atTop (m + 1)] with n hn
-    exact htbound' m n z hz hn
-  refine ⟨fun z => ∑' n, t n z, ?_, ?_⟩
+  obtain ⟨T, r, hTS, hTdisj, hTcover, hr, hbound⟩ := exists_mittagLeffler_terms hU hSU hS hP
+  set K : ℕ → Set ℂ := mlHull U
+  set t : ℕ → ℂ → ℂ := fun n z ↦ ∑ a ∈ T n, P a z - r n z
+  have htdiff : ∀ n, DifferentiableOn ℂ (t n) (U \ (T n : Set ℂ)) := fun n ↦
+    ((differentiableOn_sum_principalParts hP (hTS n)).mono fun z hz ↦ hz.2).sub
+      ((hr n).mono fun z hz ↦ hz.1)
+  have hsummable : ∀ m z, z ∈ K m → Summable fun n ↦ t n z := fun m z hz ↦
+    summable_geometric_two.of_norm_bounded_eventually <| by
+      rw [Nat.cofinite_eq_atTop]
+      filter_upwards [eventually_ge_atTop (m + 1)] with n hn using hbound m n z hz hn
+  refine ⟨fun z ↦ ∑' n, t n z, ?_, fun a ha ↦ ?_⟩
   · -- holomorphy off `S`
     intro z hz
     obtain ⟨m, hm⟩ := exists_mem_mlHull hU hz.1
-    set V : Set ℂ := interior (K (m + 1)) ∩ (U \ S) with hV_def
-    have hVo : IsOpen V := isOpen_interior.inter hopenUS
-    have hzV : z ∈ V := ⟨hKint m hm, hz⟩
-    have hVK : V ⊆ K (m + 1) := fun w hw => interior_subset hw.1
-    have hdiff : ∀ n, DifferentiableOn ℂ (t n) V := fun n =>
-      (htdiff n).mono fun w hw => ⟨hw.2.1, fun h => hw.2.2 (hTS n h)⟩
+    set V : Set ℂ := interior (K (m + 1)) ∩ (U \ S)
+    have hVo : IsOpen V := isOpen_interior.inter (isOpen_sdiff_of_subset hU hS subset_rfl)
+    have hzV : z ∈ V := ⟨mlHull_subset_interior U m hm, hz⟩
+    have hdiff : ∀ n, DifferentiableOn ℂ (t n) V := fun n ↦
+      (htdiff n).mono fun w hw ↦ ⟨hw.2.1, fun h ↦ hw.2.2 (hTS n h)⟩
     exact ((differentiableOn_tsum_of_tail_bound t hVo hdiff summable_geometric_two (m + 1 + 1)
-      (fun n w hw hn => htbound' (m + 1) n w (hVK hw) hn))
+      fun n w hw hn ↦ hbound (m + 1) n w (interior_subset hw.1) hn)
       z hzV).differentiableAt (hVo.mem_nhds hzV) |>.differentiableWithinAt
-  · -- the principal part at `a ∈ S`
-    intro a ha
-    have haU : a ∈ U := hSU ha
-    obtain ⟨m, haT, hamK⟩ := hTcover a ha
-    set t' : ℕ → ℂ → ℂ := fun n z => if n = m then 0 else t n z with ht'_def
-    set g : ℂ → ℂ := fun z => (∑ b ∈ (T m).erase a, P b z - r' m z) + ∑' n, t' n z with hg_def
-    refine ⟨g, ?_, ?_⟩
-    · -- analyticity of `g` at `a`
-      set V : Set ℂ := interior (K (m + 1)) ∩ (U \ (S \ {a})) with hV_def
-      have hVo : IsOpen V := isOpen_interior.inter (hopen' a haU)
-      have haV : a ∈ V := ⟨hKint m hamK, haU, fun h => h.2 rfl⟩
-      have hVK : V ⊆ K (m + 1) := fun w hw => interior_subset hw.1
-      have hVU : V ⊆ U := fun w hw => hw.2.1
-      have h1 : DifferentiableOn ℂ (fun z => ∑ b ∈ (T m).erase a, P b z) V := by
-        have : (fun z => ∑ b ∈ (T m).erase a, P b z) = ∑ b ∈ (T m).erase a, P b := by
-          ext z
-          simp [Finset.sum_apply]
-        rw [this]
-        refine DifferentiableOn.sum fun b hb => ?_
-        have hbS : b ∈ S := hTS m (Finset.mem_of_mem_erase hb)
-        have hba : b ≠ a := Finset.ne_of_mem_erase hb
-        refine (hP b hbS).mono fun w hw hwb => ?_
-        have hwb' : w = b := hwb
-        exact hw.2.2 ⟨hwb'.symm ▸ hbS, fun hwa => hba (hwb'.symm.trans hwa)⟩
-      have h2 : DifferentiableOn ℂ (r' m) V := (hr'diff m).mono hVU
-      have hdiff' : ∀ n, DifferentiableOn ℂ (t' n) V := by
-        intro n
-        by_cases hn : n = m
-        · simp only [t', hn, ite_true]
-          exact differentiableOn_const _
-        · simp only [t', hn, ite_false]
-          refine (htdiff n).mono fun w hw => ⟨hw.2.1, fun hwT => ?_⟩
-          exact hw.2.2 ⟨hTS n hwT, fun hwa => hTdisj (Ne.symm hn) a haT
-            ((show w = a from hwa) ▸ hwT)⟩
-      have hbound' : ∀ n z, z ∈ V → m + 1 + 1 ≤ n → ‖t' n z‖ ≤ (1 / 2 : ℝ) ^ n := by
-        intro n z hz hn
-        have hnm : n ≠ m := by omega
-        simp only [t', hnm, ite_false]
-        exact htbound' (m + 1) n z (hVK hz) hn
-      have h3 := differentiableOn_tsum_of_tail_bound t' hVo hdiff'
-        summable_geometric_two (m + 1 + 1) hbound'
-      have hg : DifferentiableOn ℂ g V := (h1.sub h2).add h3
-      exact DifferentiableOn.analyticAt hg (hVo.mem_nhds haV)
-    · -- the germ identity
-      have hev : ∀ᶠ z in 𝓝[≠] a, z ∈ U ∧ z ∉ S := by
-        filter_upwards [hSdisc a haU, nhdsWithin_le_nhds (hU.mem_nhds haU)] with z hzS hzU
-        exact ⟨hzU, hzS⟩
-      filter_upwards [hev] with z hz
-      obtain ⟨k, hk⟩ := exists_mem_mlHull hU hz.1
-      have hsum := hsummable k z hk
-      rw [hsum.tsum_eq_add_tsum_ite m]
-      have htm : t m z = P a z + (∑ b ∈ (T m).erase a, P b z - r' m z) := by
-        simp only [t, F]
-        rw [← Finset.add_sum_erase _ _ haT]
-        ring
-      rw [htm]
-      simp only [g, t']
-      ring
+  -- the principal part at `a ∈ S`
+  have haU : a ∈ U := hSU ha
+  obtain ⟨m, haT, hamK⟩ := hTcover a ha
+  set t' : ℕ → ℂ → ℂ := fun n z ↦ if n = m then 0 else t n z
+  refine ⟨fun z ↦ (∑ b ∈ (T m).erase a, P b z - r m z) + ∑' n, t' n z, ?_, ?_⟩
+  · -- analyticity of the remainder at `a`
+    set V : Set ℂ := interior (K (m + 1)) ∩ (U \ (S \ {a}))
+    have hVo : IsOpen V := isOpen_interior.inter (isOpen_sdiff_of_subset hU hS sdiff_subset)
+    have haV : a ∈ V := ⟨mlHull_subset_interior U m hamK, haU, fun h ↦ h.2 rfl⟩
+    have h1 : DifferentiableOn ℂ (fun z ↦ ∑ b ∈ (T m).erase a, P b z) V :=
+      (differentiableOn_sum_principalParts hP
+        ((Finset.coe_subset.mpr (Finset.erase_subset a _)).trans (hTS m))).mono
+        fun w hw hwT ↦ hw.2.2 ⟨hTS m (Finset.mem_of_mem_erase hwT),
+          fun hwa ↦ Finset.ne_of_mem_erase hwT hwa⟩
+    have hdiff' : ∀ n, DifferentiableOn ℂ (t' n) V := by
+      intro n
+      by_cases hn : n = m
+      · simp [t', hn]
+      · simp only [t', hn, ite_false]
+        refine (htdiff n).mono fun w hw ↦ ⟨hw.2.1, fun hwT ↦ hw.2.2 ⟨hTS n hwT, fun hwa ↦
+          hTdisj (Ne.symm hn) a haT ((show w = a from hwa) ▸ hwT)⟩⟩
+    have h3 := differentiableOn_tsum_of_tail_bound t' hVo hdiff' summable_geometric_two
+      (m + 1 + 1) fun n z hz hn ↦ by
+        simpa [t', show n ≠ m by omega] using hbound (m + 1) n z (interior_subset hz.1) hn
+    exact ((h1.sub ((hr m).mono fun w hw ↦ hw.2.1)).add h3).analyticAt (hVo.mem_nhds haV)
+  · -- the germ identity
+    filter_upwards [nhdsWithin_le_nhds (hU.mem_nhds haU)] with z hzU
+    obtain ⟨k, hk⟩ := exists_mem_mlHull hU hzU
+    rw [(hsummable k z hk).tsum_eq_add_tsum_ite m]
+    simp only [t, t', ← Finset.add_sum_erase _ _ haT]
+    ring
 
 end Complex
 

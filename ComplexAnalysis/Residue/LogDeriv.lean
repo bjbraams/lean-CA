@@ -47,20 +47,20 @@ theorem residue_logDeriv_of_order {f : ℂ → ℂ} {c : ℂ} {n : ℤ}
     residue (logDeriv f) c = (n : ℂ) := by
   obtain ⟨g, hg, hgc, he⟩ := (meromorphicOrderAt_eq_int_iff hf).mp hn
   have hlog : logDeriv f =ᶠ[𝓝[≠] c]
-      (fun z => (n : ℂ) / (z - c) + logDeriv g z) := by
+      (fun z ↦ (n : ℂ) / (z - c) + logDeriv g z) := by
     apply (logDeriv_congr_nhdsNE he).trans
     filter_upwards [hg.eventually_analyticAt.filter_mono nhdsWithin_le_nhds,
       (hg.continuousAt.eventually_ne hgc).filter_mono nhdsWithin_le_nhds,
       self_mem_nhdsWithin] with z hz hgz hzc
     have hne : z - c ≠ 0 := sub_ne_zero.mpr hzc
-    change logDeriv (fun z => (z - c) ^ n * g z) z = _
-    rw [logDeriv_fun_mul (f := fun w : ℂ => (w - c) ^ n) (g := g) z
+    change logDeriv (fun z ↦ (z - c) ^ n * g z) z = _
+    rw [logDeriv_fun_mul (f := fun w : ℂ ↦ (w - c) ^ n) (g := g) z
       (zpow_ne_zero n hne) hgz
       ((differentiableAt_id.sub_const c).zpow (Or.inl hne)) hz.differentiableAt,
-      logDeriv_fun_zpow (f := fun w : ℂ => w - c) (by fun_prop) n]
+      logDeriv_fun_zpow (f := fun w : ℂ ↦ w - c) (by fun_prop) n]
     simp [logDeriv_apply, div_eq_mul_inv]
   rw [residue_congr hlog]
-  have hk : ∀ᶠ z in 𝓝[≠] c, AnalyticAt ℂ (fun z => (n : ℂ) / (z - c)) z := by
+  have hk : ∀ᶠ z in 𝓝[≠] c, AnalyticAt ℂ (fun z ↦ (n : ℂ) / (z - c)) z := by
     filter_upwards [self_mem_nhdsWithin] with z hz
     exact analyticAt_const.div (analyticAt_id.sub analyticAt_const) (sub_ne_zero.mpr hz)
   rw [residue_add hk ((hg.logDeriv hgc).eventually_analyticAt.filter_mono nhdsWithin_le_nhds),

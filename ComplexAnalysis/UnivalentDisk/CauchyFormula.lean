@@ -43,15 +43,15 @@ theorem curveIntegral_sub_inv_smul_map'_circle_of_injOn_holomorphic
     {F : ℂ → E} (hF : DifferentiableOn ℂ F (f '' U))
     {c w : ℂ} {R : ℝ} (hw : w ∈ ball c R) (hRU : closedBall c R ⊆ U)
     (hc : ContinuousOn f (range (Path.circle c R))) :
-    curveIntegral (fun z => ContinuousLinearMap.toSpanSingleton ℂ ((z - f w)⁻¹ • F z))
+    curveIntegral (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ ((z - f w)⁻¹ • F z))
         ((Path.circle c R).map' hc) = (2 * (Real.pi : ℂ) * Complex.I) • F (f w) := by
   have hR : 0 < R := lt_of_le_of_lt dist_nonneg hw
   have hwU := hRU (ball_subset_closedBall hw)
   let g := dslope f w
   have hg : DifferentiableOn ℂ g U := (differentiableOn_dslope (hU.mem_nhds hwU)).mpr hf
-  have hg0 : ∀ z ∈ U, g z ≠ 0 := fun z hz =>
+  have hg0 : ∀ z ∈ U, g z ≠ 0 := fun z hz ↦
     dslope_ne_zero_of_injOn_holomorphic hU hf hi hwU hz
-  let A : ℂ → E := fun z => (g z)⁻¹ • (deriv f z • F (f z))
+  let A : ℂ → E := fun z ↦ (g z)⁻¹ • (deriv f z • F (f z))
   have hA : DifferentiableOn ℂ A U := (hg.inv hg0).smul
     ((hf.analyticOnNhd hU).deriv.differentiableOn.smul (hF.comp hf (mapsTo_image f U)))
   have hpath : range (Path.circle c R) ⊆ U := by
@@ -60,7 +60,7 @@ theorem curveIntegral_sub_inv_smul_map'_circle_of_injOn_holomorphic
   rw [curveIntegral_map' (Path.circle c R) hU hf hpath
     ((Path.contDiffOn_circle c R).differentiableOn one_ne_zero), curveIntegral_circle]
   calc
-    _ = circleIntegral (fun z => (z - w)⁻¹ • A z) c R := by
+    _ = circleIntegral (fun z ↦ (z - w)⁻¹ • A z) c R := by
       apply circleIntegral.integral_congr hR.le
       intro z hz
       change deriv f z • ((f z - f w)⁻¹ • F (f z)) =
@@ -85,7 +85,7 @@ theorem two_pi_I_inv_smul_curveIntegral_sub_inv_smul_map'_circle
     {c w : ℂ} {R : ℝ} (hw : w ∈ ball c R) (hRU : closedBall c R ⊆ U)
     (hc : ContinuousOn f (range (Path.circle c R))) :
     (2 * (Real.pi : ℂ) * Complex.I)⁻¹ •
-      curveIntegral (fun z => ContinuousLinearMap.toSpanSingleton ℂ ((z - f w)⁻¹ • F z))
+      curveIntegral (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ ((z - f w)⁻¹ • F z))
         ((Path.circle c R).map' hc) = F (f w) := by
   rw [curveIntegral_sub_inv_smul_map'_circle_of_injOn_holomorphic hU hf hi hF hw hRU hc,
     inv_smul_smul₀ two_pi_I_ne_zero]

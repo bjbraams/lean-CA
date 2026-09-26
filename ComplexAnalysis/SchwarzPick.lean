@@ -61,7 +61,8 @@ theorem mapsTo_schwarzPickAux (hmaps : MapsTo f (ball 0 1) (ball 0 1)) {a : ℂ}
   intro z hz
   exact mapsTo_discMobius_ball (mem_ball_zero_iff.mp hfa) (hmaps (mapsTo_discMobius_ball hna hz))
 
-/-- The Schwarz–Pick auxiliary map of a holomorphic self-map of the unit disc is holomorphic there. -/
+/-- The Schwarz–Pick auxiliary map of a holomorphic self-map of the unit disc is holomorphic
+there. -/
 theorem differentiableOn_schwarzPickAux (hf : DifferentiableOn ℂ f (ball 0 1))
     (hmaps : MapsTo f (ball 0 1) (ball 0 1)) {a : ℂ} (ha : ‖a‖ < 1) :
     DifferentiableOn ℂ (schwarzPickAux f a) (ball 0 1) := by
@@ -69,18 +70,18 @@ theorem differentiableOn_schwarzPickAux (hf : DifferentiableOn ℂ f (ball 0 1))
   have hfa : f a ∈ ball (0:ℂ) 1 := hmaps (mem_ball_zero_iff.mpr ha)
   have h1 : DifferentiableOn ℂ (discMobius (-a)) (ball 0 1) :=
     differentiableOn_discMobius_ball hna
-  have h2 : DifferentiableOn ℂ (fun z => f (discMobius (-a) z)) (ball 0 1) :=
+  have h2 : DifferentiableOn ℂ (fun z ↦ f (discMobius (-a) z)) (ball 0 1) :=
     hf.comp h1 (mapsTo_discMobius_ball hna)
   have h3 : DifferentiableOn ℂ (discMobius (f a)) (ball 0 1) :=
     differentiableOn_discMobius_ball (mem_ball_zero_iff.mp hfa)
-  exact h3.comp h2 (fun z hz => mapsTo_discMobius_ball hna hz |> fun hz' => hmaps hz')
+  exact h3.comp h2 (fun z hz ↦ mapsTo_discMobius_ball hna hz |> fun hz' ↦ hmaps hz')
 
 /-- **The Schwarz–Pick lemma**, distance form. A holomorphic self-map of the disc contracts the
 pseudo-hyperbolic distance `‖discMobius a z‖`. -/
 theorem norm_discMobius_apply_apply_le (hf : DifferentiableOn ℂ f (ball 0 1))
     (hmaps : MapsTo f (ball 0 1) (ball 0 1)) {a w : ℂ} (ha : ‖a‖ < 1) (hw : ‖w‖ < 1) :
     ‖discMobius (f a) (f w)‖ ≤ ‖discMobius a w‖ := by
-  set z : ℂ := discMobius a w with hz_def
+  set z : ℂ := discMobius a w
   have hz : ‖z‖ < 1 := norm_discMobius_lt_one ha hw
   have hφz : discMobius (-a) z = w := discMobius_neg_discMobius ha hw.le
   have hhz : schwarzPickAux f a z = discMobius (f a) (f w) := by
@@ -105,7 +106,7 @@ theorem norm_deriv_div_one_sub_normSq_le (hf : DifferentiableOn ℂ f (ball 0 1)
   have hfan : DifferentiableAt ℂ f a :=
     hf.differentiableAt (isOpen_ball.mem_nhds (mem_ball_zero_iff.mpr ha))
   have hd3 : HasDerivAt f (deriv f a) a := hfan.hasDerivAt
-  have hd23 : HasDerivAt (fun z => f (discMobius (-a) z)) (deriv f a * (1 - normSq a)) 0 :=
+  have hd23 : HasDerivAt (fun z ↦ f (discMobius (-a) z)) (deriv f a * (1 - normSq a)) 0 :=
     hd3.comp_of_eq 0 hd1 (discMobius_neg_apply_zero a).symm
   have hd2 : HasDerivAt (discMobius (f a)) ((1 - (normSq (f a) : ℂ))⁻¹) (f a) := by
     have hne : (1:ℂ) - conj (f a) * (f a) ≠ 0 := one_sub_conj_mul_ne_zero hfa hfa.le
@@ -118,12 +119,12 @@ theorem norm_deriv_div_one_sub_normSq_le (hf : DifferentiableOn ℂ f (ball 0 1)
       rw [hc, sq]
       field_simp
     rwa [hval] at h
-  have hcomp' : HasDerivAt (discMobius (f a) ∘ fun z => f (discMobius (-a) z))
+  have hcomp' : HasDerivAt (discMobius (f a) ∘ fun z ↦ f (discMobius (-a) z))
       ((1 - (normSq (f a) : ℂ))⁻¹ * (deriv f a * (1 - normSq a))) 0 :=
     hd2.comp_of_eq 0 hd23 (congrArg f (discMobius_neg_apply_zero a).symm)
   have hcomp : HasDerivAt (schwarzPickAux f a)
       ((1 - (normSq (f a) : ℂ))⁻¹ * (deriv f a * (1 - normSq a))) 0 := by
-    have heqfun : schwarzPickAux f a = discMobius (f a) ∘ fun z => f (discMobius (-a) z) := rfl
+    have heqfun : schwarzPickAux f a = discMobius (f a) ∘ fun z ↦ f (discMobius (-a) z) := rfl
     rw [heqfun]; exact hcomp'
   have hmaps' : MapsTo (schwarzPickAux f a) (ball 0 1) (closedBall (schwarzPickAux f a 0) 1) := by
     rw [schwarzPickAux_zero]

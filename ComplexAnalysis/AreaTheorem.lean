@@ -50,74 +50,6 @@ open scoped Topology
 
 namespace Complex
 
-section LogDeriv
-
-variable {U : Set ℂ} {f : ℂ → ℂ} {c w : ℂ} {R : ℝ}
-
-/-- If `f` omits `w` on a closed disc, the logarithmic derivative of `f - w` has vanishing circle
-integral. -/
-theorem circleIntegral_deriv_div_sub_eq_zero (hU : IsOpen U) (hf : DifferentiableOn ℂ f U)
-    (hR : 0 ≤ R) (hRU : closedBall c R ⊆ U) (hne : ∀ z ∈ closedBall c R, f z ≠ w) :
-    ∮ z in C(c, R), deriv f z / (f z - w) = 0 := by
-  have hd := (hf.analyticOnNhd hU).deriv
-  have h0 : ∀ z ∈ closedBall c R, f z - w ≠ 0 := fun z hz => sub_ne_zero.mpr (hne z hz)
-  have hcont : ContinuousOn (fun z => deriv f z / (f z - w)) (closedBall c R) :=
-    (hd.continuousOn.mono hRU).div ((hf.continuousOn.mono hRU).sub continuousOn_const) h0
-  refine circleIntegral_eq_zero_of_differentiable_on_off_countable hR countable_empty hcont
-    fun z hz => ?_
-  have hzU : z ∈ U := hRU (ball_subset_closedBall hz.1)
-  exact (hd z hzU).differentiableAt.div
-    (((hf z hzU).differentiableAt (hU.mem_nhds hzU)).sub_const w)
-    (h0 z (ball_subset_closedBall hz.1))
-
-/-- If `f w` is attained only at `w`, with nonzero derivative there, the logarithmic derivative
-of `f - f w` has circle integral `2πi` around any disc containing `w`. -/
-theorem circleIntegral_deriv_div_sub_eq_two_pi_I (hU : IsOpen U) (hf : DifferentiableOn ℂ f U)
-    (hw : w ∈ ball c R) (hRU : closedBall c R ⊆ U) (hw' : deriv f w ≠ 0)
-    (huniq : ∀ z ∈ U, f z = f w → z = w) :
-    ∮ z in C(c, R), deriv f z / (f z - f w) = 2 * π * I := by
-  have hR : 0 < R := lt_of_le_of_lt dist_nonneg hw
-  have hwU := hRU (ball_subset_closedBall hw)
-  let g := dslope f w
-  have hg : DifferentiableOn ℂ g U := (differentiableOn_dslope (hU.mem_nhds hwU)).mpr hf
-  have hg0 : ∀ z ∈ U, g z ≠ 0 := by
-    intro z hz
-    by_cases hzw : z = w
-    · subst hzw
-      change dslope f z z ≠ 0
-      rw [dslope_same]
-      exact hw'
-    · change dslope f w z ≠ 0
-      rw [dslope_of_ne _ hzw, slope_def_field]
-      exact div_ne_zero (sub_ne_zero.mpr fun he => hzw (huniq z hz he)) (sub_ne_zero.mpr hzw)
-  have hlog : DifferentiableOn ℂ (fun z => deriv g z / g z) U :=
-    (hg.analyticOnNhd hU).deriv.differentiableOn.div hg hg0
-  have hzero := circleIntegral_eq_zero_of_differentiable_on_off_countable hR.le countable_empty
-    (hlog.continuousOn.mono hRU) (fun z hz =>
-      (hlog z (hRU (ball_subset_closedBall hz.1))).differentiableAt
-        (hU.mem_nhds (hRU (ball_subset_closedBall hz.1))))
-  have he : EqOn (fun z => deriv f z / (f z - f w))
-      (fun z => (z - w)⁻¹ + deriv g z / g z) (sphere c R) := by
-    intro z hz
-    change deriv f z / (f z - f w) = (z - w)⁻¹ + deriv g z / g z
-    have hzU := hRU (sphere_subset_closedBall hz)
-    have hzw : z ≠ w := sphere_disjoint_ball.ne_of_mem hz hw
-    have hfact : ∀ t, (t - w) * g t = f t - f w := fun t => sub_smul_dslope f w t
-    have hd := (((hasDerivAt_id z).sub_const w).mul
-      ((hg z hzU).differentiableAt (hU.mem_nhds hzU)).hasDerivAt).deriv
-    change deriv (fun t => (t - w) * g t) z = 1 * g z + (z - w) * deriv g z at hd
-    have hefun : (fun t => (t - w) * g t) = (fun t => f t - f w) := funext hfact
-    rw [hefun, deriv_sub_const] at hd
-    rw [hd, ← hfact z]
-    field_simp [sub_ne_zero.mpr hzw, hg0 z hzU]
-  rw [circleIntegral.integral_congr hR.le he, circleIntegral.integral_add, hzero, add_zero,
-    circleIntegral.integral_sub_inv_of_mem_ball hw]
-  · exact ((continuousOn_id.sub continuousOn_const).inv₀
-      (fun z hz => sub_ne_zero.mpr (sphere_disjoint_ball.ne_of_mem hz hw))).circleIntegrable hR.le
-  · exact (hlog.continuousOn.mono (sphere_subset_closedBall.trans hRU)).circleIntegrable hR.le
-
-end LogDeriv
-
 section IndexArea
 
 variable {U : Set ℂ} {f : ℂ → ℂ} {r ρ : ℝ}
@@ -131,45 +63,45 @@ theorem integral_ball_circleIntegral_deriv_div_sub (hU : IsOpen U)
     (hρ : ∀ z ∈ sphere (0 : ℂ) r, ‖f z‖ < ρ) :
     ∫ w in ball (0 : ℂ) ρ, ∮ z in C(0, r), deriv f z / (f z - w) =
       π * ∮ z in C(0, r), (starRingEnd ℂ) (f z) * deriv f z := by
-  have hsph : ∀ θ : ℝ, circleMap 0 r θ ∈ sphere (0 : ℂ) r := fun θ =>
+  have hsph : ∀ θ : ℝ, circleMap 0 r θ ∈ sphere (0 : ℂ) r := fun θ ↦
     circleMap_mem_sphere 0 hr.le θ
   have hderiv : ContinuousOn (deriv f) U := (hf.analyticOnNhd hU).deriv.continuousOn
   -- the curve and its velocity times `f'`
-  set a : ℝ → ℂ := fun θ => f (circleMap 0 r θ) with ha_def
-  set K : ℝ → ℂ := fun θ => deriv (circleMap 0 r) θ * deriv f (circleMap 0 r θ) with hK_def
+  set a : ℝ → ℂ := fun θ ↦ f (circleMap 0 r θ) with ha_def
+  set K : ℝ → ℂ := fun θ ↦ deriv (circleMap 0 r) θ * deriv f (circleMap 0 r θ) with hK_def
   have ha : Continuous a :=
-    hf.continuousOn.comp_continuous (continuous_circleMap 0 r) fun θ => hsub (hsph θ)
+    hf.continuousOn.comp_continuous (continuous_circleMap 0 r) fun θ ↦ hsub (hsph θ)
   have hK : Continuous K := by
     simp only [hK_def, deriv_circleMap]
     exact ((continuous_circleMap 0 r).mul continuous_const).mul
-      (hderiv.comp_continuous (continuous_circleMap 0 r) fun θ => hsub (hsph θ))
-  have haρ : ∀ θ, ‖a θ‖ < ρ := fun θ => hρ _ (hsph θ)
+      (hderiv.comp_continuous (continuous_circleMap 0 r) fun θ ↦ hsub (hsph θ))
+  have haρ : ∀ θ, ‖a θ‖ < ρ := fun θ ↦ hρ _ (hsph θ)
   have hρ0 : 0 < ρ := (norm_nonneg _).trans_lt (haρ 0)
   obtain ⟨M, hM⟩ :=
     isCompact_uIcc.exists_bound_of_continuousOn (hK.continuousOn (s := uIcc 0 (2 * π)))
   -- the integrand on the product
-  set Φ : ℝ × ℂ → ℂ := fun p => K p.1 * (ball (0 : ℂ) ρ).indicator (fun w => (a p.1 - w)⁻¹) p.2
+  set Φ : ℝ × ℂ → ℂ := fun p ↦ K p.1 * (ball (0 : ℂ) ρ).indicator (fun w ↦ (a p.1 - w)⁻¹) p.2
     with hΦ_def
   have hΦmeas : Measurable Φ := by
     refine (hK.comp continuous_fst).measurable.mul ?_
-    have : Measurable fun p : ℝ × ℂ => (a p.1 - p.2)⁻¹ :=
+    have : Measurable fun p : ℝ × ℂ ↦ (a p.1 - p.2)⁻¹ :=
       ((ha.comp continuous_fst).sub continuous_snd).measurable.inv
-    have h2 : (fun p : ℝ × ℂ => (ball (0 : ℂ) ρ).indicator (fun w => (a p.1 - w)⁻¹) p.2) =
-        (univ ×ˢ ball (0 : ℂ) ρ).indicator fun p : ℝ × ℂ => (a p.1 - p.2)⁻¹ := by
+    have h2 : (fun p : ℝ × ℂ ↦ (ball (0 : ℂ) ρ).indicator (fun w ↦ (a p.1 - w)⁻¹) p.2) =
+        (univ ×ˢ ball (0 : ℂ) ρ).indicator fun p : ℝ × ℂ ↦ (a p.1 - p.2)⁻¹ := by
       funext p
       by_cases hp : p.2 ∈ ball (0 : ℂ) ρ
       · rw [indicator_of_mem hp, indicator_of_mem (mk_mem_prod (mem_univ _) hp)]
-      · rw [indicator_of_notMem hp, indicator_of_notMem fun h => hp h.2]
+      · rw [indicator_of_notMem hp, indicator_of_notMem fun h ↦ hp h.2]
     rw [h2]
     exact this.indicator (MeasurableSet.univ.prod measurableSet_ball)
-  set μ : Measure ℝ := volume.restrict (Ioc 0 (2 * π)) with hμ_def
+  set μ : Measure ℝ := volume.restrict (Ioc 0 (2 * π))
   -- the kernel bound
-  set C₀ : ℝ := ∫ u : ℂ, (closedBall (0 : ℂ) (2 * ρ)).indicator (fun u => 1 * ‖u‖⁻¹) u with hC₀
+  set C₀ : ℝ := ∫ u : ℂ, (closedBall (0 : ℂ) (2 * ρ)).indicator (fun u ↦ 1 * ‖u‖⁻¹) u
   have hC₀int := integrable_indicator_closedBall_mul_inv_norm 1 (2 * ρ)
-  have hker : ∀ θ, ∫ w : ℂ, ‖(ball (0 : ℂ) ρ).indicator (fun w => (a θ - w)⁻¹) w‖ ≤ C₀ := by
+  have hker : ∀ θ, ∫ w : ℂ, ‖(ball (0 : ℂ) ρ).indicator (fun w ↦ (a θ - w)⁻¹) w‖ ≤ C₀ := by
     intro θ
-    have hle : ∀ w : ℂ, ‖(ball (0 : ℂ) ρ).indicator (fun w => (a θ - w)⁻¹) w‖ ≤
-        (closedBall (0 : ℂ) (2 * ρ)).indicator (fun u => 1 * ‖u‖⁻¹) (w - a θ) := by
+    have hle : ∀ w : ℂ, ‖(ball (0 : ℂ) ρ).indicator (fun w ↦ (a θ - w)⁻¹) w‖ ≤
+        (closedBall (0 : ℂ) (2 * ρ)).indicator (fun u ↦ 1 * ‖u‖⁻¹) (w - a θ) := by
       intro w
       by_cases hw : w ∈ ball (0 : ℂ) ρ
       · rw [indicator_of_mem hw, indicator_of_mem, one_mul, norm_inv, norm_sub_rev]
@@ -179,26 +111,26 @@ theorem integral_ball_circleIntegral_deriv_div_sub (hU : IsOpen U)
         calc ‖w - a θ‖ ≤ ‖w‖ + ‖a θ‖ := norm_sub_le _ _
           _ ≤ 2 * ρ := by linarith
       · rw [indicator_of_notMem hw, norm_zero]
-        exact indicator_nonneg (fun _ _ => by positivity) _
-    calc ∫ w : ℂ, ‖(ball (0 : ℂ) ρ).indicator (fun w => (a θ - w)⁻¹) w‖
-        ≤ ∫ w : ℂ, (closedBall (0 : ℂ) (2 * ρ)).indicator (fun u => 1 * ‖u‖⁻¹) (w - a θ) :=
+        exact indicator_nonneg (fun _ _ ↦ by positivity) _
+    calc ∫ w : ℂ, ‖(ball (0 : ℂ) ρ).indicator (fun w ↦ (a θ - w)⁻¹) w‖
+        ≤ ∫ w : ℂ, (closedBall (0 : ℂ) (2 * ρ)).indicator (fun u ↦ 1 * ‖u‖⁻¹) (w - a θ) :=
           integral_mono (integrable_indicator_ball_inv_sub (a θ) ρ).norm
             (hC₀int.comp_sub_right (a θ)) hle
       _ = C₀ := integral_sub_right_eq_self _ (a θ)
   -- integrability on the product
   have hΦint : Integrable Φ (μ.prod volume) := by
-    refine (integrable_prod_iff hΦmeas.aestronglyMeasurable).mpr ⟨ae_of_all _ fun θ => ?_, ?_⟩
+    refine (integrable_prod_iff hΦmeas.aestronglyMeasurable).mpr ⟨ae_of_all _ fun θ ↦ ?_, ?_⟩
     · exact (integrable_indicator_ball_inv_sub (a θ) ρ).const_mul (K θ)
     · refine Integrable.mono' (integrable_const (M * C₀))
         (hΦmeas.aestronglyMeasurable.norm.integral_prod_right')
         (ae_restrict_of_ae_restrict_of_subset (subset_refl _) ?_)
       rw [ae_restrict_iff' measurableSet_Ioc]
-      refine ae_of_all _ fun θ hθ => ?_
+      refine ae_of_all _ fun θ hθ ↦ ?_
       simp only [hΦ_def, norm_mul, integral_const_mul, Real.norm_eq_abs]
-      rw [abs_of_nonneg (norm_nonneg _), abs_of_nonneg (integral_nonneg fun w => norm_nonneg _)]
-      have hC₀0 : 0 ≤ C₀ := integral_nonneg fun u => indicator_nonneg (fun _ _ => by positivity) _
+      rw [abs_of_nonneg (norm_nonneg _), abs_of_nonneg (integral_nonneg fun w ↦ norm_nonneg _)]
+      have hC₀0 : 0 ≤ C₀ := integral_nonneg fun u ↦ indicator_nonneg (fun _ _ ↦ by positivity) _
       have hMθ : ‖K θ‖ ≤ M := hM θ (uIoc_subset_uIcc (by rwa [uIoc_of_le (by positivity)]))
-      exact mul_le_mul hMθ (hker θ) (integral_nonneg fun w => norm_nonneg _)
+      exact mul_le_mul hMθ (hker θ) (integral_nonneg fun w ↦ norm_nonneg _)
         ((norm_nonneg _).trans hMθ)
   -- the left side as a product integral
   have hL : ∫ w in ball (0 : ℂ) ρ, ∮ z in C(0, r), deriv f z / (f z - w) =
@@ -208,18 +140,18 @@ theorem integral_ball_circleIntegral_deriv_div_sub (hU : IsOpen U)
     funext w
     by_cases hw : w ∈ ball (0 : ℂ) ρ
     · rw [indicator_of_mem hw, circleIntegral, intervalIntegral.integral_of_le (by positivity)]
-      refine setIntegral_congr_fun measurableSet_Ioc fun θ _ => ?_
+      refine setIntegral_congr_fun measurableSet_Ioc fun θ _ ↦ ?_
       simp only [hΦ_def, ha_def, hK_def, indicator_of_mem hw, smul_eq_mul, div_eq_mul_inv]
       ring
     · rw [indicator_of_notMem hw]
       symm
-      refine integral_eq_zero_of_ae (ae_of_all _ fun θ => ?_)
+      refine integral_eq_zero_of_ae (ae_of_all _ fun θ ↦ ?_)
       simp [hΦ_def, indicator_of_notMem hw]
   -- the right side as a product integral
   have hR : π * ∮ z in C(0, r), (starRingEnd ℂ) (f z) * deriv f z =
       ∫ θ, (∫ w : ℂ, Φ (θ, w)) ∂μ := by
     rw [circleIntegral, intervalIntegral.integral_of_le (by positivity), ← integral_const_mul]
-    refine setIntegral_congr_fun measurableSet_Ioc fun θ _ => ?_
+    refine setIntegral_congr_fun measurableSet_Ioc fun θ _ ↦ ?_
     simp only [hΦ_def, ha_def, hK_def]
     rw [integral_const_mul, integral_indicator measurableSet_ball, integral_ball_inv_sub (haρ θ),
       smul_eq_mul]
@@ -234,14 +166,14 @@ variable {h : ℂ → ℂ} {r : ℝ}
 
 /-- The maps of class `Σ` are holomorphic on the punctured disc. -/
 theorem differentiableOn_inv_add (hh : DifferentiableOn ℂ h (ball 0 1)) :
-    DifferentiableOn ℂ (fun z => z⁻¹ + h z) (ball 0 1 \ {0}) := fun z hz =>
+    DifferentiableOn ℂ (fun z ↦ z⁻¹ + h z) (ball 0 1 \ {0}) := fun z hz ↦
   ((hasDerivAt_inv hz.2).add
     ((hh z hz.1).differentiableAt
       (isOpen_ball.mem_nhds hz.1)).hasDerivAt).differentiableAt.differentiableWithinAt
 
 /-- The derivative of a map of class `Σ`. -/
 theorem deriv_inv_add (hh : DifferentiableOn ℂ h (ball 0 1)) {z : ℂ} (hz : z ∈ ball (0 : ℂ) 1)
-    (hz0 : z ≠ 0) : deriv (fun z => z⁻¹ + h z) z = -(z ^ 2)⁻¹ + deriv h z :=
+    (hz0 : z ≠ 0) : deriv (fun z ↦ z⁻¹ + h z) z = -(z ^ 2)⁻¹ + deriv h z :=
   ((hasDerivAt_inv hz0).add ((hh z hz).differentiableAt (isOpen_ball.mem_nhds hz)).hasDerivAt).deriv
 
 open Classical in
@@ -249,26 +181,26 @@ open Classical in
 circle `‖z‖ = r`, the contour integral `∮ g' / (g - w)` is `0` if `w` lies in the image of the
 punctured disc of radius `r` and `-2πi` otherwise. -/
 theorem circleIntegral_deriv_div_sub_sigma (hh : DifferentiableOn ℂ h (ball 0 1))
-    (hinj : InjOn (fun z => z⁻¹ + h z) (ball 0 1 \ {0})) (hr : 0 < r) (hr1 : r < 1) {w : ℂ}
+    (hinj : InjOn (fun z ↦ z⁻¹ + h z) (ball 0 1 \ {0})) (hr : 0 < r) (hr1 : r < 1) {w : ℂ}
     (hw : ∀ z ∈ sphere (0 : ℂ) r, z⁻¹ + h z ≠ w) :
-    ∮ z in C(0, r), deriv (fun z => z⁻¹ + h z) z / (z⁻¹ + h z - w) =
-      if w ∈ (fun z => z⁻¹ + h z) '' (ball 0 r \ {0}) then 0 else -(2 * π * I) := by
+    ∮ z in C(0, r), deriv (fun z ↦ z⁻¹ + h z) z / (z⁻¹ + h z - w) =
+      if w ∈ (fun z ↦ z⁻¹ + h z) '' (ball 0 r \ {0}) then 0 else -(2 * π * I) := by
   have hU : IsOpen (ball (0 : ℂ) 1 \ {0}) := isOpen_ball.sdiff isClosed_singleton
   have hgd := differentiableOn_inv_add hh
-  set ψ : ℂ → ℂ := fun z => 1 + z * (h z - w) with hψ_def
+  set ψ : ℂ → ℂ := fun z ↦ 1 + z * (h z - w) with hψ_def
   have hψd : DifferentiableOn ℂ ψ (ball 0 1) :=
     (differentiableOn_const _).add (differentiableOn_id.mul (hh.sub (differentiableOn_const _)))
-  have hψ : ∀ z : ℂ, z ≠ 0 → ψ z = z * (z⁻¹ + h z - w) := fun z hz => by
+  have hψ : ∀ z : ℂ, z ≠ 0 → ψ z = z * (z⁻¹ + h z - w) := fun z hz ↦ by
     simp only [hψ_def]
     field_simp
     ring
   have hψ0 : ψ 0 = 1 := by simp [hψ_def]
-  have hderiv : ∀ z ∈ ball (0 : ℂ) 1, deriv ψ z = 1 * (h z - w) + z * deriv h z := fun z hz =>
+  have hderiv : ∀ z ∈ ball (0 : ℂ) 1, deriv ψ z = 1 * (h z - w) + z * deriv h z := fun z hz ↦
     (((hasDerivAt_id z).mul
       (((hh z hz).differentiableAt (isOpen_ball.mem_nhds hz)).hasDerivAt.sub_const w)).const_add
       1).deriv
-  have hEq : EqOn (fun z => deriv (fun z => z⁻¹ + h z) z / (z⁻¹ + h z - w))
-      (fun z => deriv ψ z / ψ z - (z - 0)⁻¹) (sphere 0 r) := by
+  have hEq : EqOn (fun z ↦ deriv (fun z ↦ z⁻¹ + h z) z / (z⁻¹ + h z - w))
+      (fun z ↦ deriv ψ z / ψ z - (z - 0)⁻¹) (sphere 0 r) := by
     intro z hz
     have hz0 : z ≠ 0 := ne_of_mem_sphere hz hr.ne'
     have hz1 : z ∈ ball (0 : ℂ) 1 := by
@@ -283,20 +215,20 @@ theorem circleIntegral_deriv_div_sub_sigma (hh : DifferentiableOn ℂ h (ball 0 
       apply hgz
       field_simp
       linear_combination h0
-    change deriv (fun z => z⁻¹ + h z) z / (z⁻¹ + h z - w) = deriv ψ z / ψ z - (z - 0)⁻¹
+    change deriv (fun z ↦ z⁻¹ + h z) z / (z⁻¹ + h z - w) = deriv ψ z / ψ z - (z - 0)⁻¹
     rw [deriv_inv_add hh hz1 hz0, hderiv z hz1, sub_zero, hψ z hz0]
     field_simp
     ring
-  have h1 : CircleIntegrable (fun z => deriv ψ z / ψ z) 0 r := by
+  have h1 : CircleIntegrable (fun z ↦ deriv ψ z / ψ z) 0 r := by
     refine ContinuousOn.circleIntegrable hr.le ?_
     have hc : ContinuousOn ψ (sphere 0 r) := hψd.continuousOn.mono (sphere_subset_closedBall.trans
       (closedBall_subset_ball hr1))
     refine ((hψd.analyticOnNhd isOpen_ball).deriv.continuousOn.mono
-      (sphere_subset_closedBall.trans (closedBall_subset_ball hr1))).div hc fun z hz => ?_
+      (sphere_subset_closedBall.trans (closedBall_subset_ball hr1))).div hc fun z hz ↦ ?_
     have hz0 : z ≠ 0 := ne_of_mem_sphere hz hr.ne'
     rw [hψ z hz0]
     exact mul_ne_zero hz0 (sub_ne_zero.mpr (hw z hz))
-  have h2 : CircleIntegrable (fun z : ℂ => (z - 0)⁻¹) 0 r := by
+  have h2 : CircleIntegrable (fun z : ℂ ↦ (z - 0)⁻¹) 0 r := by
     rw [circleIntegrable_sub_inv_iff]
     right
     rw [mem_sphere_zero_iff_norm, norm_zero, abs_of_pos hr]
@@ -313,7 +245,7 @@ theorem circleIntegral_deriv_div_sub_sigma (hh : DifferentiableOn ℂ h (ball 0 
       simp
     have hd' : deriv ψ z₀ ≠ 0 := by
       rw [hderiv z₀ hz₀1, one_mul]
-      have hg' : deriv (fun z => z⁻¹ + h z) z₀ ≠ 0 :=
+      have hg' : deriv (fun z ↦ z⁻¹ + h z) z₀ ≠ 0 :=
         deriv_ne_zero_of_injOn hU hgd hinj ⟨hz₀1, hz₀0⟩
       rw [deriv_inv_add hh hz₀1 hz₀0] at hg'
       intro hzero
@@ -328,7 +260,7 @@ theorem circleIntegral_deriv_div_sub_sigma (hh : DifferentiableOn ℂ h (ball 0 
     have huniq : ∀ z ∈ ball (0 : ℂ) 1, ψ z = ψ z₀ → z = z₀ := by
       intro z hz hzz
       rw [hψz₀] at hzz
-      have hz0 : z ≠ 0 := fun h0 => by
+      have hz0 : z ≠ 0 := fun h0 ↦ by
         rw [h0, hψ0] at hzz
         exact one_ne_zero hzz
       rw [hψ z hz0, mul_eq_zero] at hzz
@@ -346,7 +278,7 @@ theorem circleIntegral_deriv_div_sub_sigma (hh : DifferentiableOn ℂ h (ball 0 
       · rw [hz0, hψ0]
         exact one_ne_zero
       · rw [hψ z hz0]
-        refine mul_ne_zero hz0 (sub_ne_zero.mpr fun hgz => ?_)
+        refine mul_ne_zero hz0 (sub_ne_zero.mpr fun hgz ↦ ?_)
         rcases (mem_closedBall_zero_iff.mp hz).lt_or_eq with hlt | heq
         · exact hmem ⟨z, ⟨mem_ball_zero_iff.mpr hlt, hz0⟩, hgz⟩
         · exact hw z (mem_sphere_zero_iff_norm.mpr heq) hgz
@@ -359,11 +291,11 @@ theorem circleIntegral_deriv_div_sub_sigma (hh : DifferentiableOn ℂ h (ball 0 
 Parseval's identity. -/
 theorem circleIntegral_conj_mul_deriv_sigma (hh : DifferentiableOn ℂ h (ball 0 1)) (hr : 0 < r)
     (hr1 : r < 1) :
-    ∮ z in C(0, r), (starRingEnd ℂ) (z⁻¹ + h z) * deriv (fun z => z⁻¹ + h z) z =
+    ∮ z in C(0, r), (starRingEnd ℂ) (z⁻¹ + h z) * deriv (fun z ↦ z⁻¹ + h z) z =
       I * ((-(2 * π) / r ^ 2 + 2 * π * ∑' n : ℕ, n * (‖taylorCoeff h n‖ ^ 2 * r ^ (2 * n)) : ℝ) :
         ℂ) := by
   have hmem := circleMap_zero_mem_ball hr.le hr1
-  have hcm : ∀ θ : ℝ, circleMap 0 r θ ≠ 0 := fun θ => circleMap_ne_center hr.ne'
+  have hcm : ∀ θ : ℝ, circleMap 0 r θ ≠ 0 := fun θ ↦ circleMap_ne_center hr.ne'
   have hr' : (r : ℂ) ≠ 0 := by exact_mod_cast hr.ne'
   have hderiv : DifferentiableOn ℂ (deriv h) (ball 0 1) :=
     (hh.analyticOnNhd isOpen_ball).deriv.differentiableOn
@@ -378,24 +310,24 @@ theorem circleIntegral_conj_mul_deriv_sigma (hh : DifferentiableOn ℂ h (ball 0
     have hc := hcm θ
     field_simp
   -- the three pieces of the integrand
-  set A : ℝ → ℂ := fun θ => (r : ℂ)⁻¹ ^ 2 *
+  set A : ℝ → ℂ := fun θ ↦ (r : ℂ)⁻¹ ^ 2 *
     (-1 + circleMap 0 r θ ^ 2 * deriv h (circleMap 0 r θ)) with hA_def
-  set B : ℝ → ℂ := fun θ => (starRingEnd ℂ) (h (circleMap 0 r θ)) * (-(circleMap 0 r θ)⁻¹)
+  set B : ℝ → ℂ := fun θ ↦ (starRingEnd ℂ) (h (circleMap 0 r θ)) * (-(circleMap 0 r θ)⁻¹)
     with hB_def
-  set C : ℝ → ℂ := fun θ => (starRingEnd ℂ) (h (circleMap 0 r θ)) *
+  set C : ℝ → ℂ := fun θ ↦ (starRingEnd ℂ) (h (circleMap 0 r θ)) *
     (circleMap 0 r θ * deriv h (circleMap 0 r θ)) with hC_def
   have hpt : ∀ θ : ℝ, deriv (circleMap 0 r) θ •
       ((starRingEnd ℂ) ((circleMap 0 r θ)⁻¹ + h (circleMap 0 r θ)) *
-        deriv (fun z => z⁻¹ + h z) (circleMap 0 r θ)) = I * (A θ + B θ + C θ) := by
+        deriv (fun z ↦ z⁻¹ + h z) (circleMap 0 r θ)) = I * (A θ + B θ + C θ) := by
     intro θ
     have hc := hcm θ
     rw [deriv_circleMap, smul_eq_mul, deriv_inv_add hh (hmem θ) (hcm θ), map_add, hconj]
     simp only [hA_def, hB_def, hC_def]
     field_simp
     ring
-  have hcont_h : Continuous fun θ : ℝ => h (circleMap 0 r θ) :=
+  have hcont_h : Continuous fun θ : ℝ ↦ h (circleMap 0 r θ) :=
     hh.continuousOn.comp_continuous (continuous_circleMap 0 r) hmem
-  have hcont_dh : Continuous fun θ : ℝ => deriv h (circleMap 0 r θ) :=
+  have hcont_dh : Continuous fun θ : ℝ ↦ deriv h (circleMap 0 r θ) :=
     hderiv.continuousOn.comp_continuous (continuous_circleMap 0 r) hmem
   have hAc : Continuous A := by
     simp only [hA_def]
@@ -411,14 +343,14 @@ theorem circleIntegral_conj_mul_deriv_sigma (hh : DifferentiableOn ℂ h (ball 0
     simp only [hA_def]
     rw [intervalIntegral.integral_const_mul]
     congr 1
-    have hF : DifferentiableOn ℂ (fun z => -1 + z ^ 2 * deriv h z) (closedBall 0 r) :=
+    have hF : DifferentiableOn ℂ (fun z ↦ -1 + z ^ 2 * deriv h z) (closedBall 0 r) :=
       (differentiableOn_const _).add ((differentiableOn_pow 2).mul
         (hderiv.mono (closedBall_subset_ball hr1)))
     have := integral_circleMap_eq_two_pi_mul hF hr
     simpa using this
   -- `∫ B`
   have hB : ∫ θ in (0 : ℝ)..2 * π, B θ = 0 := by
-    have hG : Continuous fun θ : ℝ => -(circleMap 0 r θ)⁻¹ :=
+    have hG : Continuous fun θ : ℝ ↦ -(circleMap 0 r θ)⁻¹ :=
       ((continuous_circleMap 0 r).inv₀ hcm).neg
     have hsum := hasSum_conj_taylorCoeff_mul_integral hh hr.le hr1 hG
     have hzero : ∀ n : ℕ,
@@ -450,7 +382,7 @@ theorem circleIntegral_conj_mul_deriv_sigma (hh : DifferentiableOn ℂ h (ball 0
   rw [circleIntegral]
   simp_rw [hpt]
   rw [intervalIntegral.integral_const_mul, intervalIntegral.integral_add
-    ((by fun_prop : Continuous fun θ : ℝ => A θ + B θ).intervalIntegrable _ _)
+    ((by fun_prop : Continuous fun θ : ℝ ↦ A θ + B θ).intervalIntegrable _ _)
     (hCc.intervalIntegrable _ _),
     intervalIntegral.integral_add (hAc.intervalIntegrable _ _) (hBc.intervalIntegrable _ _),
     hA, hB, hC]
@@ -463,15 +395,15 @@ theorem circleIntegral_conj_mul_deriv_sigma (hh : DifferentiableOn ℂ h (ball 0
 lies in the disc of radius `M + r⁻¹`, where `M` bounds the map on the circle `‖z‖ = r`. -/
 theorem compl_image_subset_closedBall (hh : DifferentiableOn ℂ h (ball 0 1)) (hr : 0 < r)
     (hr1 : r < 1) {M : ℝ} (hM : ∀ z ∈ sphere (0 : ℂ) r, ‖z⁻¹ + h z‖ ≤ M) :
-    ((fun z => z⁻¹ + h z) '' (ball 0 r \ {0}))ᶜ ⊆ closedBall 0 (M + r⁻¹) := by
+    ((fun z ↦ z⁻¹ + h z) '' (ball 0 r \ {0}))ᶜ ⊆ closedBall 0 (M + r⁻¹) := by
   intro w hw
   rw [mem_compl_iff] at hw
   by_contra hout
   rw [mem_closedBall_zero_iff, not_le] at hout
   have hM0 : 0 ≤ M := (norm_nonneg _).trans (hM _ (circleMap_mem_sphere 0 hr.le 0))
   have hrinv : 0 < r⁻¹ := inv_pos.mpr hr
-  set ψ : ℂ → ℂ := fun z => 1 + z * (h z - w) with hψ_def
-  have hψ : ∀ z : ℂ, z ≠ 0 → ψ z = z * (z⁻¹ + h z - w) := fun z hz => by
+  set ψ : ℂ → ℂ := fun z ↦ 1 + z * (h z - w) with hψ_def
+  have hψ : ∀ z : ℂ, z ≠ 0 → ψ z = z * (z⁻¹ + h z - w) := fun z hz ↦ by
     simp only [hψ_def]
     field_simp
     ring
@@ -483,13 +415,13 @@ theorem compl_image_subset_closedBall (hh : DifferentiableOn ℂ h (ball 0 1)) (
     · rw [hz0]
       simp [hψ_def]
     · rw [hψ z hz0]
-      refine mul_ne_zero hz0 (sub_ne_zero.mpr fun hgz => ?_)
+      refine mul_ne_zero hz0 (sub_ne_zero.mpr fun hgz ↦ ?_)
       rcases (mem_closedBall_zero_iff.mp hz).lt_or_eq with hlt | heq
       · exact hw ⟨z, ⟨mem_ball_zero_iff.mpr hlt, hz0⟩, hgz⟩
       · have := hM z (mem_sphere_zero_iff_norm.mpr heq)
         rw [hgz] at this
         linarith
-  have hφ : DiffContOnCl ℂ (fun z => (ψ z)⁻¹) (ball 0 r) := by
+  have hφ : DiffContOnCl ℂ (fun z ↦ (ψ z)⁻¹) (ball 0 r) := by
     refine DifferentiableOn.diffContOnCl ?_
     rw [closure_ball 0 hr.ne']
     exact ((hψd.mono (closedBall_subset_ball hr1)).inv hne)
@@ -518,45 +450,45 @@ theorem compl_image_subset_closedBall (hh : DifferentiableOn ℂ h (ball 0 1)) (
 /-- **The area theorem on the circle of radius `r`**: for a map `z⁻¹ + h z` of class `Σ` with
 Taylor coefficients `b n` of `h`, `∑ n ‖b n‖² r ^ (2n) ≤ r⁻²` for `0 < r < 1`. -/
 theorem tsum_mul_norm_taylorCoeff_sq_mul_pow_le (hh : DifferentiableOn ℂ h (ball 0 1))
-    (hinj : InjOn (fun z => z⁻¹ + h z) (ball 0 1 \ {0})) (hr : 0 < r) (hr1 : r < 1) :
+    (hinj : InjOn (fun z ↦ z⁻¹ + h z) (ball 0 1 \ {0})) (hr : 0 < r) (hr1 : r < 1) :
     ∑' n : ℕ, n * (‖taylorCoeff h n‖ ^ 2 * r ^ (2 * n)) ≤ (r ^ 2)⁻¹ := by
   classical
   have hU : IsOpen (ball (0 : ℂ) 1 \ {0}) := isOpen_ball.sdiff isClosed_singleton
   have hgd := differentiableOn_inv_add hh
-  have hsub : sphere (0 : ℂ) r ⊆ ball 0 1 \ {0} := fun z hz =>
+  have hsub : sphere (0 : ℂ) r ⊆ ball 0 1 \ {0} := fun z hz ↦
     mem_sdiff_of_mem (by rw [mem_ball_zero_iff, mem_sphere_zero_iff_norm.mp hz]; exact hr1)
       (ne_of_mem_sphere hz hr.ne')
   obtain ⟨M, hM⟩ := (isCompact_sphere (0 : ℂ) r).exists_bound_of_continuousOn
     (hgd.continuousOn.mono hsub)
   have hM0 : 0 ≤ M := (norm_nonneg _).trans (hM _ (circleMap_mem_sphere 0 hr.le 0))
-  set ρ : ℝ := M + r⁻¹ + 1 with hρ_def
-  have hρ : ∀ z ∈ sphere (0 : ℂ) r, ‖z⁻¹ + h z‖ < ρ := fun z hz => by
+  set ρ : ℝ := M + r⁻¹ + 1
+  have hρ : ∀ z ∈ sphere (0 : ℂ) r, ‖z⁻¹ + h z‖ < ρ := fun z hz ↦ by
     have := hM z hz
     have : 0 < r⁻¹ := inv_pos.mpr hr
     linarith
   -- the image set and its complement
-  set S := (fun z => z⁻¹ + h z) '' (ball 0 r \ {0}) with hS_def
+  set S := (fun z ↦ z⁻¹ + h z) '' (ball 0 r \ {0}) with hS_def
   have hSo : IsOpen S := isOpen_image_of_injOn (isOpen_ball.sdiff isClosed_singleton)
-    (hgd.mono fun z hz => mem_sdiff_of_mem (ball_subset_ball hr1.le hz.1) hz.2)
-    (hinj.mono fun z hz => mem_sdiff_of_mem (ball_subset_ball hr1.le hz.1) hz.2)
+    (hgd.mono fun z hz ↦ mem_sdiff_of_mem (ball_subset_ball hr1.le hz.1) hz.2)
+    (hinj.mono fun z hz ↦ mem_sdiff_of_mem (ball_subset_ball hr1.le hz.1) hz.2)
   have hEB : Sᶜ ⊆ ball (0 : ℂ) ρ :=
     (compl_image_subset_closedBall hh hr hr1 hM).trans (closedBall_subset_ball (by linarith))
   -- the image of the circle is a null set
-  have hnull : volume ((fun z => z⁻¹ + h z) '' sphere (0 : ℂ) r) = 0 :=
+  have hnull : volume ((fun z ↦ z⁻¹ + h z) '' sphere (0 : ℂ) r) = 0 :=
     addHaar_image_eq_zero_of_differentiableOn_of_addHaar_eq_zero (μ := volume)
       ((hgd.mono hsub).restrictScalars ℝ) (Measure.addHaar_sphere volume 0 r)
   -- the index-area identity
   have hidx := integral_ball_circleIntegral_deriv_div_sub hU hgd hr hsub hρ
   beta_reduce at hidx
   have hae : ∀ᵐ w ∂(volume : Measure ℂ), w ∈ ball (0 : ℂ) ρ →
-      (∮ z in C(0, r), deriv (fun z => z⁻¹ + h z) z / (z⁻¹ + h z - w)) =
-        (Sᶜ).indicator (fun _ => -(2 * π * I)) w := by
-    have h1 : ∀ᵐ w ∂(volume : Measure ℂ), w ∉ (fun z => z⁻¹ + h z) '' sphere (0 : ℂ) r := by
+      (∮ z in C(0, r), deriv (fun z ↦ z⁻¹ + h z) z / (z⁻¹ + h z - w)) =
+        (Sᶜ).indicator (fun _ ↦ -(2 * π * I)) w := by
+    have h1 : ∀ᵐ w ∂(volume : Measure ℂ), w ∉ (fun z ↦ z⁻¹ + h z) '' sphere (0 : ℂ) r := by
       rw [ae_iff]
       simp only [not_not, ofPred_mem_eq]
       exact hnull
     filter_upwards [h1] with w hw _
-    have hw' : ∀ z ∈ sphere (0 : ℂ) r, z⁻¹ + h z ≠ w := fun z hz he => hw ⟨z, hz, he⟩
+    have hw' : ∀ z ∈ sphere (0 : ℂ) r, z⁻¹ + h z ≠ w := fun z hz he ↦ hw ⟨z, hz, he⟩
     rw [circleIntegral_deriv_div_sub_sigma hh hinj hr hr1 hw', ← hS_def]
     by_cases hS : w ∈ S
     · simp [hS]
@@ -593,7 +525,7 @@ theorem tsum_mul_norm_taylorCoeff_sq_mul_pow_le (hh : DifferentiableOn ℂ h (ba
 
 /-- The partial sums of `n ‖b n‖²` are bounded by one. -/
 theorem sum_range_mul_norm_taylorCoeff_sq_le (hh : DifferentiableOn ℂ h (ball 0 1))
-    (hinj : InjOn (fun z => z⁻¹ + h z) (ball 0 1 \ {0})) (N : ℕ) :
+    (hinj : InjOn (fun z ↦ z⁻¹ + h z) (ball 0 1 \ {0})) (N : ℕ) :
     ∑ n ∈ Finset.range N, (n : ℝ) * ‖taylorCoeff h n‖ ^ 2 ≤ 1 := by
   set S := ∑ n ∈ Finset.range N, (n : ℝ) * ‖taylorCoeff h n‖ ^ 2 with hS
   have hbound : ∀ r : ℝ, r ∈ Ioo (0 : ℝ) 1 → S ≤ (r ^ 2)⁻¹ / r ^ (2 * N) := by
@@ -603,7 +535,7 @@ theorem sum_range_mul_norm_taylorCoeff_sq_le (hh : DifferentiableOn ℂ h (ball 
     have h1 : S * r ^ (2 * N) ≤
         ∑ n ∈ Finset.range N, (n : ℝ) * (‖taylorCoeff h n‖ ^ 2 * r ^ (2 * n)) := by
       rw [hS, Finset.sum_mul]
-      refine Finset.sum_le_sum fun n hn => ?_
+      refine Finset.sum_le_sum fun n hn ↦ ?_
       have hn' : 2 * n ≤ 2 * N := by
         have := Finset.mem_range.mp hn
         omega
@@ -613,12 +545,12 @@ theorem sum_range_mul_norm_taylorCoeff_sq_le (hh : DifferentiableOn ℂ h (ball 
           ≤ (n : ℝ) * ‖taylorCoeff h n‖ ^ 2 * r ^ (2 * n) :=
             mul_le_mul_of_nonneg_left hpow h0
         _ = (n : ℝ) * (‖taylorCoeff h n‖ ^ 2 * r ^ (2 * n)) := by ring
-    have h2 := sum_le_hasSum (Finset.range N) (fun n _ => by positivity) hsum.hasSum
+    have h2 := sum_le_hasSum (Finset.range N) (fun n _ ↦ by positivity) hsum.hasSum
     have h3 := tsum_mul_norm_taylorCoeff_sq_mul_pow_le hh hinj hr.1 hr.2
     rw [le_div_iff₀ (pow_pos hr.1 _)]
     linarith
-  have hlim : Tendsto (fun r : ℝ => (r ^ 2)⁻¹ / r ^ (2 * N)) (𝓝[<] 1) (𝓝 1) := by
-    have : Tendsto (fun r : ℝ => (r ^ 2)⁻¹ / r ^ (2 * N)) (𝓝 1)
+  have hlim : Tendsto (fun r : ℝ ↦ (r ^ 2)⁻¹ / r ^ (2 * N)) (𝓝[<] 1) (𝓝 1) := by
+    have : Tendsto (fun r : ℝ ↦ (r ^ 2)⁻¹ / r ^ (2 * N)) (𝓝 1)
         (𝓝 (((1 : ℝ) ^ 2)⁻¹ / 1 ^ (2 * N))) :=
       (((continuous_pow 2).tendsto 1).inv₀ (by norm_num)).div
         ((continuous_pow (2 * N)).tendsto 1) (by norm_num)
@@ -631,18 +563,26 @@ theorem sum_range_mul_norm_taylorCoeff_sq_le (hh : DifferentiableOn ℂ h (ball 
 injective on the punctured unit disc, then the Taylor coefficients `b n` of `h` satisfy
 `∑ n ‖b n‖² ≤ 1`. -/
 theorem tsum_mul_norm_taylorCoeff_sq_le (hh : DifferentiableOn ℂ h (ball 0 1))
-    (hinj : InjOn (fun z => z⁻¹ + h z) (ball 0 1 \ {0})) :
+    (hinj : InjOn (fun z ↦ z⁻¹ + h z) (ball 0 1 \ {0})) :
     ∑' n : ℕ, (n : ℝ) * ‖taylorCoeff h n‖ ^ 2 ≤ 1 :=
-  Real.tsum_le_of_sum_range_le (fun n => by positivity)
+  Real.tsum_le_of_sum_range_le (fun n ↦ by positivity)
     (sum_range_mul_norm_taylorCoeff_sq_le hh hinj)
 
 /-- The weighted squares `n ‖b n‖²` of the Taylor coefficients of a map of class `Σ` are
 summable. -/
 theorem summable_mul_norm_taylorCoeff_sq (hh : DifferentiableOn ℂ h (ball 0 1))
-    (hinj : InjOn (fun z => z⁻¹ + h z) (ball 0 1 \ {0})) :
-    Summable fun n : ℕ => (n : ℝ) * ‖taylorCoeff h n‖ ^ 2 :=
-  summable_of_sum_range_le (fun n => by positivity)
+    (hinj : InjOn (fun z ↦ z⁻¹ + h z) (ball 0 1 \ {0})) :
+    Summable fun n : ℕ ↦ (n : ℝ) * ‖taylorCoeff h n‖ ^ 2 :=
+  summable_of_sum_range_le (fun n ↦ by positivity)
     (sum_range_mul_norm_taylorCoeff_sq_le hh hinj)
+
+/-- The first Taylor coefficient of a map of class `Σ` has norm at most one. -/
+theorem norm_taylorCoeff_one_le (hh : DifferentiableOn ℂ h (ball 0 1))
+    (hinj : InjOn (fun z ↦ z⁻¹ + h z) (ball 0 1 \ {0})) : ‖taylorCoeff h 1‖ ≤ 1 := by
+  have := ((summable_mul_norm_taylorCoeff_sq hh hinj).le_tsum 1 fun j _ ↦ by positivity).trans
+    (tsum_mul_norm_taylorCoeff_sq_le hh hinj)
+  rw [Nat.cast_one, one_mul] at this
+  exact (sq_le_one_iff₀ (norm_nonneg _)).mp this
 
 end Sigma
 

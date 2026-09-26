@@ -63,7 +63,7 @@ theorem continuousOn_schwarzReflection {U : Set ℂ} {f : ℂ → ℂ}
     (hs : MapsTo conj U U) (hc : ContinuousOn f (U ∩ {z | 0 ≤ z.im}))
     (hr : ∀ z ∈ U, z.im = 0 → (f z).im = 0) : ContinuousOn (schwarzReflection f) U := by
   have hclosed : IsClosed {z : ℂ | 0 ≤ z.im} := isClosed_le continuous_const continuous_im
-  have hlow : ContinuousOn (fun z => conj (f (conj z))) (U ∩ {z | z.im ≤ 0}) := by
+  have hlow : ContinuousOn (fun z ↦ conj (f (conj z))) (U ∩ {z | z.im ≤ 0}) := by
     apply continuous_conj.comp_continuousOn
     apply hc.comp continuous_conj.continuousOn
     intro z hz

@@ -48,7 +48,7 @@ theorem norm_circleLaurentCoeff_le {f : ℂ → F} {r M : ℝ} (hr : 0 < r)
     (hM : ∀ w ∈ sphere (0 : ℂ) r, ‖f w‖ ≤ M) (k : ℤ) :
     ‖circleLaurentCoeff f r k‖ ≤ M * r ^ (-k) := by
   have h := circleIntegral.norm_two_pi_i_inv_smul_integral_le_of_norm_le_const hr.le
-    (C := r ^ (-k - 1) * M) (f := fun w => w ^ (-k - 1) • f w) (by
+    (C := r ^ (-k - 1) * M) (f := fun w ↦ w ^ (-k - 1) • f w) (by
       intro w hw
       have hn : ‖w‖ = r := mem_sphere_zero_iff_norm.mp hw
       rw [norm_smul, norm_zpow, hn]
@@ -108,7 +108,7 @@ theorem circleLaurentCoeff_eq_of_analyticOnNhd_annulus {f : ℂ → F} {r R : �
     (hf : AnalyticOnNhd ℂ f (closedBall 0 R \ ball 0 r)) :
     circleLaurentCoeff f R = circleLaurentCoeff f r := by
   funext k
-  have ha : AnalyticOnNhd ℂ (fun w => w ^ (-k - 1) • f w)
+  have ha : AnalyticOnNhd ℂ (fun w ↦ w ^ (-k - 1) • f w)
       (closedBall 0 R \ ball 0 r) := by
     intro w hw
     have hw0 : w ≠ 0 := by
@@ -119,8 +119,8 @@ theorem circleLaurentCoeff_eq_of_analyticOnNhd_annulus {f : ℂ → F} {r R : �
   unfold circleLaurentCoeff
   congr 1
   exact circleIntegral_eq_of_differentiable_on_annulus_off_countable hr hrR countable_empty
-    ha.continuousOn (fun w hw => (ha w ⟨ball_subset_closedBall hw.1.1,
-      fun hb => hw.1.2 (ball_subset_closedBall hb)⟩).differentiableAt)
+    ha.continuousOn (fun w hw ↦ (ha w ⟨ball_subset_closedBall hw.1.1,
+      fun hb ↦ hw.1.2 (ball_subset_closedBall hb)⟩).differentiableAt)
 
 omit [CompleteSpace F] in
 /-- On a connected rotation-invariant set, the Laurent coefficients do not depend on radius. -/
@@ -147,9 +147,9 @@ theorem circleLaurentCoeff_neg_eq_zero {f : ℂ → F} {r : ℝ} (hr : 0 ≤ r)
     (hf : AnalyticOnNhd ℂ f (closedBall 0 r)) {k : ℤ} (hk : k < 0) :
     circleLaurentCoeff f r k = 0 := by
   have he : -k - 1 = ((-k - 1).toNat : ℤ) := (Int.toNat_of_nonneg (by omega)).symm
-  have ha : AnalyticOnNhd ℂ (fun w => w ^ (-k - 1) • f w) (closedBall 0 r) := by
-    have ha' : AnalyticOnNhd ℂ (fun w => w ^ (-k - 1).toNat • f w) (closedBall 0 r) :=
-      fun w hw => (analyticAt_id.pow _).smul (hf w hw)
+  have ha : AnalyticOnNhd ℂ (fun w ↦ w ^ (-k - 1) • f w) (closedBall 0 r) := by
+    have ha' : AnalyticOnNhd ℂ (fun w ↦ w ^ (-k - 1).toNat • f w) (closedBall 0 r) :=
+      fun w hw ↦ (analyticAt_id.pow _).smul (hf w hw)
     convert ha' using 1
     funext w
     rw [he, zpow_natCast, Int.toNat_natCast]
@@ -162,7 +162,7 @@ omit [CompleteSpace F] in
 /-- The nonnegative Laurent terms sum to the outer Cauchy integral. -/
 theorem hasSum_circleLaurentCoeff_nat {f : ℂ → F} {R : ℝ}
     (hf : CircleIntegrable f 0 R) {z : ℂ} (hz : ‖z‖ < R) :
-    HasSum (fun n : ℕ => z ^ (n : ℤ) • circleLaurentCoeff f R n)
+    HasSum (fun n : ℕ ↦ z ^ (n : ℤ) • circleLaurentCoeff f R n)
       ((2 * Real.pi * I : ℂ)⁻¹ • ∮ w in C(0, R), (w - z)⁻¹ • f w) := by
   have hR : 0 < R := (norm_nonneg z).trans_lt hz
   have hs := (hasSum_two_pi_I_cauchyPowerSeries_integral hf hz).const_smul
@@ -184,11 +184,11 @@ omit [CompleteSpace F] in
 /-- The negative Laurent terms sum to the inner Cauchy integral with reversed kernel. -/
 theorem hasSum_circleLaurentCoeff_negSucc {f : ℂ → F} {r : ℝ} (hr : 0 ≤ r)
     (hf : ContinuousOn f (sphere (0 : ℂ) r)) {z : ℂ} (hz : r < ‖z‖) :
-    HasSum (fun n : ℕ => z ^ (Int.negSucc n) • circleLaurentCoeff f r (Int.negSucc n))
+    HasSum (fun n : ℕ ↦ z ^ (Int.negSucc n) • circleLaurentCoeff f r (Int.negSucc n))
       ((2 * Real.pi * I : ℂ)⁻¹ • ∮ w in C(0, r), (z - w)⁻¹ • f w) := by
   have hz0 : z ≠ 0 := norm_pos_iff.mp (hr.trans_lt hz)
   have hs := (hasSum_circleIntegral_geometric hr (hf.const_smul z⁻¹)
-    (g := fun w => w / z) (continuousOn_id.div_const z)
+    (g := fun w ↦ w / z) (continuousOn_id.div_const z)
     (div_nonneg hr (norm_nonneg z)) ((div_lt_one (hr.trans_lt hz)).mpr hz) (by
       intro w hw
       simp [mem_sphere_zero_iff_norm.mp hw])).const_smul (2 * Real.pi * I : ℂ)⁻¹
@@ -219,7 +219,7 @@ theorem hasSum_circleLaurentCoeff_negSucc {f : ℂ → F} {r : ℝ} (hr : 0 ≤ 
 theorem hasSum_circleLaurentCoeff_annulus {f : ℂ → F} {r R : ℝ}
     (hr : 0 < r) {z : ℂ} (hzr : r < ‖z‖) (hzR : ‖z‖ < R)
     (hf : AnalyticOnNhd ℂ f (closedBall 0 R \ ball 0 r)) :
-    HasSum (fun k : ℤ => z ^ k • circleLaurentCoeff f r k) (f z) := by
+    HasSum (fun k : ℤ ↦ z ^ k • circleLaurentCoeff f r k) (f z) := by
   have hs (t : ℝ) (ht : t = r ∨ t = R) : sphere (0 : ℂ) t ⊆ closedBall 0 R \ ball 0 r := by
     intro w hw
     have hw' := mem_sphere_zero_iff_norm.mp hw
@@ -241,14 +241,14 @@ theorem hasSum_circleLaurentCoeff_annulus {f : ℂ → F} {r R : ℝ}
   rw [hi, ← smul_add, ← sub_eq_add_neg,
     circleIntegral_sub_inv_smul_sub_of_analyticOnNhd_annulus hr hzr hzR hf,
     inv_smul_smul₀ two_pi_I_ne_zero] at hsum
-  exact hsum.congr_fun fun k => by cases k <;> rfl
+  exact hsum.congr_fun fun k ↦ by cases k <;> rfl
 
 /-- One-variable Laurent expansion on a connected rotation-invariant open set, including
 independence of radius and vanishing of negative coefficients at zero. -/
 theorem circleLaurent_expansion {V : Set ℂ} (hV : IsOpen V) (hc : IsConnected V)
     (hrot : ∀ z ∈ V, ∀ w : ℂ, ‖w‖ = ‖z‖ → w ∈ V)
     {f : ℂ → F} (hf : AnalyticOnNhd ℂ f V) {r : ℝ} (hr : 0 < r) (hrV : (r : ℂ) ∈ V) :
-    (∀ z ∈ V, HasSum (fun k : ℤ => z ^ k • circleLaurentCoeff f r k) (f z)) ∧
+    (∀ z ∈ V, HasSum (fun k : ℤ ↦ z ^ k • circleLaurentCoeff f r k) (f z)) ∧
     (∀ s : ℝ, 0 < s → (s : ℂ) ∈ V → circleLaurentCoeff f s = circleLaurentCoeff f r) ∧
     (0 ∈ V → ∀ k : ℤ, k < 0 → circleLaurentCoeff f r k = 0) := by
   have hind (s : ℝ) (hs : 0 < s) (hsV : (s : ℂ) ∈ V) :
@@ -260,7 +260,7 @@ theorem circleLaurent_expansion {V : Set ℂ} (hV : IsOpen V) (hc : IsConnected 
     apply mem_of_norm_between hc hrot h0 hrV
     · simp
     · simpa [abs_of_pos hr] using mem_closedBall_zero_iff.mp hw
-  refine ⟨?_, hind, fun h0 k hk => circleLaurentCoeff_neg_eq_zero hr.le (hdisc h0) hk⟩
+  refine ⟨?_, hind, fun h0 k hk ↦ circleLaurentCoeff_neg_eq_zero hr.le (hdisc h0) hk⟩
   intro z hz
   by_cases hz0 : z = 0
   · subst z
@@ -269,7 +269,7 @@ theorem circleLaurent_expansion {V : Set ℂ} (hV : IsOpen V) (hc : IsConnected 
       simpa [circleLaurentCoeff] using
         hdc.two_pi_i_inv_smul_circleIntegral_sub_inv_smul (mem_ball_self hr)
     simpa [he] using (hasSum_single (0 : ℤ)
-      (f := fun k : ℤ => (0 : ℂ) ^ k • circleLaurentCoeff f r k) (by
+      (f := fun k : ℤ ↦ (0 : ℂ) ^ k • circleLaurentCoeff f r k) (by
         intro k hk
         simp [zero_zpow k hk]))
   · have hn : 0 < ‖z‖ := norm_pos_iff.mpr hz0

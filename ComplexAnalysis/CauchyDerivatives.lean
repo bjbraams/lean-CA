@@ -58,7 +58,7 @@ theorem DiffContOnCl.iteratedDeriv_eq_circleIntegral_sub_zpow_smul
       (hf.two_pi_i_inv_smul_circleIntegral_sub_inv_smul hw).symm
   | succ n ih =>
     have heq : (iteratedDeriv n f) =ᶠ[nhds w]
-        (fun w => ((n.factorial : ℂ) * (2 * (Real.pi : ℂ) * I)⁻¹) •
+        (fun w ↦ ((n.factorial : ℂ) * (2 * (Real.pi : ℂ) * I)⁻¹) •
           ∮ s in C(c, R), (s - w) ^ (-(n + 1 : ℤ)) • f s) := by
       filter_upwards [isOpen_ball.mem_nhds hw] with v hv
       exact ih hv
@@ -67,7 +67,7 @@ theorem DiffContOnCl.iteratedDeriv_eq_circleIntegral_sub_zpow_smul
       (hf.continuousOn_ball.mono sphere_subset_closedBall).circleIntegrable hR.le
     have hw' : w ∉ sphere c |R| := by
       rw [abs_of_pos hR]
-      exact fun h => (mem_ball.mp hw).ne (mem_sphere.mp h)
+      exact fun h ↦ (mem_ball.mp hw).ne (mem_sphere.mp h)
     have hd := ((Complex.hasDerivAt_circleIntegral_sub_zpow_smul (n := -(n + 1 : ℤ)) hint
       hw').const_smul ((n.factorial : ℂ) * (2 * (Real.pi : ℂ) * I)⁻¹)).deriv
     refine hd.trans ?_

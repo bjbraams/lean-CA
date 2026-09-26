@@ -46,19 +46,64 @@ theorem exists_delta_inv_sub_kernel {Ω K : Set ℂ} (hΩ : IsCompact Ω) (hK : 
     (hdisj : Disjoint Ω K) {η : ℝ} (hη : 0 < η) :
     ∃ δ > 0, ∀ w ∈ Ω, ∀ w' ∈ Ω, ∀ z ∈ K, dist w w' < δ →
       ‖(w - z)⁻¹ - (w' - z)⁻¹‖ ≤ η := by
-  have hcont : ContinuousOn (fun p : ℂ × ℂ => (p.1 - p.2)⁻¹) (Ω ×ˢ K) := by
+  have hcont : ContinuousOn (fun p : ℂ × ℂ ↦ (p.1 - p.2)⁻¹) (Ω ×ˢ K) := by
     refine (continuous_fst.sub continuous_snd).continuousOn.inv₀ ?_
     rintro ⟨w, z⟩ ⟨hw, hz⟩
-    exact sub_ne_zero.mpr fun h => hdisj.notMem_of_mem_left hw (h ▸ hz)
+    exact sub_ne_zero.mpr fun h ↦ hdisj.notMem_of_mem_left hw (h ▸ hz)
   have huc := (hΩ.prod hK).uniformContinuousOn_of_continuous hcont
   rw [Metric.uniformContinuousOn_iff] at huc
   obtain ⟨δ, hδ, h⟩ := huc η hη
-  refine ⟨δ, hδ, fun w hw w' hw' z hz hd => ?_⟩
+  refine ⟨δ, hδ, fun w hw w' hw' z hz hd ↦ ?_⟩
   have := h (w, z) ⟨hw, hz⟩ (w', z) ⟨hw', hz⟩ (by
     rw [Prod.dist_eq, dist_self]
     simpa using hd)
   rw [dist_eq_norm] at this
   exact this.le
+
+/-- **A finite partition of a compact set into small pieces.** A compact set `Ω` is the
+disjoint union of finitely many measurable pieces `D i`, each contained in a ball of radius `δ`
+about a point `c i ∈ Ω`. -/
+theorem _root_.IsCompact.exists_finite_measurable_partition {Ω : Set ℂ} (hΩ : IsCompact Ω)
+    {δ : ℝ} (hδ : 0 < δ) :
+    ∃ (n : ℕ) (c : Fin n → ℂ) (D : Fin n → Set ℂ), (∀ i, c i ∈ Ω) ∧
+      (∀ i, MeasurableSet (D i)) ∧ Pairwise (Function.onFun Disjoint D) ∧ (⋃ i, D i) = Ω ∧
+      ∀ i, D i ⊆ ball (c i) δ ∩ Ω := by
+  classical
+  obtain ⟨t, htΩ, htfin, hcover⟩ := finite_cover_balls_of_compact hΩ hδ
+  set l : List ℂ := htfin.toFinset.toList
+  set n : ℕ := l.length
+  set c : Fin n → ℂ := fun i ↦ l.get i
+  have hl : ∀ x ∈ l, x ∈ t := fun x hx ↦ by simpa [l] using hx
+  have hcΩ : ∀ i, c i ∈ Ω := fun i ↦ htΩ (hl _ (List.get_mem l i))
+  -- the pieces of the cover, indexed by `ℕ`, and their disjoint refinement
+  set f : ℕ → Set ℂ := fun k ↦ if h : k < n then ball (c ⟨k, h⟩) δ ∩ Ω else ∅
+  have hf_of_lt : ∀ i : Fin n, f i = ball (c i) δ ∩ Ω := fun i ↦ by simp [f, i.isLt]
+  have hfΩ : ∀ k, f k ⊆ Ω := fun k ↦ by
+    simp only [f]
+    split_ifs
+    exacts [inter_subset_right, empty_subset _]
+  have hfcover : Ω ⊆ ⋃ k, f k := by
+    intro w hw
+    obtain ⟨x, hxt, hwx⟩ := mem_iUnion₂.mp (hcover hw)
+    obtain ⟨i, hi⟩ := List.mem_iff_get.mp (show x ∈ l by simp [l, hxt])
+    exact mem_iUnion.mpr ⟨i, by rw [hf_of_lt i]; exact ⟨(show c i = x from hi) ▸ hwx, hw⟩⟩
+  have hfempty : ∀ k, n ≤ k → f k = ∅ := fun k hk ↦ by simp [f, not_lt.mpr hk]
+  have hDempty : ∀ k, n ≤ k → disjointed f k = ∅ := fun k hk ↦
+    subset_empty_iff.mp ((disjointed_subset f k).trans (hfempty k hk).subset)
+  refine ⟨n, c, fun i ↦ disjointed f i, hcΩ, fun i ↦ MeasurableSet.disjointed (fun k ↦ ?_) i,
+    fun i j hij ↦ disjoint_disjointed f (Fin.val_injective.ne hij), ?_,
+    fun i ↦ (disjointed_subset f i).trans (hf_of_lt i).subset⟩
+  · simp only [f]
+    split_ifs
+    exacts [measurableSet_ball.inter hΩ.measurableSet, MeasurableSet.empty]
+  · refine Subset.antisymm (iUnion_subset fun i ↦ (disjointed_subset f i).trans (hfΩ i)) ?_
+    refine hfcover.trans (iUnion_disjointed (f := f) ▸ fun w hw ↦ ?_)
+    obtain ⟨k, hk⟩ := mem_iUnion.mp hw
+    have hkn : k < n := by
+      by_contra h
+      rw [hDempty k (not_lt.mp h)] at hk
+      exact hk
+    exact mem_iUnion.mpr ⟨⟨k, hkn⟩, hk⟩
 
 /-- **Finite pole sums approximate Cauchy-type integrals.** Let `Ω` and `K` be disjoint compact
 sets and `g` a function bounded by `C` on `Ω` and integrable on `Ω`. For every `ε > 0` there
@@ -69,114 +114,46 @@ theorem exists_finset_approx_setIntegral_inv_sub {Ω K : Set ℂ} (hΩ : IsCompa
     {C : ℝ} (hC : ∀ w ∈ Ω, ‖g w‖ ≤ C) {ε : ℝ} (hε : 0 < ε) :
     ∃ (n : ℕ) (c : Fin n → ℂ) (a : Fin n → ℂ), (∀ i, c i ∈ Ω) ∧
       ∀ z ∈ K, ‖(∫ w in Ω, g w * (w - z)⁻¹) - ∑ i, a i * (c i - z)⁻¹‖ ≤ ε := by
-  classical
-  set C' : ℝ := max C 0 with hC'_def
-  have hC' : ∀ w ∈ Ω, ‖g w‖ ≤ C' := fun w hw => (hC w hw).trans (le_max_left _ _)
+  set C' : ℝ := max C 0
+  have hC' : ∀ w ∈ Ω, ‖g w‖ ≤ C' := fun w hw ↦ (hC w hw).trans (le_max_left _ _)
   have hC'0 : 0 ≤ C' := le_max_right _ _
-  set V : ℝ := (volume Ω).toReal with hV_def
-  have hVfin : volume Ω ≠ ⊤ := hΩ.measure_lt_top.ne
+  set V : ℝ := (volume Ω).toReal
   have hV0 : 0 ≤ V := ENNReal.toReal_nonneg
-  set η : ℝ := ε / (C' * V + 1) with hη_def
+  set η : ℝ := ε / (C' * V + 1)
   have hη : 0 < η := div_pos hε (by positivity)
   have hηbound : C' * η * V ≤ ε := by
-    have h1 : C' * η * V = η * (C' * V) := by ring
-    rw [h1, hη_def, div_mul_eq_mul_div, div_le_iff₀ (by positivity)]
+    rw [mul_right_comm, mul_div_assoc', div_le_iff₀ (by positivity)]
     nlinarith [mul_nonneg hC'0 hV0]
   obtain ⟨δ, hδ, hker⟩ := exists_delta_inv_sub_kernel hΩ hK hdisj hη
-  obtain ⟨t, htΩ, htfin, hcover⟩ := finite_cover_balls_of_compact hΩ hδ
-  set l : List ℂ := htfin.toFinset.toList with hl_def
-  set n : ℕ := l.length with hn_def
-  have hmem_l : ∀ x ∈ t, x ∈ l := fun x hx => by
-    simp [l, Finset.mem_toList, htfin.mem_toFinset, hx]
-  have hl_mem : ∀ x ∈ l, x ∈ Ω := fun x hx => by
-    apply htΩ
-    simpa [l, Finset.mem_toList, htfin.mem_toFinset] using hx
-  set c : Fin n → ℂ := fun i => l.get i with hc_def
-  have hcΩ : ∀ i, c i ∈ Ω := fun i => hl_mem _ (List.get_mem l i)
-  -- the pieces of the cover
-  set f : ℕ → Set ℂ := fun k => if h : k < n then ball (c ⟨k, h⟩) δ ∩ Ω else ∅ with hf_def
-  have hf_of_lt : ∀ i : Fin n, f i = ball (c i) δ ∩ Ω := fun i => by
-    simp only [f]
-    split_ifs with h
-    · rfl
-    · exact absurd i.isLt h
-  have hfmeas : ∀ k, MeasurableSet (f k) := by
-    intro k
-    simp only [f]
-    split_ifs
-    · exact measurableSet_ball.inter hΩ.measurableSet
-    · exact MeasurableSet.empty
-  have hfΩ : ∀ k, f k ⊆ Ω := by
-    intro k
-    simp only [f]
-    split_ifs
-    · exact inter_subset_right
-    · exact empty_subset _
-  have hfcover : Ω ⊆ ⋃ k, f k := by
-    intro w hw
-    obtain ⟨x, hxt, hwx⟩ := mem_iUnion₂.mp (hcover hw)
-    obtain ⟨i, hi⟩ := List.mem_iff_get.mp (hmem_l x hxt)
-    refine mem_iUnion.mpr ⟨i, ?_⟩
-    rw [hf_of_lt i]
-    exact ⟨(show c i = x from hi) ▸ hwx, hw⟩
-  set D : ℕ → Set ℂ := disjointed f with hD_def
-  have hDmeas : ∀ k, MeasurableSet (D k) := MeasurableSet.disjointed hfmeas
-  have hDdisj : Pairwise (Function.onFun Disjoint D) := disjoint_disjointed f
-  have hDsub : ∀ k, D k ⊆ f k := disjointed_subset f
-  have hDΩ : ∀ k, D k ⊆ Ω := fun k => (hDsub k).trans (hfΩ k)
-  have hDunion : (⋃ k, D k) = Ω := by
-    apply Subset.antisymm (iUnion_subset hDΩ)
-    rw [hD_def, iUnion_disjointed]
-    exact hfcover
-  have hDempty : ∀ k, n ≤ k → D k = ∅ := by
-    intro k hk
-    apply eq_empty_of_subset_empty
-    refine (hDsub k).trans ?_
-    simp [f, not_lt.mpr hk]
-  have hDfin : ∀ k, volume (D k) ≠ ⊤ := fun k =>
-    ((measure_mono (hDΩ k)).trans_lt hΩ.measure_lt_top).ne
-  -- coefficients
-  refine ⟨n, c, fun i => ∫ w in D i, g w, hcΩ, fun z hz => ?_⟩
-  have hkc : ContinuousOn (fun w => (w - z)⁻¹) Ω :=
-    (continuousOn_id.sub continuousOn_const).inv₀ fun w hw =>
-      sub_ne_zero.mpr fun h => hdisj.notMem_of_mem_left hw ((show w = z from h) ▸ hz)
-  have hint : IntegrableOn (fun w => g w * (w - z)⁻¹) Ω := hg.mul_continuousOn hkc hΩ
-  -- split the integral over the pieces
-  have hsplit : ∫ w in Ω, g w * (w - z)⁻¹ = ∑ i : Fin n, ∫ w in D i, g w * (w - z)⁻¹ := by
-    rw [← hDunion, integral_iUnion hDmeas hDdisj (hDunion ▸ hint)]
-    rw [tsum_eq_sum (s := Finset.range n) (fun k hk => by
-      rw [hDempty k (by simpa using hk)]
-      simp), Finset.sum_range]
-  have hsplit' : ∑ i : Fin n, (∫ w in D i, g w) * (c i - z)⁻¹ =
-      ∑ i : Fin n, ∫ w in D i, g w * (c i - z)⁻¹ := by
-    refine Finset.sum_congr rfl fun i _ => ?_
-    rw [integral_mul_const]
-  rw [hsplit, hsplit', ← Finset.sum_sub_distrib]
-  have hsub : ∀ i : Fin n, (∫ w in D i, g w * (w - z)⁻¹) - ∫ w in D i, g w * (c i - z)⁻¹ =
-      ∫ w in D i, g w * ((w - z)⁻¹ - (c i - z)⁻¹) := by
-    intro i
-    rw [← integral_sub (hint.mono_set (hDΩ i))
-      ((hg.mono_set (hDΩ i)).mul_const _)]
-    exact integral_congr_ae (Eventually.of_forall fun w => by ring)
-  simp_rw [hsub]
-  refine (norm_sum_le _ _).trans ?_
-  have hpiece : ∀ i : Fin n, ‖∫ w in D i, g w * ((w - z)⁻¹ - (c i - z)⁻¹)‖ ≤
+  obtain ⟨n, c, D, hcΩ, hDmeas, hDdisj, hDunion, hDsub⟩ :=
+    hΩ.exists_finite_measurable_partition hδ
+  have hDΩ : ∀ i, D i ⊆ Ω := fun i ↦ (hDsub i).trans inter_subset_right
+  have hDfin : ∀ i, volume (D i) ≠ ⊤ := fun i ↦
+    ((measure_mono (hDΩ i)).trans_lt hΩ.measure_lt_top).ne
+  refine ⟨n, c, fun i ↦ ∫ w in D i, g w, hcΩ, fun z hz ↦ ?_⟩
+  have hkc : ContinuousOn (fun w ↦ (w - z)⁻¹) Ω :=
+    (continuousOn_id.sub continuousOn_const).inv₀ fun w hw ↦
+      sub_ne_zero.mpr fun h ↦ hdisj.notMem_of_mem_left hw ((show w = z from h) ▸ hz)
+  have hint : IntegrableOn (fun w ↦ g w * (w - z)⁻¹) Ω := hg.mul_continuousOn hkc hΩ
+  -- split the integral over the pieces and compare each piece with its pole term
+  have hsplit : ∫ w in Ω, g w * (w - z)⁻¹ = ∑ i, ∫ w in D i, g w * (w - z)⁻¹ := by
+    rw [← hDunion, integral_iUnion hDmeas hDdisj (hDunion ▸ hint), tsum_fintype]
+  have hpiece : ∀ i, ‖(∫ w in D i, g w * (w - z)⁻¹) - (∫ w in D i, g w) * (c i - z)⁻¹‖ ≤
       C' * η * (volume (D i)).toReal := by
     intro i
-    refine norm_setIntegral_le_of_norm_le_const (hDfin i).lt_top fun w hw => ?_
-    have hwf := hDsub i hw
-    rw [hf_of_lt i] at hwf
-    have hwΩ : w ∈ Ω := hwf.2
-    have hwc : dist w (c i) < δ := mem_ball.mp hwf.1
-    rw [norm_mul]
-    exact mul_le_mul (hC' w hwΩ) (hker w hwΩ (c i) (hcΩ i) z hz hwc) (norm_nonneg _) hC'0
-  refine (Finset.sum_le_sum fun i _ => hpiece i).trans ?_
-  rw [← Finset.mul_sum]
-  have hvol : ∑ i : Fin n, (volume (D i)).toReal = V := by
-    rw [hV_def, ← hDunion, measure_iUnion hDdisj hDmeas,
-      tsum_eq_sum (s := Finset.range n) (fun k hk => by rw [hDempty k (by simpa using hk)]; simp),
-      ENNReal.toReal_sum (fun k _ => hDfin k), Finset.sum_range]
-  rw [hvol]
+    rw [← integral_mul_const, ← integral_sub (hint.mono_set (hDΩ i))
+      ((hg.mono_set (hDΩ i)).mul_const _)]
+    refine norm_setIntegral_le_of_norm_le_const (hDfin i).lt_top fun w hw ↦ ?_
+    rw [← mul_sub, norm_mul]
+    exact mul_le_mul (hC' w (hDΩ i hw)) (hker w (hDΩ i hw) (c i) (hcΩ i) z hz
+      (mem_ball.mp (hDsub i hw).1)) (norm_nonneg _) hC'0
+  have hvol : ∑ i, (volume (D i)).toReal = V := by
+    have := measure_iUnion (μ := volume) hDdisj hDmeas
+    rw [hDunion, tsum_fintype] at this
+    rw [← ENNReal.toReal_sum fun i _ ↦ hDfin i, ← this]
+  rw [hsplit, ← Finset.sum_sub_distrib]
+  refine (norm_sum_le _ _).trans ((Finset.sum_le_sum fun i _ ↦ hpiece i).trans ?_)
+  rw [← Finset.mul_sum, hvol]
   exact hηbound
 
 end Complex

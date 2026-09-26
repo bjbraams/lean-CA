@@ -75,7 +75,7 @@ theorem norm_cayley_lt_one (hz : 0 < z.im) : ‖cayley z‖ < 1 := by
   exact lt_of_pow_lt_pow_left₀ 2 (norm_nonneg _) this
 
 /-- The Cayley transform never takes the value one on the upper half-plane. -/
-theorem cayley_ne_one (hz : 0 < z.im) : cayley z ≠ 1 := fun h => by
+theorem cayley_ne_one (hz : 0 < z.im) : cayley z ≠ 1 := fun h ↦ by
   have := norm_cayley_lt_one hz
   rw [h, norm_one] at this
   exact lt_irrefl _ this
@@ -122,29 +122,29 @@ theorem cayley_cayleyInv (hw : w ≠ 1) : cayley (cayleyInv w) = w := by
 
 /-- Away from its pole, the Cayley transform has derivative `2 * I / (z + I) ^ 2`. -/
 theorem hasDerivAt_cayley (hz : z + I ≠ 0) : HasDerivAt cayley (2 * I / (z + I) ^ 2) z := by
-  have h1 : HasDerivAt (fun z => z - I) 1 z := (hasDerivAt_id z).sub_const I
-  have h2 : HasDerivAt (fun z => z + I) 1 z := (hasDerivAt_id z).add_const I
+  have h1 : HasDerivAt (fun z ↦ z - I) 1 z := (hasDerivAt_id z).sub_const I
+  have h2 : HasDerivAt (fun z ↦ z + I) 1 z := (hasDerivAt_id z).add_const I
   have := h1.div h2 hz
   convert this using 1
   · rfl
   · ring
 
 /-- The Cayley transform is holomorphic on the upper half-plane. -/
-theorem differentiableOn_cayley : DifferentiableOn ℂ cayley upperHalfPlaneSet := fun _ hz =>
+theorem differentiableOn_cayley : DifferentiableOn ℂ cayley upperHalfPlaneSet := fun _ hz ↦
   (hasDerivAt_cayley (add_I_ne_zero hz)).differentiableAt.differentiableWithinAt
 
 /-- Away from its pole, the inverse Cayley transform has derivative `2 * I / (1 - w) ^ 2`. -/
 theorem hasDerivAt_cayleyInv (hw : 1 - w ≠ 0) : HasDerivAt cayleyInv (2 * I / (1 - w) ^ 2) w := by
-  have h1 : HasDerivAt (fun w => I * (1 + w)) (I * 1) w :=
+  have h1 : HasDerivAt (fun w ↦ I * (1 + w)) (I * 1) w :=
     ((hasDerivAt_id w).const_add 1).const_mul I
-  have h2 : HasDerivAt (fun w => 1 - w) (-1) w := (hasDerivAt_id w).const_sub 1
+  have h2 : HasDerivAt (fun w ↦ 1 - w) (-1) w := (hasDerivAt_id w).const_sub 1
   have := h1.div h2 hw
   convert this using 1
   · rfl
   · ring
 
 /-- The inverse Cayley transform is holomorphic on the open unit disc. -/
-theorem differentiableOn_cayleyInv : DifferentiableOn ℂ cayleyInv (ball 0 1) := fun w hw => by
+theorem differentiableOn_cayleyInv : DifferentiableOn ℂ cayleyInv (ball 0 1) := fun w hw ↦ by
   have hw1 : 1 - w ≠ 0 := by
     intro h
     have : w = 1 := by linear_combination -h
@@ -153,21 +153,21 @@ theorem differentiableOn_cayleyInv : DifferentiableOn ℂ cayleyInv (ball 0 1) :
   exact (hasDerivAt_cayleyInv hw1).differentiableAt.differentiableWithinAt
 
 /-- The Cayley transform maps the upper half-plane into the open unit disc. -/
-theorem mapsTo_cayley : MapsTo cayley upperHalfPlaneSet (ball 0 1) := fun _ hz =>
+theorem mapsTo_cayley : MapsTo cayley upperHalfPlaneSet (ball 0 1) := fun _ hz ↦
   mem_ball_zero_iff.mpr (norm_cayley_lt_one hz)
 
 /-- The inverse Cayley transform maps the open unit disc into the upper half-plane. -/
-theorem mapsTo_cayleyInv : MapsTo cayleyInv (ball 0 1) upperHalfPlaneSet := fun _ hw =>
+theorem mapsTo_cayleyInv : MapsTo cayleyInv (ball 0 1) upperHalfPlaneSet := fun _ hw ↦
   im_cayleyInv_pos (mem_ball_zero_iff.mp hw)
 
 /-- The Cayley transform is injective on the upper half-plane. -/
-theorem cayley_injOn : InjOn cayley upperHalfPlaneSet := fun z hz w hw h => by
+theorem cayley_injOn : InjOn cayley upperHalfPlaneSet := fun z hz w hw h ↦ by
   rw [← cayleyInv_cayley hz, h, cayleyInv_cayley hw]
 
 /-- The Cayley transform maps the upper half-plane onto the unit disc. -/
 theorem cayley_image_upperHalfPlane : cayley '' upperHalfPlaneSet = ball 0 1 := by
-  refine Subset.antisymm mapsTo_cayley.image_subset fun w hw => ?_
-  have hw1 : w ≠ 1 := fun h => by
+  refine Subset.antisymm mapsTo_cayley.image_subset fun w hw ↦ ?_
+  have hw1 : w ≠ 1 := fun h ↦ by
     rw [mem_ball_zero_iff, h, norm_one] at hw
     exact lt_irrefl _ hw
   exact ⟨cayleyInv w, mapsTo_cayleyInv hw, cayley_cayleyInv hw1⟩
@@ -182,22 +182,22 @@ theorem exists_eqOn_cayleyInv_mul_discMobius_cayley {f g : ℂ → ℂ}
     (hgm : MapsTo g upperHalfPlaneSet upperHalfPlaneSet)
     (hgf : ∀ z ∈ upperHalfPlaneSet, g (f z) = z) (hfg : ∀ z ∈ upperHalfPlaneSet, f (g z) = z) :
     ∃ c a : ℂ, ‖c‖ = 1 ∧ ‖a‖ < 1 ∧
-      EqOn f (fun z => cayleyInv (c * discMobius a (cayley z))) upperHalfPlaneSet := by
-  set F : ℂ → ℂ := fun w => cayley (f (cayleyInv w)) with hF_def
-  set G : ℂ → ℂ := fun w => cayley (g (cayleyInv w)) with hG_def
+      EqOn f (fun z ↦ cayleyInv (c * discMobius a (cayley z))) upperHalfPlaneSet := by
+  set F : ℂ → ℂ := fun w ↦ cayley (f (cayleyInv w))
+  set G : ℂ → ℂ := fun w ↦ cayley (g (cayleyInv w))
   have hFd : DifferentiableOn ℂ F (ball 0 1) :=
     differentiableOn_cayley.comp (hf.comp differentiableOn_cayleyInv mapsTo_cayleyInv)
       (hfm.comp mapsTo_cayleyInv)
   have hGd : DifferentiableOn ℂ G (ball 0 1) :=
     differentiableOn_cayley.comp (hg.comp differentiableOn_cayleyInv mapsTo_cayleyInv)
       (hgm.comp mapsTo_cayleyInv)
-  have hFm : MapsTo F (ball 0 1) (ball 0 1) := fun w hw =>
+  have hFm : MapsTo F (ball 0 1) (ball 0 1) := fun w hw ↦
     mapsTo_cayley (hfm (mapsTo_cayleyInv hw))
-  have hGm : MapsTo G (ball 0 1) (ball 0 1) := fun w hw =>
+  have hGm : MapsTo G (ball 0 1) (ball 0 1) := fun w hw ↦
     mapsTo_cayley (hgm (mapsTo_cayleyInv hw))
   have hGF : ∀ w ∈ ball 0 1, G (F w) = w := by
     intro w hw
-    have hw1 : w ≠ 1 := fun h => by
+    have hw1 : w ≠ 1 := fun h ↦ by
       rw [mem_ball_zero_iff, h, norm_one] at hw
       exact lt_irrefl _ hw
     change cayley (g (cayleyInv (cayley (f (cayleyInv w))))) = w
@@ -205,14 +205,14 @@ theorem exists_eqOn_cayleyInv_mul_discMobius_cayley {f g : ℂ → ℂ}
       cayley_cayleyInv hw1]
   have hFG : ∀ w ∈ ball 0 1, F (G w) = w := by
     intro w hw
-    have hw1 : w ≠ 1 := fun h => by
+    have hw1 : w ≠ 1 := fun h ↦ by
       rw [mem_ball_zero_iff, h, norm_one] at hw
       exact lt_irrefl _ hw
     change cayley (f (cayleyInv (cayley (g (cayleyInv w))))) = w
     rw [cayleyInv_cayley (hgm (mapsTo_cayleyInv hw)), hfg _ (mapsTo_cayleyInv hw),
       cayley_cayleyInv hw1]
   obtain ⟨c, a, hc, ha, hFeq⟩ := exists_eqOn_mul_discMobius_of_leftInverse hFd hFm hGd hGm hGF hFG
-  refine ⟨c, a, hc, ha, fun z hz => ?_⟩
+  refine ⟨c, a, hc, ha, fun z hz ↦ ?_⟩
   have h1 : f z = cayleyInv (F (cayley z)) := by
     change f z = cayleyInv (cayley (f (cayleyInv (cayley z))))
     rw [cayleyInv_cayley hz, cayleyInv_cayley (hfm hz)]

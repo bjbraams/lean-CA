@@ -48,7 +48,7 @@ variable {F : Type*} [NormedAddCommGroup F] [NormedSpace ℂ F] {n : ℕ}
 
 /-- Integrate a complex Banach-valued function around the oriented edges of a polygon. -/
 def complexIntegral (p : Polygon ℂ n) (f : ℂ → F) : F :=
-  ∑ i, curveIntegral (fun z => ContinuousLinearMap.toSpanSingleton ℂ (f z))
+  ∑ i, curveIntegral (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ (f z))
     (Path.segment (p i) (p (finRotate n i)))
 
 /-- The integral around a polygon with no vertices is zero. -/
@@ -72,7 +72,7 @@ theorem complexIntegral_eq_zero_of_isExactOn (p : Polygon ℂ n) {U : Set ℂ} {
     (hf : Complex.IsExactOn f U) (hfc : ContinuousOn f U) (hp : p.boundary ℝ ⊆ U) :
     p.complexIntegral f = 0 := by
   obtain ⟨P, hP⟩ := hf
-  have hω : ContinuousOn (fun z => ContinuousLinearMap.toSpanSingleton ℂ (f z)) U :=
+  have hω : ContinuousOn (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ (f z)) U :=
     (ContinuousLinearMap.toSpanSingletonLIE ℂ F).continuous.comp_continuousOn hfc
   have hedge (i : Fin n) : segment ℝ (p i) (p (finRotate n i)) ⊆ U := by
     intro z hz
@@ -82,8 +82,8 @@ theorem complexIntegral_eq_zero_of_isExactOn (p : Polygon ℂ n) {U : Set ℂ} {
     simpa only [edgeSet, affineSegment_eq_segment] using hz
   unfold complexIntegral
   simp_rw [curveIntegral_segment_eq_sub_of_hasFDerivAt
-    (fun z hz => (hP z hz).hasFDerivAt) hω (hedge _)]
-  rw [Finset.sum_sub_distrib, Equiv.sum_comp (finRotate n) (fun i => P (p i)), sub_self]
+    (fun z hz ↦ (hP z hz).hasFDerivAt) hω (hedge _)]
+  rw [Finset.sum_sub_distrib, Equiv.sum_comp (finRotate n) (fun i ↦ P (p i)), sub_self]
 
 /-- Cauchy's integral theorem for polygon boundaries in a convex open domain. -/
 theorem complexIntegral_eq_zero_of_differentiableOn_convex (p : Polygon ℂ n)
@@ -92,7 +92,7 @@ theorem complexIntegral_eq_zero_of_differentiableOn_convex (p : Polygon ℂ n)
     p.complexIntegral f = 0 := by
   obtain ⟨P, hP⟩ := hUc.exists_forall_hasDerivWithinAt hf
   exact p.complexIntegral_eq_zero_of_isExactOn
-    ⟨P, fun z hz => (hP z hz).hasDerivAt (hU.mem_nhds hz)⟩ hf.continuousOn hp
+    ⟨P, fun z hz ↦ (hP z hz).hasDerivAt (hU.mem_nhds hz)⟩ hf.continuousOn hp
 
 /-- Cauchy's integral theorem for polygon boundaries in a simply connected open domain.
 No simplicity assumption on the polygon is needed, including for zero or one vertex. -/

@@ -49,10 +49,10 @@ theorem exists_zero_of_norm_lt_sphere {f : ℂ → ℂ} {c : ℂ} {R : ℝ}
     (hR : 0 < R) (hf : AnalyticOnNhd ℂ f (closedBall c R))
     (hlt : ∀ z ∈ sphere c R, ‖f c‖ < ‖f z‖) :
     ∃ z ∈ ball c R, f z = 0 := by
-  obtain ⟨w, hw, he⟩ := exists_zero_of_norm_lt_boundary (f := fun w => f (c + w)) hR
-    (fun w hw => ((hf (c + w) (by simpa [dist_eq_norm] using hw)).differentiableAt.comp w
+  obtain ⟨w, hw, he⟩ := exists_zero_of_norm_lt_boundary (f := fun w ↦ f (c + w)) hR
+    (fun w hw ↦ ((hf (c + w) (by simpa [dist_eq_norm] using hw)).differentiableAt.comp w
       ((differentiableAt_const c).add differentiableAt_id)).differentiableWithinAt)
-    (fun w hw => by simpa using hlt (c + w) (by simpa [dist_eq_norm] using hw))
+    (fun w hw ↦ by simpa using hlt (c + w) (by simpa [dist_eq_norm] using hw))
   exact ⟨c + w, by simpa [dist_eq_norm] using hw, he⟩
 
 /-- Uniform convergence on a closed disk eventually preserves its divisor degree if the
@@ -119,7 +119,7 @@ theorem eqOn_zero_or_forall_ne_zero_of_tendstoLocallyUniformlyOn
   right
   intro c hc hzero
   have hp : ∀ᶠ z in 𝓝[≠] c, f z ≠ 0 :=
-    (hf c hc).eventually_eq_zero_or_eventually_ne_zero.resolve_left (fun he =>
+    (hf c hc).eventually_eq_zero_or_eventually_ne_zero.resolve_left (fun he ↦
       hall (hf.eqOn_zero_of_preconnected_of_eventuallyEq_zero hconn hc he))
   obtain ⟨R, hR, hball⟩ := Metric.mem_nhdsWithin_iff.mp hp
   obtain ⟨S, hS, hSsub⟩ := Metric.nhds_basis_closedBall.mem_iff.mp (hU.mem_nhds hc)
@@ -131,7 +131,7 @@ theorem eqOn_zero_or_forall_ne_zero_of_tendstoLocallyUniformlyOn
     intro z hz
     exact hball ⟨(mem_sphere.mp hz).trans_lt hrR, ne_of_mem_sphere hz hr.ne'⟩
   have hFn : ∀ᶠ n in l, AnalyticOnNhd ℂ (F n) (closedBall c r) :=
-    hF.mono (fun _ hn => (hn.analyticOnNhd hU).mono hKU)
+    hF.mono (fun _ hn ↦ (hn.analyticOnNhd hU).mono hKU)
   have he := eventually_exists_zero_of_tendstoUniformlyOn hr hFn
     (hf.continuousOn.mono hKU) hzero hb
     ((tendstoLocallyUniformlyOn_iff_tendstoUniformlyOn_of_compact
@@ -150,29 +150,29 @@ theorem eqOn_const_or_injOn_of_tendstoLocallyUniformlyOn
     (hF : ∀ᶠ n in l, DifferentiableOn ℂ (F n) U)
     (hinj : ∀ᶠ n in l, InjOn (F n) U)
     (hlim : TendstoLocallyUniformlyOn F f l U) :
-    (∃ v : ℂ, EqOn f (fun _ => v) U) ∨ InjOn f U := by
-  by_cases hconst : ∃ v : ℂ, EqOn f (fun _ => v) U
+    (∃ v : ℂ, EqOn f (fun _ ↦ v) U) ∨ InjOn f U := by
+  by_cases hconst : ∃ v : ℂ, EqOn f (fun _ ↦ v) U
   · exact Or.inl hconst
   right
   intro a ha b hb hab
   by_contra hne
   have hV : IsOpen (U \ {a}) := hU.sdiff isClosed_singleton
   obtain ⟨r, hr, hsub⟩ := Metric.isOpen_iff.mp hV b ⟨hb, Ne.symm hne⟩
-  have hballU : ball b r ⊆ U := fun z hz => (hsub hz).1
-  have hFd : ∀ᶠ n in l, DifferentiableOn ℂ (fun z => F n z - F n a) (ball b r) :=
-    hF.mono (fun n hn => (hn.mono hballU).sub_const (F n a))
+  have hballU : ball b r ⊆ U := fun z hz ↦ (hsub hz).1
+  have hFd : ∀ᶠ n in l, DifferentiableOn ℂ (fun z ↦ F n z - F n a) (ball b r) :=
+    hF.mono (fun n hn ↦ (hn.mono hballU).sub_const (F n a))
   have hFn : ∀ᶠ n in l, ∀ z ∈ ball b r, F n z - F n a ≠ 0 := by
     filter_upwards [hinj] with n hn z hz
-    exact sub_ne_zero.mpr (fun he => (hsub hz).2 (hn (hballU hz) ha he))
-  have hlim' : TendstoLocallyUniformlyOn (fun n z => F n z - F n a)
-      (fun z => f z - f a) l (ball b r) :=
+    exact sub_ne_zero.mpr (fun he ↦ (hsub hz).2 (hn (hballU hz) ha he))
+  have hlim' : TendstoLocallyUniformlyOn (fun n z ↦ F n z - F n a)
+      (fun z ↦ f z - f a) l (ball b r) :=
     (hlim.sub ((hlim.tendsto_at ha).tendstoUniformlyOn_const U).tendstoLocallyUniformlyOn).mono
       hballU
-  have he : EqOn (fun z => f z - f a) 0 (ball b r) :=
+  have he : EqOn (fun z ↦ f z - f a) 0 (ball b r) :=
     (eqOn_zero_or_forall_ne_zero_of_tendstoLocallyUniformlyOn isOpen_ball
-      (convex_ball b r).isPreconnected hFd hFn hlim').resolve_right (fun h =>
+      (convex_ball b r).isPreconnected hFd hFn hlim').resolve_right (fun h ↦
         h b (mem_ball_self hr) (sub_eq_zero.mpr hab.symm))
-  have he' : f =ᶠ[𝓝 b] (fun _ => f a) := by
+  have he' : f =ᶠ[𝓝 b] (fun _ ↦ f a) := by
     filter_upwards [ball_mem_nhds b hr] with z hz
     exact sub_eq_zero.mp (he hz)
   have hf := (hlim.differentiableOn hF hU).analyticOnNhd hU

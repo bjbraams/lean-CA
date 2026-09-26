@@ -33,7 +33,8 @@ the latter automatically.
 ## References
 
 * `Mathlib.MeasureTheory.Integral.CurveIntegral.Basic`: formal background used by this module.
-* `Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus`: formal background used by this module.
+* `Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus`: formal background used by
+  this module.
 * `Mathlib.Analysis.Calculus.ContDiff.Operations`: formal background used by this module.
 -/
 
@@ -54,11 +55,11 @@ theorem curveIntegral_eq_sub_of_hasFDerivAt
     (hγ : DifferentiableOn ℝ γ.extend I) (hγU : ∀ t, γ t ∈ U)
     (hint : CurveIntegrable ω γ) : curveIntegral ω γ = f b - f a := by
   let : NormedSpace ℝ F := .restrictScalars ℝ 𝕜 F
-  have hmap : MapsTo γ.extend I U := fun t ht => by
+  have hmap : MapsTo γ.extend I U := fun t ht ↦ by
     rw [γ.extend_apply ht]
     exact hγU _
   have hc : ContinuousOn (f ∘ γ.extend) I :=
-    (show ContinuousOn f U from fun x hx => (hf x hx).continuousAt.continuousWithinAt).comp
+    (show ContinuousOn f U from fun x hx ↦ (hf x hx).continuousAt.continuousWithinAt).comp
       γ.continuous_extend.continuousOn hmap
   have hd (t : ℝ) (ht : t ∈ Ioo (0 : ℝ) 1) :
       HasDerivAt (f ∘ γ.extend) (curveIntegralFun ω γ t) t := by
@@ -105,7 +106,7 @@ theorem curveIntegral_segment_eq_sub_of_hasFDerivAt
     (hab : segment ℝ a b ⊆ U) : curveIntegral ω (Path.segment a b) = f b - f a := by
   apply curveIntegral_eq_sub_of_hasFDerivAt_of_contDiffOn hf hω
   · exact (show ContDiff ℝ 1 (AffineMap.lineMap a b : ℝ → E) by
-      change ContDiff ℝ 1 (fun t : ℝ => t • (b - a) + a)
+      change ContDiff ℝ 1 (fun t : ℝ ↦ t • (b - a) + a)
       fun_prop).contDiffOn.congr
       (Path.eqOn_extend_segment a b)
   · intro t
@@ -116,7 +117,7 @@ theorem curveIntegral_segment_eq_sub_of_hasFDerivAt
 theorem ContinuousLinearMap.curveIntegral_comp_comm
     {G : Type*} [NormedAddCommGroup G] [NormedSpace 𝕜 G] [CompleteSpace G]
     (L : F →L[𝕜] G) (hint : CurveIntegrable ω γ) :
-    curveIntegral (fun x => L.comp (ω x)) γ = L (curveIntegral ω γ) := by
+    curveIntegral (fun x ↦ L.comp (ω x)) γ = L (curveIntegral ω γ) := by
   let : NormedSpace ℝ E := .restrictScalars ℝ 𝕜 E
   let : NormedSpace ℝ F := .restrictScalars ℝ 𝕜 F
   let : NormedSpace ℝ G := .restrictScalars ℝ 𝕜 G

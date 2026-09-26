@@ -8,11 +8,11 @@ on Mathlib and is written as a potential Mathlib contribution.
 There are three main directories.
 
 - `Analysis/`.
-General normed-space, functional-analysis, Taylor-estimate, and integration support,
-including the Gamma integral with a complex Laplace parameter.
+Spaces of holomorphic maps, shared normal-family arguments, curve integration of exact
+one-forms, compactly supported integration, and Taylor-remainder estimates.
 
 - `Topology/`.
-General compactness, path, graph, semicontinuity, and Baire-theorem support.
+Gluing of locally constant differences, frontier lemmas, and semicontinuity support.
 
 - `ComplexAnalysis/`.
 Single-variable complex analysis: holomorphic branches, Banach-valued primitives and
@@ -22,13 +22,11 @@ Cauchy formulas and exhaustions for injective holomorphic disk images; Laurent t
 residue calculations, the disk argument principle, Rouché's theorem and Hurwitz's theorems;
 Montel compactness, Vitali convergence from an interior accumulation point, and
 Casorati–Weierstrass with isolated-singularity classification;
-subharmonic functions, planar Cauchy transforms, removability, injectivity, divided
-differences with coincident nodes, Newton–Taylor formulas, and repeated segment integrals.
+subharmonic functions, planar Cauchy transforms, removability, and injectivity.
 The deformation theory includes Cauchy's theorem for continuous homotopies with
 differentiable, integrable boundary paths, index invariance for continuous based
 homotopies of `C¹` loops, and continuous logarithm tracking. Moving-endpoint identities
-pass to improper limits when the endpoint-track integrals vanish. Uniform tail
-bounds and explicit power-decay estimates provide convergence criteria.
+pass to improper limits when the endpoint-track integrals vanish.
 Exterior-path support proves escape to infinity and endpoint formulas for exact integrals;
 general pullback and improper-integration results live in `Analysis`.
 

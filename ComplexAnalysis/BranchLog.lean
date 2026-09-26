@@ -94,7 +94,7 @@ theorem exists_analyticOnNhd_logBranch_eq {U : Set ℂ} (hU : IsOpen U)
     (hw₀ : exp w₀ = g z₀) :
     ∃ L : ℂ → ℂ, AnalyticOnNhd ℂ L U ∧ EqOn (exp ∘ L) g U ∧ L z₀ = w₀ := by
   obtain ⟨L, hL, heq⟩ := exists_analyticOnNhd_logBranch hU hUc hg hg0
-  refine ⟨fun z => L z + (w₀ - L z₀), hL.add analyticOnNhd_const, ?_, by ring⟩
+  refine ⟨fun z ↦ L z + (w₀ - L z₀), hL.add analyticOnNhd_const, ?_, by ring⟩
   intro z hz
   simp only [Function.comp_apply, exp_add, exp_sub]
   change ∀ z ∈ U, exp (L z) = g z at heq
@@ -119,7 +119,7 @@ theorem exists_analyticOnNhd_root {U : Set ℂ} (hU : IsOpen U)
     (hg0 : ∀ z ∈ U, g z ≠ 0) {n : ℕ} (hn : n ≠ 0) :
     ∃ r : ℂ → ℂ, AnalyticOnNhd ℂ r U ∧ ∀ z ∈ U, r z ^ n = g z := by
   obtain ⟨L, hL, heq⟩ := exists_analyticOnNhd_logBranch hU hUc hg hg0
-  refine ⟨fun z => exp (L z / n), hL.div_const.cexp, ?_⟩
+  refine ⟨fun z ↦ exp (L z / n), hL.div_const.cexp, ?_⟩
   intro z hz
   rw [← exp_nat_mul, mul_div_cancel₀ _ (Nat.cast_ne_zero.mpr hn)]
   exact heq hz

@@ -88,6 +88,7 @@ public import ComplexAnalysis.DirichletDisc
 public import ComplexAnalysis.LocalMapping
 public import ComplexAnalysis.ResidueAtInfinity
 public import ComplexAnalysis.AnalyticContinuation
+public import ComplexAnalysis.AnalyticOrder
 public import ComplexAnalysis.NaturalBoundary
 public import ComplexAnalysis.CanonicalProduct
 public import ComplexAnalysis.CanonicalProduct.Bounds
@@ -177,7 +178,8 @@ and `Topology` libraries.
 * `Subharmonic`: planar submean and maximum principles, majorants, convex examples, and the
   Laplacian criterion.
 * `CauchyPompeiu`, `CauchyTransform`: planar integral identities and transforms with parameters.
-* `RemovableSingularity`, `Injective`, `ZeroPersistence`: planar removal, injectivity, and zeros.
+* `RemovableSingularity`, `Injective`, `ZeroPersistence`: planar removal, injectivity (with the
+  circle integral of `f' / (f - f w)`), and zeros.
 * `ParametricIntegral`, `RealUniqueness`, `LocallyUniform`, `Integral.Circle`: one-variable
   integration, uniqueness, convergence, and circle helpers.
 * `HolomorphicIntegral`: holomorphy of parametric interval integrals with jointly continuous
@@ -198,6 +200,8 @@ and `Topology` libraries.
 * `Runge.OpenSet`, `MittagLeffler`: Runge's theorem on open sets through hole-free compact
   exhaustions, with locally uniformly convergent sequences of approximants, and the
   Mittag-Leffler theorem on arbitrary open sets.
+* `AnalyticOrder`: finiteness of orders, finiteness and countability of zero sets, dividing out
+  zeros, and division by functions with the same orders of vanishing.
 * `InfiniteProduct`, `WeierstrassFactor`, `WeierstrassProduct`: holomorphy, zeros, and orders of
   locally uniformly convergent infinite products, the elementary factors with their uniform
   estimate, the Weierstrass product with prescribed zeros, and the factorization of entire
@@ -227,9 +231,9 @@ and `Topology` libraries.
   with `B` the Blaschke product of the zeros of `f` and `g` holomorphic and nonvanishing.
 * `SchwarzPick`: the Schwarz–Pick lemma in distance and derivative form, contracting the
   pseudo-hyperbolic distance and the hyperbolic metric of the disc.
-* `ThreeCircles`: Hadamard's three-circle theorem, that the maximum modulus of a nonvanishing
-  holomorphic function on an annulus is a log-convex function of the radius, by the maximum
-  principle for the harmonic function `log ‖f‖ - a log ‖z‖`.
+* `ThreeCircles`: Hadamard's three-circle theorem, that the maximum modulus of a holomorphic
+  function on a closed annulus is a log-convex function of the radius, deduced from Mathlib's
+  three-lines theorem through the exponential map.
 * `GreenFunction`: existence and nonnegativity of the Green function of a bounded open set with
   the exterior disc property, as the harmonic compensator for the logarithmic singularity at a
   pole.

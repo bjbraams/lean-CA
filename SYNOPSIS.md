@@ -105,8 +105,8 @@ satisfy the multiplicity-weighted Blaschke condition. The bounded-function Riesz
 writes $f=z^mBg$, with $g$ holomorphic, nonvanishing, and bounded by the same constant as $f$.
 This does not include the full inner–outer factorization theory of Hardy spaces.
 
-The three-circles inequality is proved for functions holomorphic and nonvanishing on a
-punctured disc. The version allowing zeros throughout the annulus is not included.
+The three-circles inequality is proved for Banach-valued functions holomorphic on an open
+annulus and continuous on its closure, with no nonvanishing hypothesis.
 
 ## Conformal mapping and univalent functions
 
@@ -203,7 +203,7 @@ content of the statements, not identity of proof or complete chapter coverage.
 | [Remmert, *Theory of Complex Functions* (1991)](ComplexAnalysis/References/Remmert1991TheoryOfComplexFunctions-SpringerGTM122.pdf), Chapters 6–8 | Integration, primitives, Cauchy estimates, convergence, and local mapping theory are covered jointly with Mathlib. The project emphasizes general interfaces rather than the book's historical material and worked examples. |
 
 For Lang XII in particular, Jensen, Borel–Carathéodory, and Phragmén–Lindelöf are Mathlib
-inputs; the project adds the restricted three-circles result above. Picard–Borel, the Hermite
+inputs; the project adds the three-circles theorem above. Picard–Borel, the Hermite
 interpolation formula, and the arithmetic applications are not supplied by this project.
 For XIII §3, the explicit growth-bound formulation of Hadamard factorization should be
 compared with Lang's distinction between order and strict order.

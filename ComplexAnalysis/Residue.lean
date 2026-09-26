@@ -49,7 +49,7 @@ through positive values. For an isolated holomorphic singularity the integrals s
 
 A scalar counterpart appears in Roman Kvasnytskyi's Mathlib PR #29588. See `CREDITS.md`. -/
 @[expose] def residue (f : ℂ → F) (c : ℂ) : F :=
-  limUnder (𝓝[>] (0 : ℝ)) (fun r => (2 * Real.pi * I : ℂ)⁻¹ • ∮ z in C(c, r), f z)
+  limUnder (𝓝[>] (0 : ℝ)) (fun r ↦ (2 * Real.pi * I : ℂ)⁻¹ • ∮ z in C(c, r), f z)
 
 omit [CompleteSpace F] in
 /-- Eventually constant normalized circle integrals compute the residue. -/
@@ -57,8 +57,8 @@ theorem residue_eq_of_eventually_eq {f : ℂ → F} {c : ℂ} {v : F}
     (h : ∀ᶠ r in 𝓝[>] (0 : ℝ),
       (2 * Real.pi * I : ℂ)⁻¹ • (∮ z in C(c, r), f z) = v) :
     residue f c = v := by
-  have he : (fun r => (2 * Real.pi * I : ℂ)⁻¹ • ∮ z in C(c, r), f z)
-      =ᶠ[𝓝[>] (0 : ℝ)] (fun _ => v) := h
+  have he : (fun r ↦ (2 * Real.pi * I : ℂ)⁻¹ • ∮ z in C(c, r), f z)
+      =ᶠ[𝓝[>] (0 : ℝ)] (fun _ ↦ v) := h
   exact (tendsto_const_nhds.congr' he.symm).limUnder_eq
 
 omit [CompleteSpace F] in
@@ -99,8 +99,8 @@ omit [CompleteSpace F] in
 theorem residue_congr {f g : ℂ → F} {c : ℂ} (h : f =ᶠ[𝓝[≠] c] g) :
     residue f c = residue g c := by
   obtain ⟨R, hR, hfg⟩ := Metric.mem_nhdsWithin_iff.mp h
-  have he : (fun r => (2 * Real.pi * I : ℂ)⁻¹ • ∮ z in C(c, r), f z) =ᶠ[𝓝[>] (0 : ℝ)]
-      (fun r => (2 * Real.pi * I : ℂ)⁻¹ • ∮ z in C(c, r), g z) := by
+  have he : (fun r ↦ (2 * Real.pi * I : ℂ)⁻¹ • ∮ z in C(c, r), f z) =ᶠ[𝓝[>] (0 : ℝ)]
+      (fun r ↦ (2 * Real.pi * I : ℂ)⁻¹ • ∮ z in C(c, r), g z) := by
     filter_upwards [Ioo_mem_nhdsGT hR] with r hr
     congr 1
     apply circleIntegral.integral_congr hr.1.le
@@ -128,7 +128,7 @@ theorem _root_.AnalyticAt.residue_eq_zero {f : ℂ → F} {c : ℂ}
 
 A scalar counterpart appears in Roman Kvasnytskyi's Mathlib PR #29588. See `CREDITS.md`. -/
 theorem residue_sub_inv_smul {f : ℂ → F} {c : ℂ} (hf : AnalyticAt ℂ f c) :
-    residue (fun z => (z - c)⁻¹ • f z) c = f c := by
+    residue (fun z ↦ (z - c)⁻¹ • f z) c = f c := by
   obtain ⟨R, hR, ha⟩ := hf.exists_ball_analyticOnNhd
   apply residue_eq_of_eventually_eq
   filter_upwards [Ioo_mem_nhdsGT hR] with r hr
@@ -140,12 +140,12 @@ theorem residue_sub_inv_smul {f : ℂ → F} {c : ℂ} (hf : AnalyticAt ℂ f c)
 
 A scalar counterpart appears in Roman Kvasnytskyi's Mathlib PR #29588. See `CREDITS.md`. -/
 theorem residue_div_sub {f : ℂ → ℂ} {c : ℂ} (hf : AnalyticAt ℂ f c) :
-    residue (fun z => f z / (z - c)) c = f c := by
+    residue (fun z ↦ f z / (z - c)) c = f c := by
   simpa [div_eq_mul_inv, mul_comm] using residue_sub_inv_smul hf
 
 /-- The higher-order Cauchy kernel computes a residue by an iterated derivative. -/
 theorem residue_sub_zpow_smul {f : ℂ → F} {c : ℂ} (hf : AnalyticAt ℂ f c) (n : ℕ) :
-    residue (fun z => (z - c) ^ (-(n + 1 : ℤ)) • f z) c =
+    residue (fun z ↦ (z - c) ^ (-(n + 1 : ℤ)) • f z) c =
       (n.factorial : ℂ)⁻¹ • iteratedDeriv n f c := by
   obtain ⟨R, hR, ha⟩ := hf.exists_ball_analyticOnNhd
   apply residue_eq_of_eventually_eq
@@ -161,7 +161,7 @@ theorem exists_pos_analyticOnNhd_punctured_closedBall {f : ℂ → F} {c : ℂ}
     (hf : ∀ᶠ z in 𝓝[≠] c, AnalyticAt ℂ f z) :
     ∃ R > 0, AnalyticOnNhd ℂ f (closedBall c R \ {c}) := by
   obtain ⟨R, hR, ha⟩ := Metric.mem_nhdsWithin_iff.mp hf
-  refine ⟨R / 2, half_pos hR, fun z hz => ha ⟨?_, hz.2⟩⟩
+  refine ⟨R / 2, half_pos hR, fun z hz ↦ ha ⟨?_, hz.2⟩⟩
   exact (closedBall_subset_ball (half_lt_self hR)) hz.1
 
 omit [CompleteSpace F] in
@@ -189,7 +189,7 @@ omit [CompleteSpace F] in
 theorem residue_add {f g : ℂ → F} {c : ℂ}
     (hf : ∀ᶠ z in 𝓝[≠] c, AnalyticAt ℂ f z)
     (hg : ∀ᶠ z in 𝓝[≠] c, AnalyticAt ℂ g z) :
-    residue (fun z => f z + g z) c = residue f c + residue g c := by
+    residue (fun z ↦ f z + g z) c = residue f c + residue g c := by
   apply residue_eq_of_eventually_eq
   filter_upwards [eventually_circleIntegral_eq_residue hf,
     eventually_circleIntegral_eq_residue hg] with r hr hs
@@ -199,7 +199,7 @@ omit [CompleteSpace F] in
 /-- Residues commute with multiplication by a constant scalar. -/
 theorem residue_const_smul {f : ℂ → F} {c : ℂ}
     (hf : ∀ᶠ z in 𝓝[≠] c, AnalyticAt ℂ f z) (a : ℂ) :
-    residue (fun z => a • f z) c = a • residue f c := by
+    residue (fun z ↦ a • f z) c = a • residue f c := by
   apply residue_eq_of_eventually_eq
   filter_upwards [eventually_circleIntegral_eq_residue hf] with r hr
   rw [circleIntegral.integral_smul, smul_comm, hr.2]
@@ -209,7 +209,7 @@ omit [CompleteSpace F] in
 theorem residue_sub {f g : ℂ → F} {c : ℂ}
     (hf : ∀ᶠ z in 𝓝[≠] c, AnalyticAt ℂ f z)
     (hg : ∀ᶠ z in 𝓝[≠] c, AnalyticAt ℂ g z) :
-    residue (fun z => f z - g z) c = residue f c - residue g c := by
+    residue (fun z ↦ f z - g z) c = residue f c - residue g c := by
   apply residue_eq_of_eventually_eq
   filter_upwards [eventually_circleIntegral_eq_residue hf,
     eventually_circleIntegral_eq_residue hg] with r hr hs

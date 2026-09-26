@@ -49,7 +49,7 @@ theorem norm_pow_two_pow_le {z : ℂ} (hz : ‖z‖ ≤ 1) (n : ℕ) : ‖z ^ (2
   exact pow_le_pow_of_le_one (norm_nonneg _) hz Nat.lt_two_pow_self.le
 
 /-- The dyadic lacunary series is summable at every point of the open unit disc. -/
-theorem summable_lacunary {z : ℂ} (hz : ‖z‖ < 1) : Summable fun n : ℕ => z ^ (2 ^ n) :=
+theorem summable_lacunary {z : ℂ} (hz : ‖z‖ < 1) : Summable fun n : ℕ ↦ z ^ (2 ^ n) :=
   Summable.of_norm_bounded (summable_geometric_of_lt_one (norm_nonneg _) hz)
     (norm_pow_two_pow_le hz.le)
 
@@ -63,11 +63,11 @@ theorem differentiableOn_lacunary : DifferentiableOn ℂ lacunary (ball 0 1) := 
   have hzr : z ∈ ball 0 r := by
     rw [mem_ball_zero_iff, hr_def]
     linarith
-  have hF : ∀ n : ℕ, DifferentiableOn ℂ (fun w : ℂ => w ^ (2 ^ n)) (ball 0 r) := fun n => by
+  have hF : ∀ n : ℕ, DifferentiableOn ℂ (fun w : ℂ ↦ w ^ (2 ^ n)) (ball 0 r) := fun n ↦ by
     fun_prop
-  have hdiff : DifferentiableOn ℂ (fun w : ℂ => ∑' n : ℕ, w ^ (2 ^ n)) (ball 0 r) := by
+  have hdiff : DifferentiableOn ℂ (fun w : ℂ ↦ ∑' n : ℕ, w ^ (2 ^ n)) (ball 0 r) := by
     refine differentiableOn_tsum_of_summable_norm
-      (summable_geometric_of_lt_one hr0 hr1) hF isOpen_ball fun n w hw => ?_
+      (summable_geometric_of_lt_one hr0 hr1) hF isOpen_ball fun n w hw ↦ ?_
     rw [mem_ball_zero_iff] at hw
     calc ‖w ^ (2 ^ n)‖ ≤ ‖w‖ ^ n := norm_pow_two_pow_le (hw.le.trans hr1.le) n
       _ ≤ r ^ n := pow_le_pow_left₀ (norm_nonneg _) hw.le n
@@ -104,25 +104,25 @@ theorem le_re_lacunary_mul_rootOfUnity {ζ : ℂ} {k : ℕ} (hζ : ζ ^ (2 ^ k) 
     rw [re_sum]
     calc -(k : ℝ) = ∑ _n ∈ Finset.range k, (-1 : ℝ) := by simp
       _ ≤ ∑ n ∈ Finset.range k, (((r : ℂ) * ζ) ^ (2 ^ n)).re := by
-          refine Finset.sum_le_sum fun n _ => ?_
+          refine Finset.sum_le_sum fun n _ ↦ ?_
           have h1 : |(((r : ℂ) * ζ) ^ (2 ^ n)).re| ≤ 1 := by
             refine (abs_re_le_norm _).trans ?_
             rw [norm_pow]
             exact pow_le_one₀ (norm_nonneg _) hz.le
           linarith [neg_abs_le (((r : ℂ) * ζ) ^ (2 ^ n)).re]
   -- the tail is at least `N * r ^ (2 ^ (N + k))`
-  have htail_summable : Summable fun n : ℕ => r ^ (2 ^ (n + k)) := by
+  have htail_summable : Summable fun n : ℕ ↦ r ^ (2 ^ (n + k)) := by
     have := (summable_geometric_of_lt_one hr0 hr1).comp_injective (add_left_injective k)
-    refine Summable.of_nonneg_of_le (fun n => by positivity) (fun n => ?_) this
+    refine Summable.of_nonneg_of_le (fun n ↦ by positivity) (fun n ↦ ?_) this
     exact pow_le_pow_of_le_one hr0 hr1.le Nat.lt_two_pow_self.le
   have hN : (N : ℝ) * r ^ (2 ^ (N + k)) ≤ ∑' n : ℕ, r ^ (2 ^ (n + k)) := by
     calc (N : ℝ) * r ^ (2 ^ (N + k)) = ∑ _n ∈ Finset.range N, r ^ (2 ^ (N + k)) := by simp
       _ ≤ ∑ n ∈ Finset.range N, r ^ (2 ^ (n + k)) := by
-          refine Finset.sum_le_sum fun n hn => ?_
+          refine Finset.sum_le_sum fun n hn ↦ ?_
           refine pow_le_pow_of_le_one hr0 hr1.le ?_
           exact Nat.pow_le_pow_right two_pos (by linarith [Finset.mem_range.mp hn])
       _ ≤ ∑' n : ℕ, r ^ (2 ^ (n + k)) :=
-          htail_summable.sum_le_tsum _ (fun n _ => by positivity)
+          htail_summable.sum_le_tsum _ (fun n _ ↦ by positivity)
   linarith
 
 /-- Every point of the unit circle is close to a `2 ^ k`-th root of unity. -/
@@ -139,8 +139,8 @@ theorem exists_pow_two_pow_eq_one_near {ζ₀ : ℂ} (hζ₀ : ‖ζ₀‖ = 1) 
       _ < ε * 2 ^ k := by
           rw [mul_comm (2 * π) ((1 / 2 : ℝ) ^ k)]
           exact mul_lt_mul_of_pos_right hk (by positivity)
-  set θ : ℝ := arg ζ₀ with hθ_def
-  set m : ℤ := ⌊θ * 2 ^ k / (2 * π)⌋ with hm_def
+  set θ : ℝ := arg ζ₀
+  set m : ℤ := ⌊θ * 2 ^ k / (2 * π)⌋
   set φ : ℝ := 2 * π * m / 2 ^ k with hφ_def
   refine ⟨k, exp (φ * I), ?_, ?_⟩
   · rw [← exp_nat_mul, hφ_def]
@@ -200,10 +200,10 @@ theorem exists_norm_lacunary_gt {ζ₀ : ℂ} (hζ₀ : ‖ζ₀‖ = 1) {ε : �
     linarith
   -- a radius `r` close to `1` with `r ^ (2 ^ (N + k)) ≥ 1 / 2`
   obtain ⟨r, hr, hrpow⟩ : ∃ r ∈ Ioo (max 0 (1 - ε / 2)) 1, (1 / 2 : ℝ) ≤ r ^ (2 ^ (N + k)) := by
-    have hcont : ContinuousAt (fun r : ℝ => r ^ (2 ^ (N + k))) 1 := (continuous_pow _).continuousAt
+    have hcont : ContinuousAt (fun r : ℝ ↦ r ^ (2 ^ (N + k))) 1 := (continuous_pow _).continuousAt
     have hev : ∀ᶠ r in 𝓝 (1 : ℝ), (1 / 2 : ℝ) ≤ r ^ (2 ^ (N + k)) := by
       have h1 : (1 / 2 : ℝ) < (1 : ℝ) ^ (2 ^ (N + k)) := by norm_num
-      exact (hcont.eventually (lt_mem_nhds h1)).mono fun r hr => hr.le
+      exact (hcont.eventually (lt_mem_nhds h1)).mono fun r hr ↦ hr.le
     have hmax : max 0 (1 - ε / 2) < 1 := by
       rw [max_lt_iff]
       constructor <;> linarith

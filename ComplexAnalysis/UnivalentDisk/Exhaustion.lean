@@ -64,11 +64,11 @@ theorem exists_exhaustion_image_ball_of_injOn_holomorphic {f : ℂ → ℂ} {c :
       (ball_subset_closedBall.trans (hsub n))
   have hcl (n : ℕ) : closure (f '' ball c (r n)) = f '' closedBall c (r n) :=
     closure_image_ball (hr n).1 (hf.continuousOn.mono (hsub n))
-  have hmono : Monotone (fun n => f '' ball c (r n)) :=
-    fun n m hnm => image_mono (ball_subset_ball (hrm.monotone hnm))
+  have hmono : Monotone (fun n ↦ f '' ball c (r n)) :=
+    fun n m hnm ↦ image_mono (ball_subset_ball (hrm.monotone hnm))
   have hcover : (⋃ n, f '' ball c (r n)) = f '' ball c R := by
     apply le_antisymm
-    · exact iUnion_subset fun n => image_mono (ball_subset_ball (hr n).2.le)
+    · exact iUnion_subset fun n ↦ image_mono (ball_subset_ball (hr n).2.le)
     · rintro _ ⟨z, hz, rfl⟩
       obtain ⟨n, hn⟩ := ((tendsto_order.mp hlim).1 (dist z c) hz).exists
       exact mem_iUnion.mpr ⟨n, z, hn, rfl⟩
@@ -98,7 +98,7 @@ theorem exists_image_ball_neighborhood_of_isCompact {f : ℂ → ℂ} {c : ℂ} 
       IsCompact (closure (f '' ball c r)) ∧
       closure (f '' ball c r) ⊆ f '' ball c R ∧
       frontier (f '' ball c r) = f '' sphere c r ∧
-      Topology.IsClosedEmbedding (fun z : sphere c r => f z) := by
+      Topology.IsClosedEmbedding (fun z : sphere c r ↦ f z) := by
   obtain ⟨r, _, hr, ho, hc, hsc, hk, _, _, hco⟩ :=
     exists_exhaustion_image_ball_of_injOn_holomorphic hR hf hi
   obtain ⟨n, hn⟩ := hco K hK hKU

@@ -58,7 +58,7 @@ theorem equicontinuous_of_holomorphic_bounded_on_compacts
     {U : TopologicalSpace.Opens E} {S : Set (HolomorphicMap U F)}
     (hb : ∀ K ⊆ (U : Set E), IsCompact K → ∃ M : ℝ,
       ∀ f ∈ S, ∀ z ∈ K, ‖openExtension U f.val z‖ ≤ M) :
-    Equicontinuous (fun f : S => (f.val.val : U → F)) := by
+    Equicontinuous (fun f : S ↦ (f.val.val : U → F)) := by
   let : ProperSpace E := FiniteDimensional.proper ℂ E
   intro c
   rw [Metric.equicontinuousAt_iff]
@@ -111,10 +111,10 @@ theorem isCompact_closure_of_holomorphic_bounded_on_compacts_of_isClosed
       exact mem_sUnion_of_mem (mem_singleton z) isCompact_singleton)
   have he : Topology.IsClosedEmbedding
       (UniformOnFun.ofFun {K : Set U | IsCompact K} ∘
-        (fun f : HolomorphicMap U F => (f.val : U → F))) := by
+        (fun f : HolomorphicMap U F ↦ (f.val : U → F))) := by
     exact (ContinuousMap.isUniformEmbedding_toUniformOnFunIsCompact.comp
       isUniformEmbedding_subtype_val).isClosedEmbedding
-  apply ArzelaAscoli.isCompact_closure_of_isClosedEmbedding (fun K hK => hK) he
+  apply ArzelaAscoli.isCompact_closure_of_isClosedEmbedding (fun K hK ↦ hK) he
   · intro K hK
     exact (equicontinuous_of_holomorphic_bounded_on_compacts hb).equicontinuousOn K
   · intro K hK z hz
@@ -137,7 +137,7 @@ theorem exists_tendsto_of_holomorphic_bounded_on_compacts_of_isClosed_of_unique
     (hunique : ∀ p q : HolomorphicMap U F,
       EqOn (openExtension U p.val) (openExtension U q.val) V → p = q)
     (hp : ∀ z ∈ V, ∃ y : F,
-      Tendsto (fun n => openExtension U (f n).val z) atTop (𝓝 y)) :
+      Tendsto (fun n ↦ openExtension U (f n).val z) atTop (𝓝 y)) :
     ∃ g : HolomorphicMap U F, Tendsto f atTop (𝓝 g) := by
   have hc : IsCompact (closure (range f)) :=
     isCompact_closure_of_holomorphic_bounded_on_compacts_of_isClosed hclosed (by
@@ -145,19 +145,19 @@ theorem exists_tendsto_of_holomorphic_bounded_on_compacts_of_isClosed_of_unique
       obtain ⟨M, hM⟩ := hb K hKU hK
       exact ⟨M, by rintro _ ⟨n, rfl⟩; exact hM n⟩)
   have hm : ∀ᶠ n in atTop, f n ∈ closure (range f) :=
-    .of_forall fun n => subset_closure (mem_range_self n)
+    .of_forall fun n ↦ subset_closure (mem_range_self n)
   obtain ⟨g, _, hg⟩ := hc.exists_mapClusterPt_of_frequently hm.frequently
   refine ⟨g, hc.tendsto_nhds_of_unique_mapClusterPt hm ?_⟩
   intro q _ hq
   have hvalue : ∀ (r : HolomorphicMap U F), MapClusterPt r atTop f →
       ∀ z ∈ V, ∀ y : F,
-      Tendsto (fun n => openExtension U (f n).val z) atTop (𝓝 y) →
+      Tendsto (fun n ↦ openExtension U (f n).val z) atTop (𝓝 y) →
       openExtension U r.val z = y := by
     intro r hr z hz y hy
     have he := hr.continuousAt_comp
       (continuous_holomorphicMap_eval U ⟨z, hVU hz⟩).continuousAt
     obtain ⟨φ, hφ, hlim⟩ := he.tendsto_subseq
-    have hy' : Tendsto (fun n => (f n).val ⟨z, hVU hz⟩) atTop (𝓝 y) := by
+    have hy' : Tendsto (fun n ↦ (f n).val ⟨z, hVU hz⟩) atTop (𝓝 y) := by
       simpa only [openExtension_apply U _ (hVU hz)] using hy
     simpa only [openExtension_apply U _ (hVU hz)] using
       tendsto_nhds_unique hlim (hy'.comp hφ.tendsto_atTop)
@@ -187,7 +187,7 @@ theorem exists_subseq_tendsto_of_holomorphic_bounded_on_compacts_of_isClosed
       obtain ⟨M, hM⟩ := hb K hKU hK
       exact ⟨M, by rintro _ ⟨n, rfl⟩; exact hM n⟩)
   have hm : ∀ᶠ n in atTop, f n ∈ closure (range f) :=
-    .of_forall fun n => subset_closure (mem_range_self n)
+    .of_forall fun n ↦ subset_closure (mem_range_self n)
   obtain ⟨g, _, hg⟩ := hc.exists_mapClusterPt_of_frequently hm.frequently
   obtain ⟨φ, hφ, hlim⟩ := hg.tendsto_subseq
   exact ⟨g, φ, hφ, hlim⟩

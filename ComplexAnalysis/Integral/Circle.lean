@@ -33,16 +33,16 @@ open Complex MeasureTheory Real
 
 /-- Maxima of circle-integrable functions are circle integrable. -/
 theorem CircleIntegrable.max {u v : ℂ → ℝ} {c : ℂ} {R : ℝ} (hu : CircleIntegrable u c R)
-    (hv : CircleIntegrable v c R) : CircleIntegrable (fun z => max (u z) (v z)) c R := by
+    (hv : CircleIntegrable v c R) : CircleIntegrable (fun z ↦ max (u z) (v z)) c R := by
   rw [circleIntegrable_def] at hu hv ⊢
   exact ⟨hu.1.sup hv.1, hu.2.sup hv.2⟩
 
 /-- The circle average is invariant under the antipodal reflection of the circle. -/
 theorem Real.circleAverage_reflect (u : ℂ → ℝ) (c : ℂ) (r : ℝ) :
-    circleAverage (fun t => u (2 * c - t)) c r = circleAverage u c r := by
+    circleAverage (fun t ↦ u (2 * c - t)) c r = circleAverage u c r := by
   rw [← circleAverage_neg_radius (f := u), circleAverage_def, circleAverage_def]
   congr 1
-  refine intervalIntegral.integral_congr fun θ _ => ?_
+  refine intervalIntegral.integral_congr fun θ _ ↦ ?_
   simp only [circleMap]
   congr 1
   push_cast

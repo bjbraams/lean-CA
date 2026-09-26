@@ -60,280 +60,161 @@ theorem deriv_smoothTransition_one_sub (x : ℝ) :
     deriv Real.smoothTransition (1 - x) = deriv Real.smoothTransition x := by
   have hdiff : Differentiable ℝ Real.smoothTransition :=
     (Real.smoothTransition.contDiff (n := ⊤)).differentiable (by norm_num)
-  have h1 : HasDerivAt (fun y : ℝ => Real.smoothTransition (1 - y))
+  have h1 : HasDerivAt (fun y : ℝ ↦ Real.smoothTransition (1 - y))
       (deriv Real.smoothTransition (1 - x) * (-1)) x := by
     have ha : HasDerivAt Real.smoothTransition (deriv Real.smoothTransition (1 - x)) (1 - x) :=
       (hdiff (1 - x)).hasDerivAt
-    have hb : HasDerivAt (fun y : ℝ => (1:ℝ) - y) (-1) x := by
+    have hb : HasDerivAt (fun y : ℝ ↦ (1:ℝ) - y) (-1) x := by
       simpa using (hasDerivAt_id x).const_sub (1:ℝ)
     exact ha.comp x hb
-  have h2 : HasDerivAt (fun x => (1:ℝ) - Real.smoothTransition x)
+  have h2 : HasDerivAt (fun x ↦ (1:ℝ) - Real.smoothTransition x)
       (-(deriv Real.smoothTransition x)) x :=
     ((hdiff x).hasDerivAt).const_sub 1
   rw [funext smoothTransition_one_sub] at h1
   have huniq := h1.unique h2
   linarith
 
+/-- The derivative of an edge `s ↦ p + smoothTransition (4 * s - k) * v` of the parallelogram
+loop. -/
+theorem hasDerivAt_smoothTransition_edge (p v : ℂ) (k t : ℝ) :
+    HasDerivAt (fun s : ℝ ↦ p + (Real.smoothTransition (4 * s - k) : ℂ) * v)
+      ((4 * deriv Real.smoothTransition (4 * t - k) : ℝ) * v) t := by
+  have ha : HasDerivAt Real.smoothTransition (deriv Real.smoothTransition (4 * t - k))
+      (4 * t - k) :=
+    ((Real.smoothTransition.contDiff (n := ⊤)).differentiable
+      (by norm_num)).differentiableAt.hasDerivAt
+  have hb : HasDerivAt (fun s : ℝ ↦ 4 * s - k) 4 t := by
+    simpa using ((hasDerivAt_id t).const_mul (4 : ℝ)).sub_const k
+  have hst : HasDerivAt (fun s : ℝ ↦ Real.smoothTransition (4 * s - k))
+      (deriv Real.smoothTransition (4 * t - k) * 4) t := by
+    exact ha.comp t hb
+  have h1 : HasDerivAt (fun s : ℝ ↦ (Real.smoothTransition (4 * s - k) : ℂ))
+      ((deriv Real.smoothTransition (4 * t - k) * 4 : ℝ) : ℂ) t := hst.ofReal_comp
+  convert (h1.mul_const v).const_add p using 1
+  push_cast
+  ring
+
 /-- The parallelogram loop's derivative on the open first edge `(0, 1/4)`. -/
 theorem hasDerivAt_parallelogramFun_edge1 (c w1 w2 : ℂ) {t : ℝ} (ht : t < 1 / 4) :
     HasDerivAt (parallelogramFun c w1 w2)
       ((4 * deriv Real.smoothTransition (4 * t) : ℝ) * w1) t := by
-  have heqf : parallelogramFun c w1 w2 =ᶠ[𝓝 t]
-      (fun s => c + (Real.smoothTransition (4 * s) : ℂ) * w1) :=
-    Filter.eventually_of_mem (isOpen_Iio.mem_nhds ht)
-      (fun s hs => parallelogramFun_eq_edge1 c w1 w2 hs.le)
-  have hst : HasDerivAt (fun s : ℝ => Real.smoothTransition (4 * s))
-      (deriv Real.smoothTransition (4 * t) * 4) t := by
-    have ha : HasDerivAt Real.smoothTransition (deriv Real.smoothTransition (4 * t)) (4 * t) :=
-      ((Real.smoothTransition.contDiff (n := ⊤)).differentiable
-        (by norm_num)).differentiableAt.hasDerivAt
-    have hb : HasDerivAt (fun s : ℝ => 4 * s) 4 t := by
-      simpa using (hasDerivAt_id t).const_mul (4:ℝ)
-    exact ha.comp t hb
-  have haff : HasDerivAt (fun s : ℝ => c + (Real.smoothTransition (4 * s) : ℂ) * w1)
-      (((deriv Real.smoothTransition (4 * t) * 4 : ℝ) : ℂ) * w1) t := by
-    have h1 : HasDerivAt (fun s : ℝ => (Real.smoothTransition (4 * s) : ℂ))
-        ((deriv Real.smoothTransition (4 * t) * 4 : ℝ) : ℂ) t := hst.ofReal_comp
-    simpa using (h1.mul_const w1).const_add c
-  have := haff.congr_of_eventuallyEq heqf
-  convert this using 1
-  push_cast; ring
-
-/-- The parallelogram loop's derivative on the open third edge `(1/2, 3/4)`. -/
-theorem hasDerivAt_parallelogramFun_edge3 (c w1 w2 : ℂ) {t : ℝ}
-    (ht : t ∈ Set.Ioo (1 / 2 : ℝ) (3 / 4)) :
-    HasDerivAt (parallelogramFun c w1 w2)
-      ((4 * deriv Real.smoothTransition (4 * t - 2) : ℝ) * (-w1)) t := by
-  have heqf : parallelogramFun c w1 w2 =ᶠ[𝓝 t]
-      (fun s => c + w1 + w2 + (Real.smoothTransition (4 * s - 2) : ℂ) * (-w1)) :=
-    Filter.eventually_of_mem (isOpen_Ioo.mem_nhds ht)
-      (fun s hs => parallelogramFun_eq_edge3 c w1 w2 hs.1.le hs.2.le)
-  have hst : HasDerivAt (fun s : ℝ => Real.smoothTransition (4 * s - 2))
-      (deriv Real.smoothTransition (4 * t - 2) * 4) t := by
-    have ha : HasDerivAt Real.smoothTransition (deriv Real.smoothTransition (4 * t - 2))
-        (4 * t - 2) :=
-      ((Real.smoothTransition.contDiff (n := ⊤)).differentiable
-        (by norm_num)).differentiableAt.hasDerivAt
-    have hb : HasDerivAt (fun s : ℝ => 4 * s - 2) 4 t := by
-      simpa using (hasDerivAt_id t).const_mul (4:ℝ) |>.sub_const (2:ℝ)
-    exact ha.comp t hb
-  have haff : HasDerivAt
-      (fun s : ℝ => c + w1 + w2 + (Real.smoothTransition (4 * s - 2) : ℂ) * (-w1))
-      (((deriv Real.smoothTransition (4 * t - 2) * 4 : ℝ) : ℂ) * (-w1)) t := by
-    have h1 : HasDerivAt (fun s : ℝ => (Real.smoothTransition (4 * s - 2) : ℂ))
-        ((deriv Real.smoothTransition (4 * t - 2) * 4 : ℝ) : ℂ) t := hst.ofReal_comp
-    simpa using (h1.mul_const (-w1)).const_add (c + w1 + w2)
-  have := haff.congr_of_eventuallyEq heqf
-  convert this using 1
-  push_cast; ring
+  simpa using (hasDerivAt_smoothTransition_edge c w1 0 t).congr_of_eventuallyEq
+    (Filter.eventually_of_mem (isOpen_Iio.mem_nhds ht)
+      fun s hs ↦ by simpa using parallelogramFun_eq_edge1 c w1 w2 (le_of_lt hs))
 
 /-- The parallelogram loop's derivative on the open second edge `(1/4, 1/2)`. -/
 theorem hasDerivAt_parallelogramFun_edge2 (c w1 w2 : ℂ) {t : ℝ}
     (ht : t ∈ Set.Ioo (1 / 4 : ℝ) (1 / 2)) :
     HasDerivAt (parallelogramFun c w1 w2)
-      ((4 * deriv Real.smoothTransition (4 * t - 1) : ℝ) * w2) t := by
-  have heqf : parallelogramFun c w1 w2 =ᶠ[𝓝 t]
-      (fun s => c + w1 + (Real.smoothTransition (4 * s - 1) : ℂ) * w2) :=
-    Filter.eventually_of_mem (isOpen_Ioo.mem_nhds ht)
-      (fun s hs => parallelogramFun_eq_edge2 c w1 w2 hs.1.le hs.2.le)
-  have hst : HasDerivAt (fun s : ℝ => Real.smoothTransition (4 * s - 1))
-      (deriv Real.smoothTransition (4 * t - 1) * 4) t := by
-    have ha : HasDerivAt Real.smoothTransition (deriv Real.smoothTransition (4 * t - 1))
-        (4 * t - 1) :=
-      ((Real.smoothTransition.contDiff (n := ⊤)).differentiable
-        (by norm_num)).differentiableAt.hasDerivAt
-    have hb : HasDerivAt (fun s : ℝ => 4 * s - 1) 4 t := by
-      simpa using (hasDerivAt_id t).const_mul (4:ℝ) |>.sub_const (1:ℝ)
-    exact ha.comp t hb
-  have haff : HasDerivAt (fun s : ℝ => c + w1 + (Real.smoothTransition (4 * s - 1) : ℂ) * w2)
-      (((deriv Real.smoothTransition (4 * t - 1) * 4 : ℝ) : ℂ) * w2) t := by
-    have h1 : HasDerivAt (fun s : ℝ => (Real.smoothTransition (4 * s - 1) : ℂ))
-        ((deriv Real.smoothTransition (4 * t - 1) * 4 : ℝ) : ℂ) t := hst.ofReal_comp
-    simpa using (h1.mul_const w2).const_add (c + w1)
-  have := haff.congr_of_eventuallyEq heqf
-  convert this using 1
-  push_cast; ring
+      ((4 * deriv Real.smoothTransition (4 * t - 1) : ℝ) * w2) t :=
+  (hasDerivAt_smoothTransition_edge (c + w1) w2 1 t).congr_of_eventuallyEq
+    (Filter.eventually_of_mem (isOpen_Ioo.mem_nhds ht)
+      fun _ hs ↦ parallelogramFun_eq_edge2 c w1 w2 hs.1.le hs.2.le)
+
+/-- The parallelogram loop's derivative on the open third edge `(1/2, 3/4)`. -/
+theorem hasDerivAt_parallelogramFun_edge3 (c w1 w2 : ℂ) {t : ℝ}
+    (ht : t ∈ Set.Ioo (1 / 2 : ℝ) (3 / 4)) :
+    HasDerivAt (parallelogramFun c w1 w2)
+      ((4 * deriv Real.smoothTransition (4 * t - 2) : ℝ) * (-w1)) t :=
+  (hasDerivAt_smoothTransition_edge (c + w1 + w2) (-w1) 2 t).congr_of_eventuallyEq
+    (Filter.eventually_of_mem (isOpen_Ioo.mem_nhds ht)
+      fun _ hs ↦ parallelogramFun_eq_edge3 c w1 w2 hs.1.le hs.2.le)
 
 /-- The parallelogram loop's derivative on the open fourth edge `(3/4, 1)`. -/
 theorem hasDerivAt_parallelogramFun_edge4 (c w1 w2 : ℂ) {t : ℝ} (ht : 3 / 4 < t) :
     HasDerivAt (parallelogramFun c w1 w2)
-      ((4 * deriv Real.smoothTransition (4 * t - 3) : ℝ) * (-w2)) t := by
-  have heqf : parallelogramFun c w1 w2 =ᶠ[𝓝 t]
-      (fun s => c + w2 + (Real.smoothTransition (4 * s - 3) : ℂ) * (-w2)) :=
-    Filter.eventually_of_mem (isOpen_Ioi.mem_nhds ht)
-      (fun s hs => parallelogramFun_eq_edge4 c w1 w2 hs.le)
-  have hst : HasDerivAt (fun s : ℝ => Real.smoothTransition (4 * s - 3))
-      (deriv Real.smoothTransition (4 * t - 3) * 4) t := by
-    have ha : HasDerivAt Real.smoothTransition (deriv Real.smoothTransition (4 * t - 3))
-        (4 * t - 3) :=
-      ((Real.smoothTransition.contDiff (n := ⊤)).differentiable
-        (by norm_num)).differentiableAt.hasDerivAt
-    have hb : HasDerivAt (fun s : ℝ => 4 * s - 3) 4 t := by
-      simpa using (hasDerivAt_id t).const_mul (4:ℝ) |>.sub_const (3:ℝ)
-    exact ha.comp t hb
-  have haff : HasDerivAt (fun s : ℝ => c + w2 + (Real.smoothTransition (4 * s - 3) : ℂ) * (-w2))
-      (((deriv Real.smoothTransition (4 * t - 3) * 4 : ℝ) : ℂ) * (-w2)) t := by
-    have h1 : HasDerivAt (fun s : ℝ => (Real.smoothTransition (4 * s - 3) : ℂ))
-        ((deriv Real.smoothTransition (4 * t - 3) * 4 : ℝ) : ℂ) t := hst.ofReal_comp
-    simpa using (h1.mul_const (-w2)).const_add (c + w2)
-  have := haff.congr_of_eventuallyEq heqf
-  convert this using 1
-  push_cast; ring
+      ((4 * deriv Real.smoothTransition (4 * t - 3) : ℝ) * (-w2)) t :=
+  (hasDerivAt_smoothTransition_edge (c + w2) (-w2) 3 t).congr_of_eventuallyEq
+    (Filter.eventually_of_mem (isOpen_Ioi.mem_nhds ht)
+      fun _ hs ↦ parallelogramFun_eq_edge4 c w1 w2 (le_of_lt hs))
 
+/-- An edge integral of the parallelogram loop, over a parameter interval `[a, b]` of length
+`1/4` on which the loop is `p + smoothTransition (4 * t - k) * v`, rewritten as an integral over
+the gluing parameter `u ∈ [0, 1]`. -/
+theorem integral_edge_eq (f : ℂ → ℂ) (γ : ℝ → ℂ) (p v : ℂ) {a b k : ℝ} (hab : a ≤ b)
+    (ha : 4 * a - k = 0) (hb : 4 * b - k = 1)
+    (hγ : ∀ t ∈ Set.Ioo a b, γ t = p + (Real.smoothTransition (4 * t - k) : ℂ) * v ∧
+      HasDerivAt γ ((4 * deriv Real.smoothTransition (4 * t - k) : ℝ) * v) t) :
+    (∫ t in a..b, f (γ t) * deriv γ t) =
+      ∫ u in (0 : ℝ)..1, f (p + (Real.smoothTransition u : ℂ) * v) *
+        ((deriv Real.smoothTransition u : ℝ) : ℂ) * v := by
+  set g : ℝ → ℂ := fun u ↦ f (p + (Real.smoothTransition u : ℂ) * v) *
+    ((deriv Real.smoothTransition u : ℝ) : ℂ) * v
+  have hcong : ∀ᵐ t ∂volume, t ∈ Set.uIoc a b → f (γ t) * deriv γ t = (4 : ℝ) • g (4 * t + -k) := by
+    rw [Set.uIoc_of_le hab, ae_iff]
+    refine measure_mono_null (t := {b}) (fun t ht ↦ ?_) Real.volume_singleton
+    simp only [Set.mem_ofPred_eq, not_imp] at ht
+    by_contra hne
+    obtain ⟨hγt, hdt⟩ := hγ t ⟨ht.1.1, lt_of_le_of_ne ht.1.2 hne⟩
+    refine ht.2 ?_
+    rw [hγt, hdt.deriv, ← sub_eq_add_neg, Complex.real_smul]
+    push_cast
+    ring
+  rw [intervalIntegral.integral_congr_ae hcong, intervalIntegral.integral_smul,
+    intervalIntegral.smul_integral_comp_mul_add g, ← sub_eq_add_neg, ← sub_eq_add_neg, ha, hb]
 
 /-- The first edge's contribution to the boundary integral of `f`, rewritten as an integral
 over the gluing parameter `v ∈ [0, 1]`. -/
 theorem integral_edge1_eq (c w1 w2 : ℂ) (f : ℂ → ℂ) :
     (∫ t in (0:ℝ)..(1/4), f (parallelogramFun c w1 w2 t) * deriv (parallelogramFun c w1 w2) t) =
       ∫ v in (0:ℝ)..1, f (c + (Real.smoothTransition v : ℂ) * w1) *
-        ((deriv Real.smoothTransition v : ℝ) : ℂ) * w1 := by
-  have hpt : ∀ t ∈ Set.Ioo (0:ℝ) (1/4),
-      f (parallelogramFun c w1 w2 t) * deriv (parallelogramFun c w1 w2) t =
-        (4:ℂ) * (f (c + (Real.smoothTransition (4*t) : ℂ) * w1) *
-          ((deriv Real.smoothTransition (4*t) : ℝ) : ℂ) * w1) := by
-    intro t ht
-    rw [parallelogramFun_eq_edge1 c w1 w2 ht.2.le,
-      (hasDerivAt_parallelogramFun_edge1 c w1 w2 ht.2).deriv]
-    push_cast; ring
-  have hcong : ∀ᵐ t ∂MeasureTheory.volume, t ∈ Set.uIoc (0:ℝ) (1/4) →
-      f (parallelogramFun c w1 w2 t) * deriv (parallelogramFun c w1 w2) t =
-        (4:ℂ) * (f (c + (Real.smoothTransition (4*t) : ℂ) * w1) *
-          ((deriv Real.smoothTransition (4*t) : ℝ) : ℂ) * w1) := by
-    rw [Set.uIoc_of_le (by norm_num : (0:ℝ) ≤ 1/4), MeasureTheory.ae_iff]
-    refine MeasureTheory.measure_mono_null (t := {(1/4:ℝ)}) ?_ Real.volume_singleton
-    intro t ht
-    simp only [Set.mem_ofPred_eq, not_imp] at ht
-    obtain ⟨ht1, ht2⟩ := ht
-    simp only [Set.mem_singleton_iff]
-    by_contra hne
-    exact ht2 (hpt t ⟨ht1.1, lt_of_le_of_ne ht1.2 hne⟩)
-  rw [intervalIntegral.integral_congr_ae hcong, intervalIntegral.integral_const_mul]
-  rw [show ((4:ℂ) * ∫ t in (0:ℝ)..(1/4), f (c + (Real.smoothTransition (4*t) : ℂ) * w1) *
-        ((deriv Real.smoothTransition (4*t) : ℝ) : ℂ) * w1) =
-      (4:ℝ) • ∫ t in (0:ℝ)..(1/4), f (c + (Real.smoothTransition (4*t) : ℂ) * w1) *
-        ((deriv Real.smoothTransition (4*t) : ℝ) : ℂ) * w1 by rw [Complex.real_smul]; norm_num]
-  rw [intervalIntegral.smul_integral_comp_mul_left
-    (fun v => f (c + (Real.smoothTransition v : ℂ) * w1) *
-      ((deriv Real.smoothTransition v : ℝ) : ℂ) * w1) (4:ℝ)]
-  norm_num
+        ((deriv Real.smoothTransition v : ℝ) : ℂ) * w1 :=
+  integral_edge_eq f _ c w1 (k := 0) (by norm_num) (by norm_num) (by norm_num) fun t ht ↦
+    ⟨by simpa using parallelogramFun_eq_edge1 c w1 w2 ht.2.le,
+      by simpa using hasDerivAt_parallelogramFun_edge1 c w1 w2 ht.2⟩
 
 /-- The second edge's contribution to the boundary integral of `f`, rewritten as an integral
 over the gluing parameter `v ∈ [0, 1]`. -/
 theorem integral_edge2_eq (c w1 w2 : ℂ) (f : ℂ → ℂ) :
     (∫ t in (1/4:ℝ)..(1/2), f (parallelogramFun c w1 w2 t) * deriv (parallelogramFun c w1 w2) t) =
       ∫ v in (0:ℝ)..1, f (c + w1 + (Real.smoothTransition v : ℂ) * (w2)) *
-        ((deriv Real.smoothTransition v : ℝ) : ℂ) * (w2) := by
-  have hpt : ∀ t ∈ Set.Ioo (1/4:ℝ) (1/2),
-      f (parallelogramFun c w1 w2 t) * deriv (parallelogramFun c w1 w2) t =
-        (4:ℂ) * (f (c + w1 + (Real.smoothTransition (4*t + (-1)) : ℂ) * (w2)) *
-          ((deriv Real.smoothTransition (4*t + (-1)) : ℝ) : ℂ) * (w2)) := by
-    intro t ht
-    rw [parallelogramFun_eq_edge2 c w1 w2 ht.1.le ht.2.le,
-      (hasDerivAt_parallelogramFun_edge2 c w1 w2 ht).deriv]
-    push_cast; ring_nf
-  have hcong : ∀ᵐ t ∂MeasureTheory.volume, t ∈ Set.uIoc (1/4:ℝ) (1/2) →
-      f (parallelogramFun c w1 w2 t) * deriv (parallelogramFun c w1 w2) t =
-        (4:ℂ) * (f (c + w1 + (Real.smoothTransition (4*t + (-1)) : ℂ) * (w2)) *
-          ((deriv Real.smoothTransition (4*t + (-1)) : ℝ) : ℂ) * (w2)) := by
-    rw [Set.uIoc_of_le (by norm_num : (1/4:ℝ) ≤ 1/2), MeasureTheory.ae_iff]
-    refine MeasureTheory.measure_mono_null (t := {(1/2:ℝ)}) ?_ Real.volume_singleton
-    intro t ht
-    simp only [Set.mem_ofPred_eq, not_imp] at ht
-    obtain ⟨ht1, ht2⟩ := ht
-    simp only [Set.mem_singleton_iff]
-    by_contra hne
-    exact ht2 (hpt t ⟨ht1.1, lt_of_le_of_ne ht1.2 hne⟩)
-  rw [intervalIntegral.integral_congr_ae hcong, intervalIntegral.integral_const_mul]
-  rw [show ((4:ℂ) * ∫ t in (1/4:ℝ)..(1/2),
-        f (c + w1 + (Real.smoothTransition (4*t + (-1)) : ℂ) * (w2)) *
-        ((deriv Real.smoothTransition (4*t + (-1)) : ℝ) : ℂ) * (w2)) =
-      (4:ℝ) • ∫ t in (1/4:ℝ)..(1/2),
-        f (c + w1 + (Real.smoothTransition (4*t + (-1)) : ℂ) * (w2)) *
-        ((deriv Real.smoothTransition (4*t + (-1)) : ℝ) : ℂ) * (w2) by
-    rw [Complex.real_smul]; norm_num]
-  rw [intervalIntegral.smul_integral_comp_mul_add
-    (fun v => f (c + w1 + (Real.smoothTransition v : ℂ) * (w2)) *
-      ((deriv Real.smoothTransition v : ℝ) : ℂ) * (w2)) (4:ℝ) (-1)]
-  norm_num
+        ((deriv Real.smoothTransition v : ℝ) : ℂ) * (w2) :=
+  integral_edge_eq f _ (c + w1) w2 (k := 1) (by norm_num) (by norm_num) (by norm_num) fun t ht ↦
+    ⟨parallelogramFun_eq_edge2 c w1 w2 ht.1.le ht.2.le,
+      hasDerivAt_parallelogramFun_edge2 c w1 w2 ht⟩
 
 /-- The third edge's contribution to the boundary integral of `f`, rewritten as an integral
 over the gluing parameter `v ∈ [0, 1]`. -/
 theorem integral_edge3_eq (c w1 w2 : ℂ) (f : ℂ → ℂ) :
     (∫ t in (1/2:ℝ)..(3/4), f (parallelogramFun c w1 w2 t) * deriv (parallelogramFun c w1 w2) t) =
       ∫ v in (0:ℝ)..1, f (c + w1 + w2 + (Real.smoothTransition v : ℂ) * (-w1)) *
-        ((deriv Real.smoothTransition v : ℝ) : ℂ) * (-w1) := by
-  have hpt : ∀ t ∈ Set.Ioo (1/2:ℝ) (3/4),
-      f (parallelogramFun c w1 w2 t) * deriv (parallelogramFun c w1 w2) t =
-        (4:ℂ) * (f (c + w1 + w2 + (Real.smoothTransition (4*t + (-2)) : ℂ) * (-w1)) *
-          ((deriv Real.smoothTransition (4*t + (-2)) : ℝ) : ℂ) * (-w1)) := by
-    intro t ht
-    rw [parallelogramFun_eq_edge3 c w1 w2 ht.1.le ht.2.le,
-      (hasDerivAt_parallelogramFun_edge3 c w1 w2 ht).deriv]
-    push_cast; ring_nf
-  have hcong : ∀ᵐ t ∂MeasureTheory.volume, t ∈ Set.uIoc (1/2:ℝ) (3/4) →
-      f (parallelogramFun c w1 w2 t) * deriv (parallelogramFun c w1 w2) t =
-        (4:ℂ) * (f (c + w1 + w2 + (Real.smoothTransition (4*t + (-2)) : ℂ) * (-w1)) *
-          ((deriv Real.smoothTransition (4*t + (-2)) : ℝ) : ℂ) * (-w1)) := by
-    rw [Set.uIoc_of_le (by norm_num : (1/2:ℝ) ≤ 3/4), MeasureTheory.ae_iff]
-    refine MeasureTheory.measure_mono_null (t := {(3/4:ℝ)}) ?_ Real.volume_singleton
-    intro t ht
-    simp only [Set.mem_ofPred_eq, not_imp] at ht
-    obtain ⟨ht1, ht2⟩ := ht
-    simp only [Set.mem_singleton_iff]
-    by_contra hne
-    exact ht2 (hpt t ⟨ht1.1, lt_of_le_of_ne ht1.2 hne⟩)
-  rw [intervalIntegral.integral_congr_ae hcong, intervalIntegral.integral_const_mul]
-  rw [show ((4:ℂ) * ∫ t in (1/2:ℝ)..(3/4),
-        f (c + w1 + w2 + (Real.smoothTransition (4*t + (-2)) : ℂ) * (-w1)) *
-        ((deriv Real.smoothTransition (4*t + (-2)) : ℝ) : ℂ) * (-w1)) =
-      (4:ℝ) • ∫ t in (1/2:ℝ)..(3/4),
-        f (c + w1 + w2 + (Real.smoothTransition (4*t + (-2)) : ℂ) * (-w1)) *
-        ((deriv Real.smoothTransition (4*t + (-2)) : ℝ) : ℂ) * (-w1) by
-    rw [Complex.real_smul]; norm_num]
-  rw [intervalIntegral.smul_integral_comp_mul_add
-    (fun v => f (c + w1 + w2 + (Real.smoothTransition v : ℂ) * (-w1)) *
-      ((deriv Real.smoothTransition v : ℝ) : ℂ) * (-w1)) (4:ℝ) (-2)]
-  norm_num
+        ((deriv Real.smoothTransition v : ℝ) : ℂ) * (-w1) :=
+  integral_edge_eq f _ (c + w1 + w2) (-w1) (k := 2) (by norm_num) (by norm_num) (by norm_num)
+    fun t ht ↦ ⟨parallelogramFun_eq_edge3 c w1 w2 ht.1.le ht.2.le,
+      hasDerivAt_parallelogramFun_edge3 c w1 w2 ht⟩
 
 /-- The fourth edge's contribution to the boundary integral of `f`, rewritten as an integral
 over the gluing parameter `v ∈ [0, 1]`. -/
 theorem integral_edge4_eq (c w1 w2 : ℂ) (f : ℂ → ℂ) :
     (∫ t in (3/4:ℝ)..(1), f (parallelogramFun c w1 w2 t) * deriv (parallelogramFun c w1 w2) t) =
       ∫ v in (0:ℝ)..1, f (c + w2 + (Real.smoothTransition v : ℂ) * (-w2)) *
-        ((deriv Real.smoothTransition v : ℝ) : ℂ) * (-w2) := by
-  have hpt : ∀ t ∈ Set.Ioo (3/4:ℝ) (1),
-      f (parallelogramFun c w1 w2 t) * deriv (parallelogramFun c w1 w2) t =
-        (4:ℂ) * (f (c + w2 + (Real.smoothTransition (4*t + (-3)) : ℂ) * (-w2)) *
-          ((deriv Real.smoothTransition (4*t + (-3)) : ℝ) : ℂ) * (-w2)) := by
-    intro t ht
-    rw [parallelogramFun_eq_edge4 c w1 w2 ht.1.le,
-      (hasDerivAt_parallelogramFun_edge4 c w1 w2 ht.1).deriv]
-    push_cast; ring_nf
-  have hcong : ∀ᵐ t ∂MeasureTheory.volume, t ∈ Set.uIoc (3/4:ℝ) (1) →
-      f (parallelogramFun c w1 w2 t) * deriv (parallelogramFun c w1 w2) t =
-        (4:ℂ) * (f (c + w2 + (Real.smoothTransition (4*t + (-3)) : ℂ) * (-w2)) *
-          ((deriv Real.smoothTransition (4*t + (-3)) : ℝ) : ℂ) * (-w2)) := by
-    rw [Set.uIoc_of_le (by norm_num : (3/4:ℝ) ≤ 1), MeasureTheory.ae_iff]
-    refine MeasureTheory.measure_mono_null (t := {(1:ℝ)}) ?_ Real.volume_singleton
-    intro t ht
-    simp only [Set.mem_ofPred_eq, not_imp] at ht
-    obtain ⟨ht1, ht2⟩ := ht
-    simp only [Set.mem_singleton_iff]
-    by_contra hne
-    exact ht2 (hpt t ⟨ht1.1, lt_of_le_of_ne ht1.2 hne⟩)
-  rw [intervalIntegral.integral_congr_ae hcong, intervalIntegral.integral_const_mul]
-  rw [show ((4:ℂ) * ∫ t in (3/4:ℝ)..(1),
-        f (c + w2 + (Real.smoothTransition (4*t + (-3)) : ℂ) * (-w2)) *
-        ((deriv Real.smoothTransition (4*t + (-3)) : ℝ) : ℂ) * (-w2)) =
-      (4:ℝ) • ∫ t in (3/4:ℝ)..(1),
-        f (c + w2 + (Real.smoothTransition (4*t + (-3)) : ℂ) * (-w2)) *
-        ((deriv Real.smoothTransition (4*t + (-3)) : ℝ) : ℂ) * (-w2) by
-    rw [Complex.real_smul]; norm_num]
-  rw [intervalIntegral.smul_integral_comp_mul_add
-    (fun v => f (c + w2 + (Real.smoothTransition v : ℂ) * (-w2)) *
-      ((deriv Real.smoothTransition v : ℝ) : ℂ) * (-w2)) (4:ℝ) (-3)]
-  norm_num
+        ((deriv Real.smoothTransition v : ℝ) : ℂ) * (-w2) :=
+  integral_edge_eq f _ (c + w2) (-w2) (k := 3) (by norm_num) (by norm_num) (by norm_num)
+    fun t ht ↦ ⟨parallelogramFun_eq_edge4 c w1 w2 ht.1.le,
+      hasDerivAt_parallelogramFun_edge4 c w1 w2 ht.1⟩
 
+/-- **Opposite edges cancel.** For `f` periodic with period `w`, the edge from `p` in direction
+`v` and the edge from `q = p + v + w` in direction `-v` contribute opposite integrals. -/
+theorem integral_edge_add_integral_opposite_edge_eq_zero {f : ℂ → ℂ} {w : ℂ}
+    (hper : Function.Periodic f w) (p v q : ℂ) (hq : q = p + v + w) :
+    (∫ u in (0:ℝ)..1, f (p + (Real.smoothTransition u : ℂ) * v) *
+        ((deriv Real.smoothTransition u : ℝ) : ℂ) * v) +
+      (∫ u in (0:ℝ)..1, f (q + (Real.smoothTransition u : ℂ) * (-v)) *
+        ((deriv Real.smoothTransition u : ℝ) : ℂ) * (-v)) = 0 := by
+  have hrev := intervalIntegral.integral_comp_sub_left
+    (fun u ↦ f (q + (Real.smoothTransition u : ℂ) * (-v)) *
+      ((deriv Real.smoothTransition u : ℝ) : ℂ) * (-v)) (1 : ℝ) (a := 0) (b := 1)
+  simp only [sub_self, sub_zero] at hrev
+  have hsecond : (∫ u in (0 : ℝ)..1, f (q + (Real.smoothTransition (1 - u) : ℂ) * (-v)) *
+      ((deriv Real.smoothTransition (1 - u) : ℝ) : ℂ) * (-v)) =
+      ∫ u in (0 : ℝ)..1, -(f (p + (Real.smoothTransition u : ℂ) * v) *
+        ((deriv Real.smoothTransition u : ℝ) : ℂ) * v) := by
+    refine intervalIntegral.integral_congr fun u _ ↦ ?_
+    simp only [smoothTransition_one_sub, deriv_smoothTransition_one_sub, hq]
+    rw [show p + v + w + (((1 : ℝ) - Real.smoothTransition u : ℝ) : ℂ) * (-v) =
+      (p + (Real.smoothTransition u : ℂ) * v) + w by push_cast; ring, hper]
+    ring
+  rw [← hrev, hsecond, intervalIntegral.integral_neg, add_neg_cancel]
 
 /-- Edges 1 and 3, offset by periodicity in `w2`, cancel exactly. -/
 theorem integral_edge1_add_edge3_eq_zero (c w1 w2 : ℂ) {f : ℂ → ℂ}
@@ -342,29 +223,7 @@ theorem integral_edge1_add_edge3_eq_zero (c w1 w2 : ℂ) {f : ℂ → ℂ}
     (∫ t in (1/2:ℝ)..(3/4), f (parallelogramFun c w1 w2 t) *
       deriv (parallelogramFun c w1 w2) t) = 0 := by
   rw [integral_edge1_eq, integral_edge3_eq]
-  have hrev : (∫ v in (0:ℝ)..1, f (c + w1 + w2 + (Real.smoothTransition v : ℂ) * (-w1)) *
-      ((deriv Real.smoothTransition v : ℝ) : ℂ) * (-w1)) =
-      ∫ v in (0:ℝ)..1, f (c + w1 + w2 + (Real.smoothTransition (1 - v) : ℂ) * (-w1)) *
-        ((deriv Real.smoothTransition (1 - v) : ℝ) : ℂ) * (-w1) := by
-    have hcomp := intervalIntegral.integral_comp_sub_left
-      (fun v => f (c + w1 + w2 + (Real.smoothTransition v : ℂ) * (-w1)) *
-        ((deriv Real.smoothTransition v : ℝ) : ℂ) * (-w1)) (1:ℝ) (a := (0:ℝ)) (b := 1)
-    simpa using hcomp.symm
-  rw [hrev]
-  have hpt : ∀ v : ℝ, f (c + w1 + w2 + (Real.smoothTransition (1 - v) : ℂ) * (-w1)) *
-      ((deriv Real.smoothTransition (1 - v) : ℝ) : ℂ) * (-w1) =
-      -(f (c + (Real.smoothTransition v : ℂ) * w1) *
-        ((deriv Real.smoothTransition v : ℝ) : ℂ) * w1) := by
-    intro v
-    rw [smoothTransition_one_sub, deriv_smoothTransition_one_sub]
-    have hz : c + w1 + w2 + (((1:ℝ) - Real.smoothTransition v : ℝ) : ℂ) * (-w1) =
-        (c + (Real.smoothTransition v : ℂ) * w1) + w2 := by push_cast; ring
-    rw [hz, hper2]
-    ring
-  rw [intervalIntegral.integral_congr (fun v _ => hpt v)]
-  rw [intervalIntegral.integral_neg]
-  ring
-
+  exact integral_edge_add_integral_opposite_edge_eq_zero hper2 c w1 _ rfl
 
 /-- Edges 2 and 4, offset by periodicity in `w1`, cancel exactly. -/
 theorem integral_edge2_add_edge4_eq_zero (c w1 w2 : ℂ) {f : ℂ → ℂ}
@@ -373,53 +232,29 @@ theorem integral_edge2_add_edge4_eq_zero (c w1 w2 : ℂ) {f : ℂ → ℂ}
     (∫ t in (3/4:ℝ)..1, f (parallelogramFun c w1 w2 t) *
       deriv (parallelogramFun c w1 w2) t) = 0 := by
   rw [integral_edge2_eq, integral_edge4_eq]
-  have hrev : (∫ v in (0:ℝ)..1, f (c + w2 + (Real.smoothTransition v : ℂ) * (-w2)) *
-      ((deriv Real.smoothTransition v : ℝ) : ℂ) * (-w2)) =
-      ∫ v in (0:ℝ)..1, f (c + w2 + (Real.smoothTransition (1 - v) : ℂ) * (-w2)) *
-        ((deriv Real.smoothTransition (1 - v) : ℝ) : ℂ) * (-w2) := by
-    have hcomp := intervalIntegral.integral_comp_sub_left
-      (fun v => f (c + w2 + (Real.smoothTransition v : ℂ) * (-w2)) *
-        ((deriv Real.smoothTransition v : ℝ) : ℂ) * (-w2)) (1:ℝ) (a := (0:ℝ)) (b := 1)
-    simpa using hcomp.symm
-  rw [hrev]
-  have hpt : ∀ v : ℝ, f (c + w2 + (Real.smoothTransition (1 - v) : ℂ) * (-w2)) *
-      ((deriv Real.smoothTransition (1 - v) : ℝ) : ℂ) * (-w2) =
-      -(f (c + w1 + (Real.smoothTransition v : ℂ) * w2) *
-        ((deriv Real.smoothTransition v : ℝ) : ℂ) * w2) := by
-    intro v
-    rw [smoothTransition_one_sub, deriv_smoothTransition_one_sub]
-    have hz1 : c + w2 + (((1:ℝ) - Real.smoothTransition v : ℝ) : ℂ) * (-w2) =
-        c + (Real.smoothTransition v : ℂ) * w2 := by push_cast; ring
-    have hz2 : c + w1 + (Real.smoothTransition v : ℂ) * w2 =
-        (c + (Real.smoothTransition v : ℂ) * w2) + w1 := by ring
-    rw [hz1, hz2, hper1]
-    ring
-  rw [intervalIntegral.integral_congr (fun v _ => hpt v)]
-  rw [intervalIntegral.integral_neg]
-  ring
-
+  exact integral_edge_add_integral_opposite_edge_eq_zero hper1.neg (c + w1) w2 _ (by ring)
 
 /-- **The boundary integral of a doubly periodic function over a period parallelogram
 vanishes.** Opposite edges cancel exactly: each is the periodic translate of the other,
 traversed in the opposite direction. -/
 theorem curveIntegral_toSpanSingleton_parallelogramLoop_eq_zero {c w1 w2 : ℂ} {f : ℂ → ℂ}
     (hf : Continuous f) (hper1 : Function.Periodic f w1) (hper2 : Function.Periodic f w2) :
-    curveIntegral (fun z => ContinuousLinearMap.toSpanSingleton ℂ (f z))
+    curveIntegral (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ (f z))
       (parallelogramLoop c w1 w2) = 0 := by
-  have hCIeq : curveIntegral (fun z => ContinuousLinearMap.toSpanSingleton ℂ (f z))
+  have hCIeq : curveIntegral (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ (f z))
       (parallelogramLoop c w1 w2) =
       ∫ t in (0:ℝ)..1, f (parallelogramFun c w1 w2 t) * deriv (parallelogramFun c w1 w2) t := by
     rw [curveIntegral_eq_intervalIntegral_deriv, parallelogramLoop_extend]
     simp only [ContinuousLinearMap.toSpanSingleton_apply, smul_eq_mul]
-    exact intervalIntegral.integral_congr (fun t _ => mul_comm _ _)
+    exact intervalIntegral.integral_congr (fun t _ ↦ mul_comm _ _)
   rw [hCIeq]
-  have hcontg : Continuous (fun t => f (parallelogramFun c w1 w2 t) *
+  have hcontg : Continuous (fun t ↦ f (parallelogramFun c w1 w2 t) *
       deriv (parallelogramFun c w1 w2) t) :=
     (hf.comp (continuous_parallelogramFun c w1 w2)).mul
       ((contDiff_parallelogramFun c w1 w2).iterate_deriv 1).continuous
   have hInt : ∀ a b : ℝ, IntervalIntegrable
-      (fun t => f (parallelogramFun c w1 w2 t) * deriv (parallelogramFun c w1 w2) t)
-      MeasureTheory.volume a b := fun a b => hcontg.intervalIntegrable a b
+      (fun t ↦ f (parallelogramFun c w1 w2 t) * deriv (parallelogramFun c w1 w2) t)
+      MeasureTheory.volume a b := fun a b ↦ hcontg.intervalIntegrable a b
   have hsplit1 := intervalIntegral.integral_add_adjacent_intervals
     (hInt 0 (1/4)) (hInt (1/4) (1/2))
   have hsplit2 := intervalIntegral.integral_add_adjacent_intervals

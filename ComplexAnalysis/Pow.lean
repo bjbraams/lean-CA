@@ -61,7 +61,7 @@ theorem mul_cpow_of_re_pos {a w : ℂ} (ha : 0 < a.re) (hw : 0 < w.re) (t : ℂ)
 /-- The principal power is holomorphic on any disk centered at a positive real
 number with that number as radius. -/
 theorem analyticOnNhd_cpow_ball_ofReal (t : ℂ) (A : ℝ) :
-    AnalyticOnNhd ℂ (fun w : ℂ => w ^ t) (Metric.ball (A : ℂ) A) := by
+    AnalyticOnNhd ℂ (fun w : ℂ ↦ w ^ t) (Metric.ball (A : ℂ) A) := by
   intro w hw
   have hnorm : ‖(A : ℂ) - w‖ < A := by simpa [dist_eq_norm, norm_sub_rev] using hw
   have hreal : 0 < w.re := by

@@ -115,7 +115,7 @@ theorem cayleyCircle_im_neg_of_lt_norm {z : ℂ} (hr : 0 ≤ r) (hz : r < ‖z�
 /-- `cayleyCircleInv r` is a left inverse of `cayleyCircle r` away from the pole `-r`. -/
 theorem cayleyCircleInv_cayleyCircle (hr : 0 < r) {z : ℂ} (hz : z ≠ -(r : ℂ)) :
     cayleyCircleInv r (cayleyCircle r z) = z := by
-  have hrz : (r : ℂ) + z ≠ 0 := fun h => hz (by linear_combination h)
+  have hrz : (r : ℂ) + z ≠ 0 := fun h ↦ hz (by linear_combination h)
   have hr0 : (r : ℂ) ≠ 0 := by exact_mod_cast hr.ne'
   have hWI : cayleyCircle r z + Complex.I = 2 * Complex.I * r / ((r : ℂ) + z) := by
     unfold cayleyCircle; field_simp; ring
@@ -129,7 +129,7 @@ theorem cayleyCircleInv_cayleyCircle (hr : 0 < r) {z : ℂ} (hz : z ≠ -(r : �
 /-- `cayleyCircleInv r` is a right inverse of `cayleyCircle r` away from the pole `-I`. -/
 theorem cayleyCircle_cayleyCircleInv (hr : 0 < r) {w : ℂ} (hw : w ≠ -Complex.I) :
     cayleyCircle r (cayleyCircleInv r w) = w := by
-  have hwI : w + Complex.I ≠ 0 := fun h => hw (by linear_combination h)
+  have hwI : w + Complex.I ≠ 0 := fun h ↦ hw (by linear_combination h)
   have hr0 : (r : ℂ) ≠ 0 := by exact_mod_cast hr.ne'
   have hsub : (r : ℂ) - cayleyCircleInv r w = 2 * r * w / (w + Complex.I) := by
     unfold cayleyCircleInv; field_simp; ring
@@ -282,21 +282,21 @@ avoiding the inversion pole `0` and the Möbius pole `-r`, a function holomorphi
 circle, continuous up to it, and real-valued on it extends holomorphically across the circle. -/
 theorem analyticOnNhd_circleReflection {r : ℝ} (hr : 0 < r) {U : Set ℂ} {f : ℂ → ℂ}
     (hU : IsOpen U) (h0 : (0 : ℂ) ∉ U) (hmr : -(r : ℂ) ∉ U)
-    (hs : MapsTo (fun z => (r : ℂ) ^ 2 / conj z) U U)
+    (hs : MapsTo (fun z ↦ (r : ℂ) ^ 2 / conj z) U U)
     (hc : ContinuousOn f (U ∩ closedBall 0 r))
     (hd : DifferentiableOn ℂ f (U ∩ ball 0 r))
     (hreal : ∀ z ∈ U, ‖z‖ = r → (f z).im = 0) :
     AnalyticOnNhd ℂ (circleReflection r f) U := by
   set ψ : ℂ → ℂ := cayleyCircleInv r with hψ_def
   set φ : ℂ → ℂ := cayleyCircle r with hφ_def
-  set V : Set ℂ := {w : ℂ | w ≠ -Complex.I} ∩ ψ ⁻¹' U with hV_def
+  set V : Set ℂ := {w : ℂ | w ≠ -Complex.I} ∩ ψ ⁻¹' U
   set g : ℂ → ℂ := f ∘ ψ with hg_def
-  have hψcont : ContinuousOn ψ {w : ℂ | w ≠ -Complex.I} := fun w hw =>
+  have hψcont : ContinuousOn ψ {w : ℂ | w ≠ -Complex.I} := fun w hw ↦
     (differentiableAt_cayleyCircleInv r
-      (fun h => hw (by linear_combination h))).continuousAt.continuousWithinAt
+      (fun h ↦ hw (by linear_combination h))).continuousAt.continuousWithinAt
   have hφV : MapsTo φ U V := by
     intro z hz
-    have hzr : z ≠ -(r : ℂ) := fun h => hmr (h ▸ hz)
+    have hzr : z ≠ -(r : ℂ) := fun h ↦ hmr (h ▸ hz)
     refine ⟨cayleyCircle_ne_neg_I hr z, ?_⟩
     rw [Set.mem_preimage, hψ_def, hφ_def, cayleyCircleInv_cayleyCircle hr hzr]
     exact hz
@@ -305,8 +305,8 @@ theorem analyticOnNhd_circleReflection {r : ℝ} (hr : 0 < r) {U : Set ℂ} {f :
     intro w hw
     obtain ⟨hwI, hwU⟩ := hw
     have hzU : ψ w ∈ U := hwU
-    have hz0 : ψ w ≠ 0 := fun h => h0 (h ▸ hzU)
-    have hzr : ψ w ≠ -(r : ℂ) := fun h => hmr (h ▸ hzU)
+    have hz0 : ψ w ≠ 0 := fun h ↦ h0 (h ▸ hzU)
+    have hzr : ψ w ≠ -(r : ℂ) := fun h ↦ hmr (h ▸ hzU)
     have hwφz : φ (ψ w) = w := cayleyCircle_cayleyCircleInv hr hwI
     have hconjw : conj w = φ ((r : ℂ) ^ 2 / conj (ψ w)) := by
       conv_lhs => rw [← hwφz]
@@ -323,12 +323,12 @@ theorem analyticOnNhd_circleReflection {r : ℝ} (hr : 0 < r) {U : Set ℂ} {f :
     rintro w ⟨⟨_, hwU⟩, hwim⟩
     exact ⟨hwU, mem_ball_zero_iff.mpr (norm_cayleyCircleInv_lt_of_im_pos hr hwim)⟩
   have hgcont : ContinuousOn g (V ∩ {z : ℂ | 0 ≤ z.im}) :=
-    hc.comp (hψcont.mono (fun w hw => hw.1.1)) hψmapsC
+    hc.comp (hψcont.mono (fun w hw ↦ hw.1.1)) hψmapsC
   have hgdiff : DifferentiableOn ℂ g (V ∩ {z : ℂ | 0 < z.im}) := by
     intro w hw
     have h1 : DifferentiableWithinAt ℂ ψ (V ∩ {z : ℂ | 0 < z.im}) w :=
       (differentiableAt_cayleyCircleInv r
-        (fun h => hw.1.1 (by linear_combination h))).differentiableWithinAt
+        (fun h ↦ hw.1.1 (by linear_combination h))).differentiableWithinAt
     exact DifferentiableWithinAt.comp (f := ψ) (x := w) (hd (ψ w) (hψmapsO hw)) h1 hψmapsO
   have hgreal : ∀ w ∈ V, w.im = 0 → (g w).im = 0 := by
     intro w hw himeq
@@ -347,7 +347,7 @@ theorem analyticOnNhd_circleReflection {r : ℝ} (hr : 0 < r) {U : Set ℂ} {f :
   have hcomp : AnalyticOnNhd ℂ (schwarzReflection g ∘ φ) U := hgan.comp hφan hφV
   have heq : Set.EqOn (circleReflection r f) (schwarzReflection g ∘ φ) U := by
     intro z hz
-    have hzr : z ≠ -(r : ℂ) := fun h => hmr (h ▸ hz)
+    have hzr : z ≠ -(r : ℂ) := fun h ↦ hmr (h ▸ hz)
     simp only [Function.comp_apply]
     by_cases hzle : ‖z‖ ≤ r
     · rw [circleReflection_of_le hzle]
@@ -361,7 +361,7 @@ theorem analyticOnNhd_circleReflection {r : ℝ} (hr : 0 < r) {U : Set ℂ} {f :
     · rw [not_le] at hzle
       rw [circleReflection_of_gt hzle]
       have him : (φ z).im < 0 := cayleyCircle_im_neg_of_lt_norm hr.le hzle
-      have hz0 : z ≠ 0 := fun h => h0 (h ▸ hz)
+      have hz0 : z ≠ 0 := fun h ↦ h0 (h ▸ hz)
       rw [schwarzReflection_of_neg him, hg_def]
       simp only [Function.comp_apply]
       congr 1

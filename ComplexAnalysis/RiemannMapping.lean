@@ -61,14 +61,14 @@ theorem riemannFamily_nonempty (hU : IsOpen U) (hUc : IsSimplyConnected U) (hne 
     (hz₀ : z₀ ∈ U) : (riemannFamily U z₀).Nonempty := by
   obtain ⟨a, ha⟩ := (ne_univ_iff_exists_notMem U).mp hne
   -- a holomorphic square root of `z - a`
-  have hgd : DifferentiableOn ℂ (fun z => z - a) U := differentiableOn_id.sub_const a
-  have hg0 : ∀ z ∈ U, z - a ≠ 0 := fun z hz h0 => ha (sub_eq_zero.mp h0 ▸ hz)
+  have hgd : DifferentiableOn ℂ (fun z ↦ z - a) U := differentiableOn_id.sub_const a
+  have hg0 : ∀ z ∈ U, z - a ≠ 0 := fun z hz h0 ↦ ha (sub_eq_zero.mp h0 ▸ hz)
   obtain ⟨h, hh, hhsq⟩ := exists_analyticOnNhd_root hU hUc hgd hg0 two_ne_zero
   have hhd : DifferentiableOn ℂ h U := hh.differentiableOn
-  have hhi : InjOn h U := fun x hx y hy hxy => by
+  have hhi : InjOn h U := fun x hx y hy hxy ↦ by
     have : x - a = y - a := by rw [← hhsq x hx, ← hhsq y hy, hxy]
     exact sub_left_inj.mp this
-  have hh0 : ∀ z ∈ U, h z ≠ 0 := fun z hz h0 => by
+  have hh0 : ∀ z ∈ U, h z ≠ 0 := fun z hz h0 ↦ by
     have := hhsq z hz
     rw [h0, zero_pow two_ne_zero] at this
     exact hg0 z hz this.symm
@@ -87,12 +87,12 @@ theorem riemannFamily_nonempty (hU : IsOpen U) (hUc : IsSimplyConnected U) (hne 
     have hya : y - a = z - a := by rw [← hhsq y hy, ← hhsq z hz, hyz, neg_sq]
     rw [sub_left_inj.mp hya] at hyz
     exact hh0 z hz (by linear_combination hyz / 2)
-  have hden : ∀ z ∈ U, h z + h z₀ ≠ 0 := fun z hz h0 => by
+  have hden : ∀ z ∈ U, h z + h z₀ ≠ 0 := fun z hz h0 ↦ by
     have := hfar z hz
     rw [h0, norm_zero] at this
     linarith
   -- the map `z ↦ (ε / 2) / (h z + h z₀)` into the disc
-  set k : ℂ → ℂ := fun z => ((ε / 2 : ℝ) : ℂ) / (h z + h z₀) with hk_def
+  set k : ℂ → ℂ := fun z ↦ ((ε / 2 : ℝ) : ℂ) / (h z + h z₀) with hk_def
   have hkd : DifferentiableOn ℂ k U := (differentiableOn_const _).div (hhd.add_const _) hden
   have hkm : MapsTo k U (ball 0 1) := by
     intro z hz
@@ -108,12 +108,12 @@ theorem riemannFamily_nonempty (hU : IsOpen U) (hUc : IsSimplyConnected U) (hne 
     rw [div_eq_div_iff (hden x hx) (hden y hy)] at h1
     exact hhi hx hy (add_right_cancel (mul_left_cancel₀ hε' h1)).symm
   have hk1 : ‖k z₀‖ < 1 := mem_ball_zero_iff.mp (hkm hz₀)
-  refine ⟨fun z => discMobius (k z₀) (k z), ?_, ?_, ?_, ?_⟩
+  refine ⟨fun z ↦ discMobius (k z₀) (k z), ?_, ?_, ?_, ?_⟩
   · exact (differentiableOn_discMobius_ball hk1).comp hkd hkm
   · intro a ha' b hb' hab
     exact hki ha' hb' (discMobius_injOn hk1 (ball_subset_closedBall (hkm ha'))
       (ball_subset_closedBall (hkm hb')) hab)
-  · exact fun z hz => mapsTo_discMobius_ball hk1 (hkm hz)
+  · exact fun z hz ↦ mapsTo_discMobius_ball hk1 (hkm hz)
   · exact discMobius_self _
 
 /-- The Cauchy estimate bounds the derivatives at `z₀` of the members of the family. -/
@@ -121,7 +121,7 @@ theorem norm_deriv_le_of_mem_riemannFamily {r : ℝ} (hr : 0 < r) (hrU : closedB
     {f : ℂ → ℂ} (hf : f ∈ riemannFamily U z₀) : ‖deriv f z₀‖ ≤ 1 / r := by
   obtain ⟨hfd, -, hfm, -⟩ := hf
   refine norm_deriv_le_of_forall_mem_sphere_norm_le hr (hfd.diffContOnCl_ball hrU)
-    fun z hz => ?_
+    fun z hz ↦ ?_
   exact (mem_ball_zero_iff.mp (hfm (hrU (sphere_subset_closedBall hz)))).le
 
 /-- **The extremal map exists.** Montel, Hurwitz, and the open mapping theorem provide a
@@ -129,11 +129,11 @@ member of the family maximizing `‖deriv f z₀‖`. -/
 theorem exists_forall_norm_deriv_le_of_riemannFamily (hU : IsOpen U) (hUc : IsSimplyConnected U)
     (hne : U ≠ univ) (hz₀ : z₀ ∈ U) :
     ∃ g ∈ riemannFamily U z₀, ∀ f ∈ riemannFamily U z₀, ‖deriv f z₀‖ ≤ ‖deriv g z₀‖ := by
-  set S := riemannFamily U z₀ with hS_def
+  set S := riemannFamily U z₀
   have hSne := riemannFamily_nonempty hU hUc hne hz₀
   obtain ⟨r, hr, hrU⟩ := Metric.isOpen_iff.mp hU z₀ hz₀
   have hrU' : closedBall z₀ (r / 2) ⊆ U := (closedBall_subset_ball (half_lt_self hr)).trans hrU
-  set D : Set ℝ := (fun f => ‖deriv f z₀‖) '' S with hD_def
+  set D : Set ℝ := (fun f ↦ ‖deriv f z₀‖) '' S
   have hDne : D.Nonempty := hSne.image _
   have hDbdd : BddAbove D := by
     refine ⟨1 / (r / 2), ?_⟩
@@ -141,13 +141,13 @@ theorem exists_forall_norm_deriv_le_of_riemannFamily (hU : IsOpen U) (hUc : IsSi
     exact norm_deriv_le_of_mem_riemannFamily (half_pos hr) hrU' hf
   obtain ⟨u, -, hu, huD⟩ := exists_seq_tendsto_sSup hDne hDbdd
   choose f hfS hfu using huD
-  have hfd : ∀ n, DifferentiableOn ℂ (f n) U := fun n => (hfS n).1
+  have hfd : ∀ n, DifferentiableOn ℂ (f n) U := fun n ↦ (hfS n).1
   obtain ⟨g, φ, hφ, hgd, hlim⟩ := exists_subseq_tendstoLocallyUniformlyOn_of_bounded_on_compacts
-    hU hfd fun K hKU _ => ⟨1, fun n z hz => (mem_ball_zero_iff.mp ((hfS n).2.2.1 (hKU hz))).le⟩
+    hU hfd fun K hKU _ ↦ ⟨1, fun n z hz ↦ (mem_ball_zero_iff.mp ((hfS n).2.2.1 (hKU hz))).le⟩
   -- the derivatives at `z₀` converge
-  have hderiv : Tendsto (fun n => deriv (f (φ n)) z₀) atTop (𝓝 (deriv g z₀)) :=
-    (hlim.deriv (Eventually.of_forall fun n => hfd (φ n)) hU).tendsto_at hz₀
-  have hnorm' : Tendsto (fun n => ‖deriv (f (φ n)) z₀‖) atTop (𝓝 (sSup D)) := by
+  have hderiv : Tendsto (fun n ↦ deriv (f (φ n)) z₀) atTop (𝓝 (deriv g z₀)) :=
+    (hlim.deriv (Eventually.of_forall fun n ↦ hfd (φ n)) hU).tendsto_at hz₀
+  have hnorm' : Tendsto (fun n ↦ ‖deriv (f (φ n)) z₀‖) atTop (𝓝 (sSup D)) := by
     simp only [hfu]
     exact hu.comp hφ.tendsto_atTop
   have hgM : ‖deriv g z₀‖ = sSup D := tendsto_nhds_unique hderiv.norm hnorm'
@@ -160,16 +160,16 @@ theorem exists_forall_norm_deriv_le_of_riemannFamily (hU : IsOpen U) (hUc : IsSi
     rw [← norm_pos_iff, hgM]
     exact hM0
   have hg0 : g z₀ = 0 := by
-    have h1 : Tendsto (fun n => f (φ n) z₀) atTop (𝓝 (g z₀)) := hlim.tendsto_at hz₀
-    have h2 : Tendsto (fun n => f (φ n) z₀) atTop (𝓝 0) := by
+    have h1 : Tendsto (fun n ↦ f (φ n) z₀) atTop (𝓝 (g z₀)) := hlim.tendsto_at hz₀
+    have h2 : Tendsto (fun n ↦ f (φ n) z₀) atTop (𝓝 0) := by
       simp only [(hfS _).2.2.2]
       exact tendsto_const_nhds
     exact tendsto_nhds_unique h1 h2
-  have hgle : ∀ z ∈ U, ‖g z‖ ≤ 1 := fun z hz =>
+  have hgle : ∀ z ∈ U, ‖g z‖ ≤ 1 := fun z hz ↦
     le_of_tendsto (hlim.tendsto_at hz).norm
-      (Eventually.of_forall fun n => (mem_ball_zero_iff.mp ((hfS (φ n)).2.2.1 hz)).le)
+      (Eventually.of_forall fun n ↦ (mem_ball_zero_iff.mp ((hfS (φ n)).2.2.1 hz)).le)
   have hUconn : IsPreconnected U := hUc.isPathConnected.isConnected.isPreconnected
-  have hnotconst : ¬ ∃ v : ℂ, EqOn g (fun _ => v) U := by
+  have hnotconst : ¬ ∃ v : ℂ, EqOn g (fun _ ↦ v) U := by
     rintro ⟨v, hv⟩
     apply hgz₀
     rw [(hv.eventuallyEq_of_mem (hU.mem_nhds hz₀)).deriv_eq]
@@ -177,13 +177,13 @@ theorem exists_forall_norm_deriv_le_of_riemannFamily (hU : IsOpen U) (hUc : IsSi
   -- injective by Hurwitz's theorem
   have hgi : InjOn g U :=
     (eqOn_const_or_injOn_of_tendstoLocallyUniformlyOn hU hUconn
-      (Eventually.of_forall fun n => hfd (φ n)) (Eventually.of_forall fun n => (hfS (φ n)).2.1)
+      (Eventually.of_forall fun n ↦ hfd (φ n)) (Eventually.of_forall fun n ↦ (hfS (φ n)).2.1)
       hlim).resolve_left hnotconst
   -- maps into the open disc by the open mapping theorem
   have hgm : MapsTo g U (ball 0 1) := by
     have hopen : IsOpen (g '' U) := by
       rcases (hgd.analyticOnNhd hU).is_constant_or_isOpen hUconn with ⟨w, hw⟩ | h
-      · exact absurd ⟨w, fun z hz => hw z hz⟩ hnotconst
+      · exact absurd ⟨w, fun z hz ↦ hw z hz⟩ hnotconst
       · exact h U subset_rfl hU
     intro z hz
     have hsub : g '' U ⊆ closedBall 0 1 := by
@@ -191,7 +191,7 @@ theorem exists_forall_norm_deriv_le_of_riemannFamily (hU : IsOpen U) (hUc : IsSi
       exact mem_closedBall_zero_iff.mpr (hgle w hw)
     have := interior_maximal hsub hopen (mem_image_of_mem g hz)
     rwa [interior_closedBall' (0 : ℂ) 1] at this
-  refine ⟨g, ⟨hgd, hgi, hgm, hg0⟩, fun f hf => ?_⟩
+  refine ⟨g, ⟨hgd, hgi, hgm, hg0⟩, fun f hf ↦ ?_⟩
   rw [hgM]
   exact le_csSup hDbdd ⟨f, hf, rfl⟩
 
@@ -205,16 +205,16 @@ theorem ball_subset_image_of_forall_norm_deriv_le (hU : IsOpen U) (hUc : IsSimpl
   by_contra hcon
   obtain ⟨w, hw, hwg⟩ := not_subset.mp hcon
   have hw1 : ‖w‖ < 1 := mem_ball_zero_iff.mp hw
-  have hw0 : w ≠ 0 := fun h => hwg ⟨z₀, hz₀, by rw [hg0, h]⟩
+  have hw0 : w ≠ 0 := fun h ↦ hwg ⟨z₀, hz₀, by rw [hg0, h]⟩
   -- the nonvanishing function `φ_w ∘ g`
-  set g₁ : ℂ → ℂ := fun z => discMobius w (g z) with hg₁_def
+  set g₁ : ℂ → ℂ := fun z ↦ discMobius w (g z) with hg₁_def
   have hg₁d : DifferentiableOn ℂ g₁ U := (differentiableOn_discMobius_ball hw1).comp hgd hgm
   have hg₁0 : ∀ z ∈ U, g₁ z ≠ 0 := by
     intro z hz h
     refine hwg ⟨z, hz, ?_⟩
     exact (discMobius_eq_zero_iff
       (one_sub_conj_mul_ne_zero hw1 (mem_ball_zero_iff.mp (hgm hz)).le)).mp h
-  have hg₁m : ∀ z ∈ U, ‖g₁ z‖ < 1 := fun z hz =>
+  have hg₁m : ∀ z ∈ U, ‖g₁ z‖ < 1 := fun z hz ↦
     norm_discMobius_lt_one hw1 (mem_ball_zero_iff.mp (hgm hz))
   -- a holomorphic square root
   obtain ⟨h, hh, hhsq⟩ := exists_analyticOnNhd_root hU hUc hg₁d hg₁0 two_ne_zero
@@ -241,15 +241,15 @@ theorem ball_subset_image_of_forall_norm_deriv_le (hU : IsOpen U) (hUc : IsSimpl
     rw [h0] at hcsq
     simpa using hcsq.symm
   -- the competitor `φ_c ∘ h`
-  set ψ : ℂ → ℂ := fun z => discMobius c (h z) with hψ_def
+  set ψ : ℂ → ℂ := fun z ↦ discMobius c (h z)
   have hψ : ψ ∈ riemannFamily U z₀ := by
     refine ⟨?_, ?_, ?_, discMobius_self c⟩
     · exact (differentiableOn_discMobius_ball hc1).comp hhd
-        fun z hz => mem_ball_zero_iff.mpr (hhm z hz)
+        fun z hz ↦ mem_ball_zero_iff.mpr (hhm z hz)
     · intro a ha b hb hab
       exact hhi ha hb (discMobius_injOn hc1 (mem_closedBall_zero_iff.mpr (hhm a ha).le)
         (mem_closedBall_zero_iff.mpr (hhm b hb).le) hab)
-    · exact fun z hz => mapsTo_discMobius_ball hc1 (mem_ball_zero_iff.mpr (hhm z hz))
+    · exact fun z hz ↦ mapsTo_discMobius_ball hc1 (mem_ball_zero_iff.mpr (hhm z hz))
   -- derivative computations at `z₀`
   have hhz₀ : HasDerivAt h (deriv h z₀) z₀ := (hhd.differentiableAt (hU.mem_nhds hz₀)).hasDerivAt
   have hgz₀ : HasDerivAt g (deriv g z₀) z₀ := (hgd.differentiableAt (hU.mem_nhds hz₀)).hasDerivAt
@@ -260,7 +260,7 @@ theorem ball_subset_image_of_forall_norm_deriv_le (hU : IsOpen U) (hUc : IsSimpl
     rw [← deriv_discMobius_self hc1]
     exact h2.deriv
   have hkey : 2 * c * deriv h z₀ = (1 - normSq w) * deriv g z₀ := by
-    have hev : g₁ =ᶠ[𝓝 z₀] fun z => h z * h z := by
+    have hev : g₁ =ᶠ[𝓝 z₀] fun z ↦ h z * h z := by
       filter_upwards [hU.mem_nhds hz₀] with z hz
       rw [← sq, hhsq z hz]
     have hd1 : HasDerivAt g₁ (deriv h z₀ * h z₀ + h z₀ * deriv h z₀) z₀ :=
@@ -275,7 +275,7 @@ theorem ball_subset_image_of_forall_norm_deriv_le (hU : IsOpen U) (hUc : IsSimpl
     rw [← hc_def] at this
     linear_combination this
   -- norms
-  set t := ‖c‖ with ht_def
+  set t := ‖c‖
   have ht0 : 0 < t := norm_pos_iff.mpr hc0
   have ht1 : t < 1 := hc1
   have hwt : ‖w‖ = t ^ 2 := by
@@ -321,7 +321,7 @@ theorem exists_riemannMap (hU : IsOpen U) (hUc : IsSimplyConnected U) (hne : U �
     Subset.antisymm hg.2.2.1.image_subset
       (ball_subset_image_of_forall_norm_deriv_le hU hUc hz₀ hg hmax)
   obtain ⟨hgd, hgi, hgm, hg0⟩ := hg
-  set d := deriv g z₀ with hd_def
+  set d := deriv g z₀
   have hd0 : d ≠ 0 := deriv_ne_zero_of_injOn hU hgd hgi hz₀
   have hdc : (‖d‖ : ℂ) ≠ 0 := ofReal_ne_zero.mpr (norm_ne_zero_iff.mpr hd0)
   set c : ℂ := conj d / ‖d‖ with hc_def
@@ -331,9 +331,9 @@ theorem exists_riemannMap (hU : IsOpen U) (hUc : IsSimplyConnected U) (hne : U �
   have hc0 : c ≠ 0 := by
     rw [← norm_ne_zero_iff, hc1]
     exact one_ne_zero
-  refine ⟨fun z => c * g z, hgd.const_mul c, ?_, ?_, by simp [hg0], ‖d‖, norm_pos_iff.mpr hd0, ?_⟩
-  · exact fun a ha b hb hab => hgi ha hb (mul_left_cancel₀ hc0 hab)
-  · rw [← Set.image_image (fun w => c * w) g U, himg]
+  refine ⟨fun z ↦ c * g z, hgd.const_mul c, ?_, ?_, by simp [hg0], ‖d‖, norm_pos_iff.mpr hd0, ?_⟩
+  · exact fun a ha b hb hab ↦ hgi ha hb (mul_left_cancel₀ hc0 hab)
+  · rw [← Set.image_image (fun w ↦ c * w) g U, himg]
     ext w
     constructor
     · rintro ⟨v, hv, rfl⟩
@@ -345,7 +345,7 @@ theorem exists_riemannMap (hU : IsOpen U) (hUc : IsSimplyConnected U) (hne : U �
       rw [mem_ball_zero_iff] at hw ⊢
       rw [norm_mul, norm_inv, hc1, inv_one, one_mul]
       exact hw
-  · have hderiv : deriv (fun z => c * g z) z₀ = c * d :=
+  · have hderiv : deriv (fun z ↦ c * g z) z₀ = c * d :=
       ((hgd.differentiableAt (hU.mem_nhds hz₀)).hasDerivAt.const_mul c).deriv
     rw [hderiv, hc_def, div_mul_eq_mul_div, conj_mul', sq, mul_div_assoc, div_self hdc, mul_one]
 

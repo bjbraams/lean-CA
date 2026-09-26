@@ -52,11 +52,11 @@ theorem continuousOn_curveIndex {a : ℂ} (γ : Path a a)
   let U := (range γ)ᶜ
   have hU : IsOpen U := (isCompact_range γ.continuous).isClosed.isOpen_compl
   let : LocallyCompactSpace U := hU.locallyCompactSpace
-  let D : ℝ → ℂ := fun t => derivWithin γ.extend I (projIcc 0 1 zero_le_one t)
+  let D : ℝ → ℂ := fun t ↦ derivWithin γ.extend I (projIcc 0 1 zero_le_one t)
   have hD : Continuous D :=
     (continuousOn_iff_continuous_domRestrict.mp
       (hγ.continuousOn_derivWithin uniqueDiffOn_Icc_zero_one le_rfl)).comp continuous_projIcc
-  let K : U → ℝ → ℂ := fun w t => (γ.extend t - w)⁻¹ * D t
+  let K : U → ℝ → ℂ := fun w t ↦ (γ.extend t - w)⁻¹ * D t
   have hK : Continuous K.uncurry := by
     apply Continuous.mul
     · apply Continuous.inv₀
@@ -79,17 +79,17 @@ theorem continuousOn_curveIndex {a : ℂ} (γ : Path a a)
     simp only [curveIntegralFun_def, ContinuousLinearMap.toSpanSingleton_apply,
       smul_eq_mul, K, D, projIcc_of_mem zero_le_one ht, mul_comm]
   exact continuousOn_iff_continuous_domRestrict.mpr
-    ((continuous_const.mul hc).congr (fun w => (he w).symm))
+    ((continuous_const.mul hc).congr (fun w ↦ (he w).symm))
 
 /-- The index is locally constant on the complement of a closed `C¹` curve. -/
 theorem isLocallyConstant_curveIndex {a : ℂ} (γ : Path a a)
     (hγ : ContDiffOn ℝ 1 γ.extend I) :
-    IsLocallyConstant (fun w : ((range γ)ᶜ : Set ℂ) => curveIndex γ w) := by
+    IsLocallyConstant (fun w : ((range γ)ᶜ : Set ℂ) ↦ curveIndex γ w) := by
   let T := range ((↑) : ℤ → ℂ)
   let : DiscreteTopology T :=
     isDiscrete_iff_discreteTopology.mp isClosedEmbedding_intCast.isEmbedding.isDiscrete_range
-  let f : ((range γ)ᶜ : Set ℂ) → T := fun w => ⟨curveIndex γ w, by
-    obtain ⟨n, hn⟩ := exists_int_curveIndex γ hγ (fun t ht => w.property ⟨t, ht⟩)
+  let f : ((range γ)ᶜ : Set ℂ) → T := fun w ↦ ⟨curveIndex γ w, by
+    obtain ⟨n, hn⟩ := exists_int_curveIndex γ hγ (fun t ht ↦ w.property ⟨t, ht⟩)
     exact ⟨n, hn.symm⟩⟩
   have hf : Continuous f :=
     (continuousOn_iff_continuous_domRestrict.mp (continuousOn_curveIndex γ hγ)).subtype_mk _
@@ -104,7 +104,7 @@ theorem curveIndex_eq_of_isPreconnected {a : ℂ} (γ : Path a a)
   apply hU.constant_of_mapsTo isClosedEmbedding_intCast.isEmbedding.isDiscrete_range
     ((continuousOn_curveIndex γ hγ).mono hUγ) _ hv hw
   intro z hz
-  obtain ⟨n, hn⟩ := exists_int_curveIndex γ hγ (fun t ht => hUγ hz ⟨t, ht⟩)
+  obtain ⟨n, hn⟩ := exists_int_curveIndex γ hγ (fun t ht ↦ hUγ hz ⟨t, ht⟩)
   exact ⟨n, hn.symm⟩
 
 /-- Every pole off a closed `C¹` curve has a disk avoiding the curve on which the index
@@ -115,7 +115,7 @@ theorem exists_ball_curveIndex_eq {a : ℂ} (γ : Path a a)
       ∀ z ∈ ball w r, curveIndex γ z = curveIndex γ w := by
   have hU := (isCompact_range γ.continuous).isClosed.isOpen_compl
   obtain ⟨r, hr, hball⟩ := Metric.isOpen_iff.mp hU w hw
-  exact ⟨r, hr, hball, fun z hz => curveIndex_eq_of_isPreconnected γ hγ
+  exact ⟨r, hr, hball, fun z hz ↦ curveIndex_eq_of_isPreconnected γ hγ
     (convex_ball w r).isPreconnected hball hz (mem_ball_self hr)⟩
 
 /-- The index is constant on each connected component of the complement of the curve. -/
@@ -130,9 +130,9 @@ theorem curveIndex_eq_of_mem_connectedComponentIn {a : ℂ} (γ : Path a a)
 theorem curveIndex_eq_zero_of_notMem_ball {a c w : ℂ} {R : ℝ} (γ : Path a a)
     (hγ : ContDiffOn ℝ 1 γ.extend I) (hball : ∀ t, γ t ∈ ball c R)
     (hw : w ∉ ball c R) : curveIndex γ w = 0 := by
-  have hf : DifferentiableOn ℂ (fun z => (z - w)⁻¹) (ball c R) :=
+  have hf : DifferentiableOn ℂ (fun z ↦ (z - w)⁻¹) (ball c R) :=
     (differentiableOn_id.sub_const w).inv
-      (fun z hz => sub_ne_zero.mpr (ne_of_mem_of_not_mem hz hw))
+      (fun z hz ↦ sub_ne_zero.mpr (ne_of_mem_of_not_mem hz hw))
   rw [curveIndex, curveIntegral_eq_zero_of_differentiableOn_convex
     isOpen_ball (convex_ball c R) hf hγ hball, mul_zero]
 
@@ -141,8 +141,8 @@ theorem exists_pos_curveIndex_eq_zero_outside_ball {a : ℂ} (γ : Path a a)
     (hγ : ContDiffOn ℝ 1 γ.extend I) (c : ℂ) :
     ∃ R > 0, ∀ w, w ∉ ball c R → curveIndex γ w = 0 := by
   obtain ⟨R, hR, hball⟩ := (isCompact_range γ.continuous).isBounded.subset_ball_lt 0 c
-  exact ⟨R, hR, fun w hw => curveIndex_eq_zero_of_notMem_ball γ hγ
-    (fun t => hball ⟨t, rfl⟩) hw⟩
+  exact ⟨R, hR, fun w hw ↦ curveIndex_eq_zero_of_notMem_ball γ hγ
+    (fun t ↦ hball ⟨t, rfl⟩) hw⟩
 
 /-- The index vanishes on every unbounded preconnected set disjoint from the curve. -/
 theorem curveIndex_eq_zero_of_isPreconnected_of_not_isBounded {a : ℂ} (γ : Path a a)

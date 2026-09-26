@@ -40,8 +40,8 @@ theorem curveIntegral_map'_of_hasFDerivAt
     {a b : E} (γ : Path a b) {U : Set E} {g : E → G} {g' : E → E →L[𝕜] G}
     (hg : ∀ x ∈ U, HasFDerivAt g (g' x) x) (hγU : range γ ⊆ U)
     (hγ : DifferentiableOn ℝ γ.extend I) (ω : G → G →L[𝕜] F) :
-    curveIntegral ω (γ.map' (fun x hx => (hg x (hγU hx)).continuousAt.continuousWithinAt)) =
-      curveIntegral (fun x => (ω (g x)).comp (g' x)) γ := by
+    curveIntegral ω (γ.map' (fun x hx ↦ (hg x (hγU hx)).continuousAt.continuousWithinAt)) =
+      curveIntegral (fun x ↦ (ω (g x)).comp (g' x)) γ := by
   let : NormedSpace ℝ F := .restrictScalars ℝ 𝕜 F
   rw [curveIntegral_def, curveIntegral_def]
   apply intervalIntegral.integral_congr
@@ -64,14 +64,14 @@ theorem curveIntegral_map_segment
     [NormedAddCommGroup F] [NormedSpace ℝ F]
     {a b : ℝ} {γ γ' : ℝ → E} (hγ : ∀ t ∈ uIcc a b, HasDerivAt γ (γ' t) t)
     (ω : E → E →L[ℝ] F) :
-    curveIntegral ω ((Path.segment a b).map' (fun t ht =>
+    curveIntegral ω ((Path.segment a b).map' (fun t ht ↦
       (hγ t (by
         simpa only [Path.range_segment,
             segment_eq_uIcc] using ht)).continuousAt.continuousWithinAt)) =
       ∫ t in a..b, ω (γ t) (γ' t) := by
   rw [curveIntegral_map'_of_hasFDerivAt (Path.segment a b) (U := uIcc a b)
-    (g' := fun t => ContinuousLinearMap.toSpanSingleton ℝ (γ' t))
-    (fun t ht => (hγ t ht).hasFDerivAt)
+    (g' := fun t ↦ ContinuousLinearMap.toSpanSingleton ℝ (γ' t))
+    (fun t ht ↦ (hγ t ht).hasFDerivAt)
     (by simp only [Path.range_segment, segment_eq_uIcc, subset_refl])
     (show DifferentiableOn ℝ (Path.segment a b).extend I from
       (show DifferentiableOn ℝ (AffineMap.lineMap a b : ℝ → ℝ) I by
@@ -81,5 +81,5 @@ theorem curveIntegral_map_segment
   simp only [ContinuousLinearMap.comp_apply, ContinuousLinearMap.toSpanSingleton_apply,
     map_smul, intervalIntegral.integral_smul, AffineMap.lineMap_apply_ring']
   simp_rw [mul_comm _ (b - a)]
-  rw [intervalIntegral.smul_integral_comp_mul_add (f := fun t => ω (γ t) (γ' t))]
+  rw [intervalIntegral.smul_integral_comp_mul_add (f := fun t ↦ ω (γ t) (γ' t))]
   simp

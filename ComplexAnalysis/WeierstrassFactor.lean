@@ -79,28 +79,28 @@ theorem elementaryFactor_eq_zero_iff (p : ℕ) (z : ℂ) : elementaryFactor p z 
 /-- The elementary factor vanishes to first order at `1`. -/
 theorem analyticOrderAt_elementaryFactor_one (p : ℕ) :
     analyticOrderAt (elementaryFactor p) 1 = 1 := by
-  have h1 : (fun z : ℂ => 1 - z) = fun z => (-1 : ℂ) * (z - 1) := by
+  have h1 : (fun z : ℂ ↦ 1 - z) = fun z ↦ (-1 : ℂ) * (z - 1) := by
     ext z
     ring
-  have hexp : AnalyticAt ℂ (fun z => exp (elementaryExponent p z)) 1 :=
+  have hexp : AnalyticAt ℂ (fun z ↦ exp (elementaryExponent p z)) 1 :=
     ((differentiable_elementaryExponent p).analyticAt 1).cexp
-  have hfun : elementaryFactor p = (fun z => 1 - z) * fun z => exp (elementaryExponent p z) :=
-    funext fun z => elementaryFactor_eq p z
+  have hfun : elementaryFactor p = (fun z ↦ 1 - z) * fun z ↦ exp (elementaryExponent p z) :=
+    funext fun z ↦ elementaryFactor_eq p z
   rw [hfun]
   rw [analyticOrderAt_mul (by fun_prop) hexp, (hexp.analyticOrderAt_eq_zero).mpr (exp_ne_zero _),
     add_zero, h1]
-  change analyticOrderAt ((fun _ => (-1 : ℂ)) * fun z => z - 1) 1 = 1
+  change analyticOrderAt ((fun _ ↦ (-1 : ℂ)) * fun z ↦ z - 1) 1 = 1
   rw [analyticOrderAt_mul analyticAt_const (by fun_prop),
     (analyticAt_const.analyticOrderAt_eq_zero).mpr (by norm_num), zero_add]
   exact analyticOrderAt_id_sub_const_self
 
 /-- The power series of `-log (1 - z)`. -/
 theorem hasSum_pow_div_neg_log_one_sub {z : ℂ} (hz : ‖z‖ < 1) :
-    HasSum (fun n : ℕ => z ^ n / n) (-log (1 - z)) := by
+    HasSum (fun n : ℕ ↦ z ^ n / n) (-log (1 - z)) := by
   have h := hasSum_taylorSeries_log (z := -z) (by simpa using hz)
   rw [show (1 : ℂ) + -z = 1 - z by ring] at h
   have h' := h.neg
-  refine h'.congr_fun fun n => ?_
+  refine h'.congr_fun fun n ↦ ?_
   rw [neg_pow z n, ← mul_assoc, ← pow_add, show n + 1 + n = 2 * n + 1 by ring, pow_succ,
     pow_mul, neg_one_sq, one_pow, one_mul]
   ring
@@ -119,7 +119,7 @@ theorem elementaryFactor_eq_exp_neg_tsum {p : ℕ} {z : ℂ} (hz : ‖z‖ < 1) 
   have hhead : ∑ i ∈ Finset.range (p + 1), z ^ i / (i : ℂ) = elementaryExponent p z := by
     rw [Finset.sum_range_succ', elementaryExponent]
     simp only [pow_zero, Nat.cast_zero, div_zero, add_zero]
-    refine Finset.sum_congr rfl fun k _ => ?_
+    refine Finset.sum_congr rfl fun k _ ↦ ?_
     push_cast
     ring
   rw [hhead] at hsplit
@@ -137,17 +137,17 @@ theorem elementaryFactor_eq_exp_neg_tsum {p : ℕ} {z : ℂ} (hz : ‖z‖ < 1) 
 theorem norm_tsum_pow_div_tail_le {p : ℕ} {z : ℂ} (hz : ‖z‖ ≤ 1 / 2) :
     ‖∑' n : ℕ, z ^ (n + (p + 1)) / ((n + (p + 1) : ℕ) : ℂ)‖ ≤ 2 * ‖z‖ ^ (p + 1) := by
   have hz1 : ‖z‖ < 1 := by linarith
-  set T : ℂ := ∑' n : ℕ, z ^ (n + (p + 1)) / ((n + (p + 1) : ℕ) : ℂ) with hT_def
+  set T : ℂ := ∑' n : ℕ, z ^ (n + (p + 1)) / ((n + (p + 1) : ℕ) : ℂ)
   have hterm : ∀ n : ℕ, ‖z ^ (n + (p + 1)) / ((n + (p + 1) : ℕ) : ℂ)‖ ≤ ‖z‖ ^ (n + (p + 1)) := by
     intro n
     rw [norm_div, norm_pow, Complex.norm_natCast]
     have hn : (1 : ℝ) ≤ (n + (p + 1) : ℕ) := by exact_mod_cast Nat.succ_le_succ (Nat.zero_le _)
     exact div_le_self (by positivity) hn
-  have hgeom : Summable fun n : ℕ => ‖z‖ ^ (n + (p + 1)) :=
+  have hgeom : Summable fun n : ℕ ↦ ‖z‖ ^ (n + (p + 1)) :=
     (summable_geometric_of_lt_one (norm_nonneg _) hz1).comp_injective
       (add_left_injective (p + 1))
-  have hsumnorm : Summable fun n : ℕ => ‖z ^ (n + (p + 1)) / ((n + (p + 1) : ℕ) : ℂ)‖ :=
-    Summable.of_nonneg_of_le (fun n => norm_nonneg _) hterm hgeom
+  have hsumnorm : Summable fun n : ℕ ↦ ‖z ^ (n + (p + 1)) / ((n + (p + 1) : ℕ) : ℂ)‖ :=
+    Summable.of_nonneg_of_le (fun n ↦ norm_nonneg _) hterm hgeom
   have hTbound : ‖T‖ ≤ 2 * ‖z‖ ^ (p + 1) := by
     calc ‖T‖ ≤ ∑' n : ℕ, ‖z ^ (n + (p + 1)) / ((n + (p + 1) : ℕ) : ℂ)‖ :=
           norm_tsum_le_tsum_norm hsumnorm
@@ -175,7 +175,7 @@ theorem norm_one_sub_elementaryFactor_le {p : ℕ} {z : ℂ} (hz : ‖z‖ ≤ 1
     ‖1 - elementaryFactor p z‖ ≤ 4 * ‖z‖ ^ (p + 1) := by
   have hz1 : ‖z‖ < 1 := by linarith
   rw [elementaryFactor_eq_exp_neg_tsum hz1]
-  set T : ℂ := ∑' n : ℕ, z ^ (n + (p + 1)) / ((n + (p + 1) : ℕ) : ℂ) with hT_def
+  set T : ℂ := ∑' n : ℕ, z ^ (n + (p + 1)) / ((n + (p + 1) : ℕ) : ℂ)
   have hTbound : ‖T‖ ≤ 2 * ‖z‖ ^ (p + 1) := norm_tsum_pow_div_tail_le hz
   have hzp : ‖z‖ ^ (p + 1) ≤ 1 / 2 := by
     calc ‖z‖ ^ (p + 1) ≤ (1 / 2 : ℝ) ^ (p + 1) := pow_le_pow_left₀ (norm_nonneg _) hz _

@@ -56,15 +56,15 @@ theorem exists_logBranch_homotopy {a b l : ℂ} {γ δ : Path a b} (H : γ.Homot
   refine ⟨L, hL, ?_, ?_⟩
   · intro s
     exact eqOn_logBranch_of_continuousOn isPreconnected_univ
-      (L.continuous.comp (show Continuous (fun s : I => (s, (0 : I))) by fun_prop)).continuousOn
+      (L.continuous.comp (show Continuous (fun s : I ↦ (s, (0 : I))) by fun_prop)).continuousOn
       continuousOn_const
-      (g := fun _ : I => a) (by intro t _; simpa using hL (t, 0))
+      (g := fun _ : I ↦ a) (by intro t _; simpa using hL (t, 0))
       (by intro _ _; exact hl) (mem_univ 0) hL0 (mem_univ s)
   · intro s
     exact eqOn_logBranch_of_continuousOn isPreconnected_univ
-      (L.continuous.comp (show Continuous (fun s : I => (s, (1 : I))) by fun_prop)).continuousOn
+      (L.continuous.comp (show Continuous (fun s : I ↦ (s, (1 : I))) by fun_prop)).continuousOn
       continuousOn_const
-      (g := fun _ : I => b) (by intro t _; simpa using hL (t, 1))
+      (g := fun _ : I ↦ b) (by intro t _; simpa using hL (t, 1))
       (by intro _ _; simpa using hL (0, 1)) (mem_univ 0) rfl (mem_univ s)
 
 /-- Logarithms continued along homotopic paths avoiding zero have the same terminal value
@@ -76,15 +76,15 @@ theorem logBranch_endpoint_eq_of_homotopy {a b : ℂ} {γ δ : Path a b}
     (hzero : L 0 = M 0) : L 1 = M 1 := by
   obtain ⟨N, heN, hN0, hN1⟩ := exists_logBranch_homotopy H hH
     (by simpa using heL 0)
-  have hleft : ∀ t, N (0, t) = L t := fun t =>
+  have hleft : ∀ t, N (0, t) = L t := fun t ↦
     eqOn_logBranch_of_continuousOn isPreconnected_univ
-      (N.continuous.comp (show Continuous (fun s : I => ((0 : I), s)) by fun_prop)).continuousOn
+      (N.continuous.comp (show Continuous (fun s : I ↦ ((0 : I), s)) by fun_prop)).continuousOn
       hL.continuousOn
       (g := γ) (by intro s _; simpa using heN (0, s))
       (by intro s _; exact heL s) (mem_univ 0) (hN0 0) (mem_univ t)
-  have hright : ∀ t, N (1, t) = M t := fun t =>
+  have hright : ∀ t, N (1, t) = M t := fun t ↦
     eqOn_logBranch_of_continuousOn isPreconnected_univ
-      (N.continuous.comp (show Continuous (fun s : I => ((1 : I), s)) by fun_prop)).continuousOn
+      (N.continuous.comp (show Continuous (fun s : I ↦ ((1 : I), s)) by fun_prop)).continuousOn
       hM.continuousOn
       (g := δ) (by intro s _; simpa using heN (1, s))
       (by intro s _; exact heM s) (mem_univ 0) ((hN0 1).trans hzero) (mem_univ t)

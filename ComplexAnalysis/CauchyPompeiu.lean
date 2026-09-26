@@ -121,8 +121,8 @@ theorem dbarAlong_comp_clm {G : Type*} [NormedAddCommGroup G] [NormedSpace ℂ G
 @[expose] def complexLinearOfDbar (L : E →L[ℝ] F) (h : ∀ v, dbarAlong L v = 0) : E →L[ℂ] F where
   toFun := L
   map_add' := map_add L
-  map_smul' := fun c v => by
-    have hI : ∀ v, L (I • v) = I • L v := fun v => (dbarAlong_eq_zero_iff L v).mp (h v)
+  map_smul' := fun c v ↦ by
+    have hI : ∀ v, L (I • v) = I • L v := fun v ↦ (dbarAlong_eq_zero_iff L v).mp (h v)
     simp only [RingHom.id_apply]
     calc L (c • v) = L ((c.re : ℝ) • v + (c.im : ℝ) • (I • v)) := by
           congr 1
@@ -190,7 +190,7 @@ theorem smul_inv_smul_dbarAlong_polar (φ : ℂ → F) {r θ : ℝ} (hr : 0 < r)
   have hinv : ((r : ℂ) * exp (θ * I))⁻¹ = (r : ℂ)⁻¹ * exp (-(θ * I)) := by
     rw [mul_inv, ← exp_neg]
   rw [hinv, polarRadialDeriv, polarAngularDeriv]
-  simp only
+  dsimp only
   rw [apply_exp_add_I_smul_apply_I_mul_exp, dbarAlong]
   simp only [smul_eq_mul, mul_one]
   rw [← Complex.coe_smul, smul_smul, smul_smul, smul_smul]
@@ -261,18 +261,18 @@ theorem integrableOn_polarCoord_target_of_bound {A : ℝ × ℝ → F} (hA : Con
     (hC : ∀ p, ‖A p‖ ≤ C) (hzero : ∀ p : ℝ × ℝ, R < |p.1| → A p = 0) :
     IntegrableOn A polarCoord.target := by
   have hC0 : 0 ≤ C := (norm_nonneg _).trans (hC 0)
-  have hg : Integrable ((Icc (0 : ℝ) R ×ˢ Icc (-π) π).indicator fun _ => C) :=
+  have hg : Integrable ((Icc (0 : ℝ) R ×ˢ Icc (-π) π).indicator fun _ ↦ C) :=
     (integrableOn_const (isCompact_Icc.prod isCompact_Icc).measure_lt_top.ne).integrable_indicator
       (measurableSet_Icc.prod measurableSet_Icc)
   refine Integrable.mono' hg.integrableOn hA.aestronglyMeasurable ?_
-  refine ae_restrict_of_forall_mem polarCoord.open_target.measurableSet fun p hp => ?_
+  refine ae_restrict_of_forall_mem polarCoord.open_target.measurableSet fun p hp ↦ ?_
   rw [polarCoord_target] at hp
   by_cases h : p.1 ≤ R
   · rw [indicator_of_mem (show p ∈ Icc (0 : ℝ) R ×ˢ Icc (-π) π from
       ⟨⟨hp.1.le, h⟩, hp.2.1.le, hp.2.2.le⟩)]
     exact hC p
   · rw [hzero p (by rw [abs_of_pos hp.1]; exact not_le.mp h), norm_zero]
-    exact indicator_nonneg (fun _ _ => hC0) p
+    exact indicator_nonneg (fun _ _ ↦ hC0) p
 
 variable [CompleteSpace F]
 
@@ -281,17 +281,17 @@ theorem integral_Ioi_polarRadialDeriv {φ : ℂ → F} (hφ : ContDiff ℝ 1 φ)
     (hR : tsupport φ ⊆ Metric.closedBall 0 R) (θ : ℝ) :
     ∫ r in Ioi (0 : ℝ), polarRadialDeriv φ (r, θ) = -φ 0 := by
   have hderiv : ∀ r ∈ Ici (0 : ℝ),
-      HasDerivAt (fun r : ℝ => φ (r * exp (θ * I))) (polarRadialDeriv φ (r, θ)) r := by
+      HasDerivAt (fun r : ℝ ↦ φ (r * exp (θ * I))) (polarRadialDeriv φ (r, θ)) r := by
     intro r _
-    have h1 : HasDerivAt (fun r : ℝ => (r : ℂ) * exp (θ * I)) (exp (θ * I)) r := by
+    have h1 : HasDerivAt (fun r : ℝ ↦ (r : ℂ) * exp (θ * I)) (exp (θ * I)) r := by
       simpa using (hasDerivAt_id r).ofReal_comp.mul_const (exp (θ * I))
     exact (hφ.differentiable one_ne_zero _).hasFDerivAt.comp_hasDerivAt r h1
-  have hint : IntegrableOn (fun r : ℝ => polarRadialDeriv φ (r, θ)) (Ioi 0) := by
+  have hint : IntegrableOn (fun r : ℝ ↦ polarRadialDeriv φ (r, θ)) (Ioi 0) := by
     refine MeasureTheory.integrableOn_Ioi_of_continuous_of_eq_zero (R := R)
-      ((continuous_polarRadialDeriv hφ).comp (by fun_prop)) fun r hr => ?_
+      ((continuous_polarRadialDeriv hφ).comp (by fun_prop)) fun r hr ↦ ?_
     exact polarRadialDeriv_eq_zero hR (lt_of_lt_of_le hr (le_abs_self r))
-  have hlim : Tendsto (fun r : ℝ => φ (r * exp (θ * I))) atTop (𝓝 0) := by
-    refine tendsto_const_nhds.congr' ((eventually_gt_atTop R).mono fun r hr => ?_)
+  have hlim : Tendsto (fun r : ℝ ↦ φ (r * exp (θ * I))) atTop (𝓝 0) := by
+    refine tendsto_const_nhds.congr' ((eventually_gt_atTop R).mono fun r hr ↦ ?_)
     symm
     apply image_eq_zero_of_notMem_tsupport
     intro h
@@ -305,15 +305,15 @@ theorem integral_Ioi_polarRadialDeriv {φ : ℂ → F} (hφ : ContDiff ℝ 1 φ)
 theorem integral_Ioo_polarAngularDeriv {φ : ℂ → F} (hφ : ContDiff ℝ 1 φ) {r : ℝ} (hr : 0 < r) :
     ∫ θ in Ioo (-π) π, polarAngularDeriv φ (r, θ) = 0 := by
   have hderiv : ∀ θ ∈ uIcc (-π) π,
-      HasDerivAt (fun θ : ℝ => φ (r * exp (θ * I))) (r • polarAngularDeriv φ (r, θ)) θ := by
+      HasDerivAt (fun θ : ℝ ↦ φ (r * exp (θ * I))) (r • polarAngularDeriv φ (r, θ)) θ := by
     intro θ _
-    have h1 : HasDerivAt (fun θ : ℝ => (r : ℂ) * exp (θ * I)) ((r : ℂ) * (exp (θ * I) * I)) θ := by
+    have h1 : HasDerivAt (fun θ : ℝ ↦ (r : ℂ) * exp (θ * I)) ((r : ℂ) * (exp (θ * I) * I)) θ := by
       simpa using ((hasDerivAt_id θ).ofReal_comp.mul_const I).cexp.const_mul (r : ℂ)
     refine ((hφ.differentiable one_ne_zero _).hasFDerivAt.comp_hasDerivAt θ h1).congr_deriv ?_
     unfold polarAngularDeriv
     rw [show (r : ℂ) * (exp (θ * I) * I) = r • (I * exp (θ * I)) by
       rw [Complex.real_smul]; ring, map_smul]
-  have hcont : IntervalIntegrable (fun θ : ℝ => r • polarAngularDeriv φ (r, θ)) volume (-π) π :=
+  have hcont : IntervalIntegrable (fun θ : ℝ ↦ r • polarAngularDeriv φ (r, θ)) volume (-π) π :=
     (((continuous_polarAngularDeriv hφ).comp (by fun_prop)).const_smul r).intervalIntegrable _ _
   have hftc := intervalIntegral.integral_eq_sub_of_hasDerivAt hderiv hcont
   have hzero : φ (r * exp (π * I)) - φ (r * exp ((-π : ℝ) * I)) = 0 := by
@@ -335,19 +335,19 @@ theorem integral_inv_smul_dbarAlong_fderiv {φ : ℂ → F} (hφ : ContDiff ℝ 
   obtain ⟨C, hC⟩ := (hsupp.fderiv ℝ).exists_bound_of_continuous (hφ.continuous_fderiv one_ne_zero)
   have hAi : IntegrableOn (polarRadialDeriv φ) polarCoord.target :=
     integrableOn_polarCoord_target_of_bound (continuous_polarRadialDeriv hφ)
-      (norm_polarRadialDeriv_le hC) fun p hp => polarRadialDeriv_eq_zero hR hp
+      (norm_polarRadialDeriv_le hC) fun p hp ↦ polarRadialDeriv_eq_zero hR hp
   have hBi : IntegrableOn (polarAngularDeriv φ) polarCoord.target :=
     integrableOn_polarCoord_target_of_bound (continuous_polarAngularDeriv hφ)
-      (norm_polarAngularDeriv_le hC) fun p hp => polarAngularDeriv_eq_zero hR hp
+      (norm_polarAngularDeriv_le hC) fun p hp ↦ polarAngularDeriv_eq_zero hR hp
   rw [← Complex.integral_comp_polarCoord_symm]
-  have hpt : EqOn (fun p : ℝ × ℝ => p.1 • ((Complex.polarCoord.symm p)⁻¹ •
+  have hpt : EqOn (fun p : ℝ × ℝ ↦ p.1 • ((Complex.polarCoord.symm p)⁻¹ •
       dbarAlong (fderiv ℝ φ (Complex.polarCoord.symm p)) 1))
-      (fun p => (2 : ℂ)⁻¹ • (polarRadialDeriv φ p + I • polarAngularDeriv φ p))
+      (fun p ↦ (2 : ℂ)⁻¹ • (polarRadialDeriv φ p + I • polarAngularDeriv φ p))
       polarCoord.target := by
     rintro ⟨r, θ⟩ hp
     rw [polarCoord_target] at hp
     exact smul_inv_smul_dbarAlong_polar φ hp.1
-  have hBi2 : Integrable (fun p => I • polarAngularDeriv φ p) (volume.restrict polarCoord.target) :=
+  have hBi2 : Integrable (fun p ↦ I • polarAngularDeriv φ p) (volume.restrict polarCoord.target) :=
     hBi.smul I
   rw [setIntegral_congr_fun polarCoord.open_target.measurableSet hpt, integral_smul,
     integral_add hAi hBi2, integral_smul]
@@ -367,7 +367,7 @@ theorem integral_inv_smul_dbarAlong_fderiv {φ : ℂ → F} (hφ : ContDiff ℝ 
         ((volume.restrict (Ioi (0 : ℝ))).prod (volume.restrict (Ioo (-π) π))) := by
       rwa [Measure.prod_restrict, ← Measure.volume_eq_prod, ← polarCoord_target]
     rw [polarCoord_target, Measure.volume_eq_prod, ← Measure.prod_restrict, integral_prod _ hBi']
-    exact setIntegral_eq_zero_of_forall_eq_zero fun r hr => integral_Ioo_polarAngularDeriv hφ hr
+    exact setIntegral_eq_zero_of_forall_eq_zero fun r hr ↦ integral_Ioo_polarAngularDeriv hφ hr
   rw [hA_int, hB_int, smul_zero, add_zero, ← Complex.coe_smul, smul_neg, smul_smul]
   congr 2
   push_cast

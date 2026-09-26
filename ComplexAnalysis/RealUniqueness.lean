@@ -71,6 +71,6 @@ theorem AnalyticOnNhd.eq_of_eqOn_posReal {F G : ℂ → H}
     filter_upwards [eventually_gt_nhds (show (0 : ℝ) < 1 by norm_num)] with x hx
     exact hEq x hx
   have h := hF.eqOn_of_eventuallyEq_ofReal hG isPreconnected_univ (Set.mem_univ _) hEq'
-  exact funext fun z => h (Set.mem_univ z)
+  exact funext fun z ↦ h (Set.mem_univ z)
 
 end

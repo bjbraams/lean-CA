@@ -37,9 +37,9 @@ namespace Complex
 
 /-- Translating the parameter of a function with the local submean property. -/
 theorem HasSubmeanAt.comp_add_right {u : ℂ → ℝ} {t₀ : ℂ}
-    (h : HasSubmeanAt (fun t => u (t + t₀)) 0) : HasSubmeanAt u t₀ := by
+    (h : HasSubmeanAt (fun t ↦ u (t + t₀)) 0) : HasSubmeanAt u t₀ := by
   filter_upwards [h] with r ⟨hint, hle⟩
-  have hmap : ∀ θ : ℝ, circleMap 0 r θ + t₀ = circleMap t₀ r θ := fun θ => by
+  have hmap : ∀ θ : ℝ, circleMap 0 r θ + t₀ = circleMap t₀ r θ := fun θ ↦ by
     simp [circleMap, add_comm]
   refine ⟨?_, ?_⟩
   · rw [circleIntegrable_def] at hint ⊢
@@ -49,9 +49,9 @@ theorem HasSubmeanAt.comp_add_right {u : ℂ → ℝ} {t₀ : ℂ}
 /-- A continuous function that is convex on an open set of `ℂ` is subharmonic there. -/
 theorem _root_.ConvexOn.subharmonicOn {u : ℂ → ℝ} {W : Set ℂ} (hW : IsOpen W)
     (hu : ConvexOn ℝ W u) (hc : ContinuousOn u W) : SubharmonicOn u W := by
-  refine ⟨hc.upperSemicontinuousOn, fun a ha => ?_⟩
+  refine ⟨hc.upperSemicontinuousOn, fun a ha ↦ ?_⟩
   obtain ⟨ρ, hρ, hball⟩ := Metric.mem_nhds_iff.mp (hW.mem_nhds ha)
-  refine hasSubmeanAt_of_forall_lt hρ fun r hr hrρ => ?_
+  refine hasSubmeanAt_of_forall_lt hρ fun r hr hrρ ↦ ?_
   have hsub : closedBall a r ⊆ W := (closedBall_subset_ball hrρ).trans hball
   have hint : CircleIntegrable u a r :=
     (hc.mono (sphere_subset_closedBall.trans hsub)).circleIntegrable hr.le
@@ -61,9 +61,9 @@ theorem _root_.ConvexOn.subharmonicOn {u : ℂ → ℝ} {W : Set ℂ} (hW : IsOp
     rw [← ht, ← norm_neg]
     congr 1
     ring
-  have hint' : CircleIntegrable (fun t => u (2 * a - t)) a r := by
+  have hint' : CircleIntegrable (fun t ↦ u (2 * a - t)) a r := by
     refine ContinuousOn.circleIntegrable hr.le ?_
-    exact (hc.mono (sphere_subset_closedBall.trans hsub)).comp (by fun_prop) fun t ht =>
+    exact (hc.mono (sphere_subset_closedBall.trans hsub)).comp (by fun_prop) fun t ht ↦
       hrefl t (by simpa [abs_of_pos hr] using ht)
   refine ⟨hint, ?_⟩
   have hmid : ∀ t ∈ sphere a r, u a ≤ (1 / 2 : ℝ) • u t + (1 / 2 : ℝ) • u (2 * a - t) := by
@@ -75,10 +75,10 @@ theorem _root_.ConvexOn.subharmonicOn {u : ℂ → ℝ} {W : Set ℂ} (hW : IsOp
     simp only [Complex.real_smul]
     push_cast
     ring
-  have hi₁ : CircleIntegrable (fun t => (1 / 2 : ℝ) • u t) a r := hint.const_smul
-  have hi₂ : CircleIntegrable (fun t => (1 / 2 : ℝ) • u (2 * a - t)) a r := hint'.const_smul
+  have hi₁ : CircleIntegrable (fun t ↦ (1 / 2 : ℝ) • u t) a r := hint.const_smul
+  have hi₂ : CircleIntegrable (fun t ↦ (1 / 2 : ℝ) • u (2 * a - t)) a r := hint'.const_smul
   have hle := circleAverage_mono (circleIntegrable_const (u a) a r) (hi₁.add hi₂)
-    (fun t ht => hmid t (by simpa [abs_of_pos hr] using ht))
+    (fun t ht ↦ hmid t (by simpa [abs_of_pos hr] using ht))
   rw [circleAverage_const, circleAverage_add hi₁ hi₂, circleAverage_fun_smul,
     circleAverage_fun_smul, Real.circleAverage_reflect] at hle
   simp only [smul_eq_mul] at hle

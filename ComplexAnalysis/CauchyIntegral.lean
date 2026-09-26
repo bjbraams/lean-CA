@@ -56,7 +56,7 @@ variable {F : Type*} [NormedAddCommGroup F] [NormedSpace ℂ F]
 /-- A continuous complex Banach-valued function is integrable along a `C¹` path in its domain. -/
 theorem curveIntegrable_of_continuousOn (hf : ContinuousOn f U)
     (hγ : ContDiffOn ℝ 1 γ.extend I) (hγU : ∀ t, γ t ∈ U) :
-    CurveIntegrable (fun z => ContinuousLinearMap.toSpanSingleton ℂ (f z)) γ :=
+    CurveIntegrable (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ (f z)) γ :=
   ((ContinuousLinearMap.toSpanSingletonLIE ℂ F).continuous.comp_continuousOn
       hf).curveIntegrable_of_contDiffOn
     hγ hγU
@@ -67,16 +67,16 @@ variable [CompleteSpace F]
 theorem curveIntegral_eq_sub_of_hasDerivAt
     (hP : ∀ z ∈ U, HasDerivAt P (f z) z)
     (hγ : DifferentiableOn ℝ γ.extend I) (hγU : ∀ t, γ t ∈ U)
-    (hint : CurveIntegrable (fun z => ContinuousLinearMap.toSpanSingleton ℂ (f z)) γ) :
-    curveIntegral (fun z => ContinuousLinearMap.toSpanSingleton ℂ (f z)) γ = P b - P a :=
-  _root_.curveIntegral_eq_sub_of_hasFDerivAt (fun z hz => (hP z hz).hasFDerivAt) hγ hγU hint
+    (hint : CurveIntegrable (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ (f z)) γ) :
+    curveIntegral (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ (f z)) γ = P b - P a :=
+  _root_.curveIntegral_eq_sub_of_hasFDerivAt (fun z hz ↦ (hP z hz).hasFDerivAt) hγ hγU hint
 
 /-- A complex function with a primitive has zero integral along every closed differentiable
 path on which the integral exists. -/
 theorem IsExactOn.curveIntegral_eq_zero (hf : IsExactOn f U) {γ : Path a a}
     (hγ : DifferentiableOn ℝ γ.extend I) (hγU : ∀ t, γ t ∈ U)
-    (hint : CurveIntegrable (fun z => ContinuousLinearMap.toSpanSingleton ℂ (f z)) γ) :
-    curveIntegral (fun z => ContinuousLinearMap.toSpanSingleton ℂ (f z)) γ = 0 := by
+    (hint : CurveIntegrable (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ (f z)) γ) :
+    curveIntegral (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ (f z)) γ = 0 := by
   obtain ⟨P, hP⟩ := hf
   rw [curveIntegral_eq_sub_of_hasDerivAt hP hγ hγU hint, sub_self]
 
@@ -84,10 +84,10 @@ theorem IsExactOn.curveIntegral_eq_zero (hf : IsExactOn f U) {γ : Path a a}
 theorem IsExactOn.curveIntegral_eq (hf : IsExactOn f U) {δ : Path a b}
     (hγ : DifferentiableOn ℝ γ.extend I) (hδ : DifferentiableOn ℝ δ.extend I)
     (hγU : ∀ t, γ t ∈ U) (hδU : ∀ t, δ t ∈ U)
-    (hγint : CurveIntegrable (fun z => ContinuousLinearMap.toSpanSingleton ℂ (f z)) γ)
-    (hδint : CurveIntegrable (fun z => ContinuousLinearMap.toSpanSingleton ℂ (f z)) δ) :
-    curveIntegral (fun z => ContinuousLinearMap.toSpanSingleton ℂ (f z)) γ =
-      curveIntegral (fun z => ContinuousLinearMap.toSpanSingleton ℂ (f z)) δ := by
+    (hγint : CurveIntegrable (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ (f z)) γ)
+    (hδint : CurveIntegrable (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ (f z)) δ) :
+    curveIntegral (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ (f z)) γ =
+      curveIntegral (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ (f z)) δ := by
   obtain ⟨P, hP⟩ := hf
   rw [curveIntegral_eq_sub_of_hasDerivAt hP hγ hγU hγint,
     curveIntegral_eq_sub_of_hasDerivAt hP hδ hδU hδint]
@@ -96,9 +96,9 @@ theorem IsExactOn.curveIntegral_eq (hf : IsExactOn f U) {δ : Path a b}
 theorem curveIntegral_eq_zero_of_differentiableOn_convex (hU : IsOpen U)
     (hUc : Convex ℝ U) (hf : DifferentiableOn ℂ f U) {γ : Path a a}
     (hγ : ContDiffOn ℝ 1 γ.extend I) (hγU : ∀ t, γ t ∈ U) :
-    curveIntegral (fun z => ContinuousLinearMap.toSpanSingleton ℂ (f z)) γ = 0 := by
+    curveIntegral (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ (f z)) γ = 0 := by
   obtain ⟨P, hP⟩ := hUc.exists_forall_hasDerivWithinAt hf
-  have hex : IsExactOn f U := ⟨P, fun z hz => (hP z hz).hasDerivAt (hU.mem_nhds hz)⟩
+  have hex : IsExactOn f U := ⟨P, fun z hz ↦ (hP z hz).hasDerivAt (hU.mem_nhds hz)⟩
   exact hex.curveIntegral_eq_zero (hγ.differentiableOn one_ne_zero) hγU
     (curveIntegrable_of_continuousOn hf.continuousOn hγ hγU)
 
@@ -107,8 +107,8 @@ functions. Only differentiability of the path and existence of its integral are 
 theorem curveIntegral_eq_zero_of_differentiableOn_isSimplyConnected
     (hU : IsOpen U) (hUc : IsSimplyConnected U) (hf : DifferentiableOn ℂ f U)
     {γ : Path a a} (hγ : DifferentiableOn ℝ γ.extend I) (hγU : ∀ t, γ t ∈ U)
-    (hint : CurveIntegrable (fun z => ContinuousLinearMap.toSpanSingleton ℂ (f z)) γ) :
-    curveIntegral (fun z => ContinuousLinearMap.toSpanSingleton ℂ (f z)) γ = 0 :=
+    (hint : CurveIntegrable (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ (f z)) γ) :
+    curveIntegral (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ (f z)) γ = 0 :=
   (hf.isExactOn_of_isSimplyConnected hU hUc).curveIntegral_eq_zero hγ hγU hint
 
 /-- The integral of a holomorphic function on a simply connected open domain is independent
@@ -117,8 +117,8 @@ theorem curveIntegral_eq_of_differentiableOn_isSimplyConnected
     (hU : IsOpen U) (hUc : IsSimplyConnected U) (hf : DifferentiableOn ℂ f U)
     {δ : Path a b} (hγ : ContDiffOn ℝ 1 γ.extend I) (hδ : ContDiffOn ℝ 1 δ.extend I)
     (hγU : ∀ t, γ t ∈ U) (hδU : ∀ t, δ t ∈ U) :
-    curveIntegral (fun z => ContinuousLinearMap.toSpanSingleton ℂ (f z)) γ =
-      curveIntegral (fun z => ContinuousLinearMap.toSpanSingleton ℂ (f z)) δ :=
+    curveIntegral (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ (f z)) γ =
+      curveIntegral (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ (f z)) δ :=
   (hf.isExactOn_of_isSimplyConnected hU hUc).curveIntegral_eq
     (hγ.differentiableOn one_ne_zero) (hδ.differentiableOn one_ne_zero) hγU hδU
     (curveIntegrable_of_continuousOn hf.continuousOn hγ hγU)
@@ -130,12 +130,12 @@ theorem curveIntegral_logDeriv_eq_sub {g L : ℂ → ℂ} (hU : IsOpen U)
     (hg : DifferentiableOn ℂ g U) (hL : ContinuousOn L U)
     (heq : EqOn (exp ∘ L) g U)
     (hγ : ContDiffOn ℝ 1 γ.extend I) (hγU : ∀ t, γ t ∈ U) :
-    curveIntegral (fun z => ContinuousLinearMap.toSpanSingleton ℂ (deriv g z / g z)) γ =
+    curveIntegral (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ (deriv g z / g z)) γ =
       L b - L a := by
-  have hg0 : ∀ z ∈ U, g z ≠ 0 := fun z hz => by
+  have hg0 : ∀ z ∈ U, g z ≠ 0 := fun z hz ↦ by
     rw [← heq hz]
     exact exp_ne_zero _
-  have hc : ContinuousOn (fun z => deriv g z / g z) U :=
+  have hc : ContinuousOn (fun z ↦ deriv g z / g z) U :=
     (hg.analyticOnNhd hU).deriv.continuousOn.div hg.continuousOn hg0
   apply curveIntegral_eq_sub_of_hasDerivAt (U := U) (P := L) _
     (hγ.differentiableOn one_ne_zero) hγU (curveIntegrable_of_continuousOn hc hγ hγU)
@@ -150,7 +150,7 @@ theorem curveIntegral_logDeriv_eq_zero_of_isSimplyConnected {g : ℂ → ℂ}
     (hU : IsOpen U) (hUc : IsSimplyConnected U) (hg : DifferentiableOn ℂ g U)
     (hg0 : ∀ z ∈ U, g z ≠ 0) {γ : Path a a}
     (hγ : ContDiffOn ℝ 1 γ.extend I) (hγU : ∀ t, γ t ∈ U) :
-    curveIntegral (fun z => ContinuousLinearMap.toSpanSingleton ℂ (deriv g z / g z)) γ = 0 := by
+    curveIntegral (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ (deriv g z / g z)) γ = 0 := by
   obtain ⟨L, hL, heq⟩ := exists_analyticOnNhd_logBranch hU hUc hg hg0
   rw [curveIntegral_logDeriv_eq_sub hU hg hL.continuousOn heq hγ hγU, sub_self]
 

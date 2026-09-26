@@ -45,18 +45,18 @@ namespace Complex
 theorem curveIndex_eq_of_homotopy {a w : ℂ} {γ δ : Path a a} (H : γ.Homotopy δ)
     (hw : ∀ p, H p ≠ w)
     (hH : ContDiffOn ℝ 2
-      (fun p : ℝ × ℝ => IccExtend zero_le_one (H.toHomotopy.extend p.1) p.2) (Icc 0 1)) :
+      (fun p : ℝ × ℝ ↦ IccExtend zero_le_one (H.toHomotopy.extend p.1) p.2) (Icc 0 1)) :
     curveIndex γ w = curveIndex δ w := by
   apply congrArg ((2 * (Real.pi : ℂ) * Complex.I)⁻¹ * ·)
   exact curveIntegral_eq_of_homotopy H (isOpen_compl_singleton (x := w))
-    ((differentiableOn_id.sub_const w).inv (fun z hz => sub_ne_zero.mpr hz))
+    ((differentiableOn_id.sub_const w).inv (fun z hz ↦ sub_ne_zero.mpr hz))
     (by rintro _ ⟨p, rfl⟩; exact hw p) hH
 
 /-- A loop admitting a smooth contraction away from the pole has analytic index zero. -/
 theorem curveIndex_eq_zero_of_nullhomotopy {a w : ℂ} {γ : Path a a}
     (H : γ.Homotopy (Path.refl a)) (hw : ∀ p, H p ≠ w)
     (hH : ContDiffOn ℝ 2
-      (fun p : ℝ × ℝ => IccExtend zero_le_one (H.toHomotopy.extend p.1) p.2) (Icc 0 1)) :
+      (fun p : ℝ × ℝ ↦ IccExtend zero_le_one (H.toHomotopy.extend p.1) p.2) (Icc 0 1)) :
     curveIndex γ w = 0 := by
   rw [curveIndex_eq_of_homotopy H hw hH, curveIndex_refl]
 
@@ -69,7 +69,7 @@ theorem curveIndex_eq_of_continuous_homotopy {a w : ℂ} {γ δ : Path a a}
   apply congrArg ((2 * (Real.pi : ℂ) * Complex.I)⁻¹ * ·)
   exact curveIntegral_eq_of_continuous_homotopy_of_contDiffOn H
     (isOpen_compl_singleton (x := w))
-    ((differentiableOn_id.sub_const w).inv (fun z hz => sub_ne_zero.mpr hz))
+    ((differentiableOn_id.sub_const w).inv (fun z hz ↦ sub_ne_zero.mpr hz))
     (by rintro _ ⟨p, rfl⟩; exact hw p) hγ hδ
 
 /-- A `C¹` loop contractible in the punctured plane has analytic index zero,
@@ -77,6 +77,7 @@ without a smoothness assumption on the contraction. -/
 theorem curveIndex_eq_zero_of_continuous_nullhomotopy {a w : ℂ} {γ : Path a a}
     (H : γ.Homotopy (Path.refl a)) (hw : ∀ p, H p ≠ w)
     (hγ : ContDiffOn ℝ 1 γ.extend I) : curveIndex γ w = 0 := by
-  rw [curveIndex_eq_of_continuous_homotopy H hw hγ (by simp; fun_prop), curveIndex_refl]
+  rw [curveIndex_eq_of_continuous_homotopy H hw hγ
+    (by simp only [Path.refl_extend, ContinuousMap.coe_const]; fun_prop), curveIndex_refl]
 
 end Complex

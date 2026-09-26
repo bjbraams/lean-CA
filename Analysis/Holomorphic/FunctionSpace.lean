@@ -74,7 +74,7 @@ omit [NormedSpace ℂ E] [NormedSpace ℂ F] in
   carrier := {f | AnalyticOnNhd ℂ (openExtension U f) U}
   zero_mem' := by
     change AnalyticOnNhd ℂ (openExtension U 0) U
-    have h : openExtension U (0 : C(U, F)) = fun _ => 0 := by
+    have h : openExtension U (0 : C(U, F)) = fun _ ↦ 0 := by
       funext z
       simp [openExtension]
     rw [h]
@@ -105,7 +105,7 @@ instance (U : TopologicalSpace.Opens E) : IsUniformAddGroup (HolomorphicMap U F)
   uniformContinuous_sub := by
     apply isUniformEmbedding_subtype_val.uniformContinuous_iff.mpr
     apply ContinuousMap.isUniformEmbedding_toUniformOnFunIsCompact.uniformContinuous_iff.mpr
-    have h : UniformContinuous (fun f : HolomorphicMap U F =>
+    have h : UniformContinuous (fun f : HolomorphicMap U F ↦
         ContinuousMap.toUniformOnFunIsCompact f.val) :=
       ContinuousMap.isUniformEmbedding_toUniformOnFunIsCompact.uniformContinuous.comp
         uniformContinuous_subtype_val
@@ -119,7 +119,7 @@ extensions on the open domain. -/
 theorem tendsto_iff_openExtension [LocallyCompactSpace E] {U : TopologicalSpace.Opens E}
     {κ : Type*} {l : Filter κ} {f : κ → C(U, F)} {g : C(U, F)} :
     Tendsto f l (𝓝 g) ↔
-      TendstoLocallyUniformlyOn (fun n => openExtension U (f n)) (openExtension U g) l U := by
+      TendstoLocallyUniformlyOn (fun n ↦ openExtension U (f n)) (openExtension U g) l U := by
   let := U.isOpen.locallyCompactSpace
   rw [ContinuousMap.tendsto_iff_tendstoLocallyUniformly,
     tendstoLocallyUniformlyOn_iff_tendstoLocallyUniformly_comp_coe]
@@ -129,7 +129,7 @@ theorem tendsto_iff_openExtension [LocallyCompactSpace E] {U : TopologicalSpace.
 omit [CompleteSpace F] in
 /-- Evaluation at a point is continuous in the compact-open topology. -/
 theorem continuous_holomorphicMap_eval (U : TopologicalSpace.Opens E) (z : U) :
-    Continuous (fun f : HolomorphicMap U F => f.val z) :=
+    Continuous (fun f : HolomorphicMap U F ↦ f.val z) :=
   (continuous_eval_const z).comp continuous_subtype_val
 
 omit [CompleteSpace F] in
@@ -137,14 +137,14 @@ omit [CompleteSpace F] in
 theorem holomorphicMap_tendsto_iff [LocallyCompactSpace E] {U : TopologicalSpace.Opens E}
     {κ : Type*} {l : Filter κ} {f : κ → HolomorphicMap U F} {g : HolomorphicMap U F} :
     Tendsto f l (𝓝 g) ↔ TendstoLocallyUniformlyOn
-      (fun n => openExtension U (f n).val) (openExtension U g.val) l U := by
+      (fun n ↦ openExtension U (f n).val) (openExtension U g.val) l U := by
   rw [tendsto_subtype_rng, tendsto_iff_openExtension]
 
 omit [CompleteSpace F] in
 /-- Restriction to a smaller open domain preserves holomorphy. -/
 @[expose] def holomorphicRestrict {U V : TopologicalSpace.Opens E} (hVU : V ≤ U)
     (f : HolomorphicMap U F) : HolomorphicMap V F := by
-  let inc : C(V, U) := ⟨fun z => ⟨z, hVU z.property⟩,
+  let inc : C(V, U) := ⟨fun z ↦ ⟨z, hVU z.property⟩,
     continuous_subtype_val.subtype_mk _⟩
   refine ⟨f.val.comp inc, ?_⟩
   apply AnalyticOnNhd.congr V.isOpen (f.property.mono hVU)
@@ -158,14 +158,14 @@ theorem continuous_holomorphicRestrict {U V : TopologicalSpace.Opens E}
     (hVU : V ≤ U) : Continuous (holomorphicRestrict (F := F) hVU) := by
   apply Continuous.subtype_mk
   exact (ContinuousMap.continuous_precomp
-    ⟨fun z : V => (⟨z, hVU z.property⟩ : U), continuous_subtype_val.subtype_mk _⟩).comp
+    ⟨fun z : V ↦ (⟨z, hVU z.property⟩ : U), continuous_subtype_val.subtype_mk _⟩).comp
       continuous_subtype_val
 
 /-- Restrict an ambient analytic function to its open domain as a holomorphic map. -/
 @[expose] def holomorphicMapOfAnalyticOnNhd (U : TopologicalSpace.Opens E) (f : E → F)
     (hf : AnalyticOnNhd ℂ f U) : HolomorphicMap U F :=
-  ⟨⟨fun z => f z, hf.continuousOn.domRestrict⟩,
-    hf.congr U.isOpen (fun z hz => by rw [openExtension_apply U _ hz]; rfl)⟩
+  ⟨⟨fun z ↦ f z, hf.continuousOn.domRestrict⟩,
+    hf.congr U.isOpen (fun z hz ↦ by rw [openExtension_apply U _ hz]; rfl)⟩
 
 end Complex
 

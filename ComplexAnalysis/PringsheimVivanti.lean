@@ -10,10 +10,10 @@ public import ComplexAnalysis.LaurentSeries.Basic
 /-!
 # The Pringsheim–Vivanti theorem
 
-A power series `∑ a_n z^n` with nonnegative real coefficients and finite positive radius of convergence
-`R` cannot be continued holomorphically across the boundary point `z = R`: if it could, the
-series would in fact converge at some real point beyond `R`, contradicting that `R` is the
-radius of convergence.
+A power series `∑ a_n z^n` with nonnegative real coefficients and finite positive radius of
+convergence `R` cannot be continued holomorphically across the boundary point `z = R`: if it
+could, the series would in fact converge at some real point beyond `R`, contradicting that `R`
+is the radius of convergence.
 
 The proof is the classical one. Fix a point `x0` strictly between `0` and `R`, close enough to
 `R` that the holomorphic extension near `R` provides a genuinely larger disc of convergence for
@@ -37,8 +37,8 @@ convergence on the small circle, Weierstrass's `M`-test) and the elementary eval
 
 * `Complex.exists_gt_summable_of_forall_nonneg_of_differentiableOn_union_ball`:
   **the Pringsheim–Vivanti theorem**. If the sum of a power series with nonnegative
-  coefficients extends holomorphically to a neighborhood of the positive real boundary point `R` of its disc of
-  convergence, the series converges at some real point beyond `R`.
+  coefficients extends holomorphically to a neighborhood of the positive real boundary point `R`
+  of its disc of convergence, the series converges at some real point beyond `R`.
 
 ## References
 
@@ -54,110 +54,60 @@ open scoped Topology Real
 
 namespace Complex
 
+/-- **Term-by-term circle integration.** If continuous functions `f k` on the circle are bounded
+there by a summable sequence `u k`, the circle integral of `∑' k, f k` is the sum of the
+circle integrals (Weierstrass's `M`-test and uniform convergence). -/
+theorem circleIntegral_tsum_of_norm_le {E : Type*} [NormedAddCommGroup E] [NormedSpace ℂ E]
+    [CompleteSpace E] {f : ℕ → ℂ → E} {c : ℂ} {R : ℝ} (hR : 0 ≤ R)
+    (hf : ∀ k, ContinuousOn (f k) (sphere c R)) {u : ℕ → ℝ} (hu : Summable u)
+    (hfu : ∀ k, ∀ w ∈ sphere c R, ‖f k w‖ ≤ u k) :
+    (∮ w in C(c, R), ∑' k, f k w) = ∑' k, ∮ w in C(c, R), f k w := by
+  have htend := (tendstoUniformlyOn_tsum_nat hu fun k w hw ↦ hfu k w hw)
+    |>.tendsto_circleIntegral_of_continuousOn hR
+      (.of_forall fun N ↦ continuousOn_finsetSum _ fun k _ ↦ hf k)
+  simp only [circleIntegral.integral_fun_sum fun k _ ↦ (hf k).circleIntegrable hR] at htend
+  have hsum : Summable fun k ↦ ∮ w in C(c, R), f k w := by
+    refine Summable.of_norm_bounded (hu.mul_left (2 * π * R)) fun k ↦ ?_
+    have := circleIntegral.norm_integral_le_of_norm_le_const hR (hfu k)
+    linarith
+  exact tendsto_nhds_unique htend hsum.hasSum.tendsto_sum_nat
+
+/-- The circle `‖w‖ = r > 0` avoids the origin. -/
+theorem ne_zero_of_mem_sphere_zero {r : ℝ} (hr : 0 < r) {w : ℂ} (hw : w ∈ sphere (0 : ℂ) r) :
+    w ≠ 0 := by
+  rintro rfl
+  simp [hr.ne] at hw
+
 /-- Term-by-term circle integration of a power series recentered at `x0`, on a circle of
-radius `r` with `x0 + r` inside the original radius of convergence: interchanging the circle
-integral with the sum is justified by uniform convergence of the partial sums on the circle
-(Weierstrass's `M`-test). -/
+radius `r` with `x0 + r` inside the original radius of convergence. -/
 theorem circleIntegral_zpow_mul_tsum_add_eq (a : ℕ → ℝ) (ha : ∀ n, 0 ≤ a n) (x0 r : ℝ)
-    (hx0 : 0 ≤ x0) (hr : 0 < r) (hconv : Summable (fun k => a k * (x0 + r) ^ k)) (n : ℤ) :
+    (hx0 : 0 ≤ x0) (hr : 0 < r) (hconv : Summable (fun k ↦ a k * (x0 + r) ^ k)) (n : ℤ) :
     (∮ w in C(0, r), w ^ n * (∑' k, (a k : ℂ) * ((x0 : ℂ) + w) ^ k)) =
       ∑' k, (a k : ℂ) * ∮ w in C(0, r), w ^ n * ((x0 : ℂ) + w) ^ k := by
-  set f : ℕ → ℂ → ℂ := fun k w => w ^ n * ((a k : ℂ) * ((x0 : ℂ) + w) ^ k) with hf_def
-  have hfcont : ∀ k, ContinuousOn (f k) (sphere (0 : ℂ) r) := by
-    intro k
-    rw [hf_def]
-    apply ContinuousOn.mul
-    · exact (continuousOn_zpow₀ n).mono (fun w hw => by
-        rw [mem_sphere_zero_iff_norm] at hw
-        rintro rfl
-        simp at hw
-        linarith)
-    · fun_prop
-  have hbound : ∀ k w, ‖w‖ = r → ‖f k w‖ ≤ r ^ n * (a k * (x0 + r) ^ k) := by
-    intro k w hw
-    rw [hf_def]
-    simp only
-    rw [norm_mul, norm_zpow, hw, norm_mul, Complex.norm_real, Real.norm_of_nonneg (ha k), norm_pow]
+  simp_rw [← tsum_mul_left]
+  rw [circleIntegral_tsum_of_norm_le hr.le
+    (f := fun k w ↦ w ^ n * ((a k : ℂ) * ((x0 : ℂ) + w) ^ k))
+    (u := fun k ↦ r ^ n * (a k * (x0 + r) ^ k))
+    (fun k ↦ ((continuousOn_zpow₀ n).mono fun w hw ↦ ne_zero_of_mem_sphere_zero hr hw).mul
+      (by fun_prop)) (hconv.mul_left _) fun k w hw ↦ ?_]
+  · congr 1 with k
+    rw [← circleIntegral.integral_const_mul]
+    congr 1 with w
+    ring
+  · rw [mem_sphere_zero_iff_norm] at hw
     have h1 : ‖(x0 : ℂ) + w‖ ≤ x0 + r := by
-      calc ‖(x0 : ℂ) + w‖ ≤ ‖(x0 : ℂ)‖ + ‖w‖ := norm_add_le _ _
-        _ = x0 + r := by rw [Complex.norm_real, Real.norm_of_nonneg hx0, hw]
+      simpa [Complex.norm_real, Real.norm_of_nonneg hx0, hw] using norm_add_le (x0 : ℂ) w
+    rw [norm_mul, norm_zpow, hw, norm_mul, Complex.norm_real, Real.norm_of_nonneg (ha k),
+      norm_pow]
     gcongr
     exact ha k
-  have hsum2 : Summable (fun k => r ^ n * (a k * (x0 + r) ^ k)) := hconv.mul_left _
-  have htu : TendstoUniformlyOn (fun N => fun w => ∑ k ∈ Finset.range N, f k w)
-      (fun w => ∑' k, f k w) atTop (sphere (0 : ℂ) r) := by
-    apply tendstoUniformlyOn_tsum_nat (f := f) hsum2
-    intro k w hw
-    rw [mem_sphere_zero_iff_norm] at hw
-    exact hbound k w hw
-  have hcont : ∀ᶠ N in atTop,
-      ContinuousOn (fun w => ∑ k ∈ Finset.range N, f k w) (sphere (0 : ℂ) r) := by
-    filter_upwards with N
-    exact continuousOn_finsetSum _ fun k _ => hfcont k
-  have htend := TendstoUniformlyOn.tendsto_circleIntegral_of_continuousOn hr.le hcont htu
-  have hgeq : (fun w => ∑' k, f k w) = fun w => w ^ n * ∑' k, (a k : ℂ) * ((x0 : ℂ) + w) ^ k := by
-    funext w
-    rw [hf_def]
-    simp only
-    rw [tsum_mul_left]
-  rw [hgeq] at htend
-  have hrhs : ∀ N : ℕ, (∮ w in C(0, r), (∑ k ∈ Finset.range N, f k w)) =
-      ∑ k ∈ Finset.range N, ∮ w in C(0, r), f k w := by
-    intro N
-    unfold circleIntegral
-    rw [show (fun θ : ℝ => deriv (circleMap 0 r) θ • ∑ k ∈ Finset.range N, f k (circleMap 0 r θ))
-        = fun θ => ∑ k ∈ Finset.range N, deriv (circleMap 0 r) θ • f k (circleMap 0 r θ) by
-      funext θ; rw [Finset.smul_sum]]
-    have hderiv : Continuous (fun θ => deriv (circleMap (0 : ℂ) r) θ) := by
-      simp_rw [deriv_circleMap]; fun_prop
-    exact intervalIntegral.integral_finsetSum (fun k _ =>
-      (hderiv.smul ((hfcont k).comp_continuous (continuous_circleMap 0 r)
-        (fun θ => circleMap_mem_sphere 0 hr.le θ))).intervalIntegrable 0 (2 * Real.pi))
-  simp only [hrhs] at htend
-  have hnormbound : ∀ k,
-      ‖∮ w in C(0, r), f k w‖ ≤ 2 * Real.pi * r * (r ^ n * (a k * (x0 + r) ^ k)) := by
-    intro k
-    have := circleIntegral.norm_integral_le_of_norm_le_const hr.le
-      (f := f k) (C := r ^ n * (a k * (x0 + r) ^ k)) (fun w hw => hbound k w (by
-        rw [mem_sphere_zero_iff_norm] at hw; exact hw))
-    linarith
-  have hcompsum : Summable (fun k => ‖∮ w in C(0, r), f k w‖) := by
-    apply Summable.of_nonneg_of_le (fun k => norm_nonneg _) hnormbound
-    exact hsum2.mul_left _
-  have hsummable : Summable (fun k => ∮ w in C(0, r), f k w) := hcompsum.of_norm
-  have hlim1 := hsummable.hasSum.tendsto_sum_nat
-  have heq := tendsto_nhds_unique hlim1 htend
-  rw [← heq]
-  refine tsum_congr fun k => ?_
-  rw [hf_def]
-  simp only
-  rw [show (fun w : ℂ => w ^ n * ((a k : ℂ) * ((x0 : ℂ) + w) ^ k)) =
-      fun w => (a k : ℂ) • (w ^ n * ((x0 : ℂ) + w) ^ k) by
-    funext w; rw [smul_eq_mul]; ring]
-  rw [circleIntegral.integral_smul]
-  rfl
-
-/-- Finite-sum linearity of the circle integral, given continuity of each summand on the
-circle. -/
-theorem circleIntegral_finsetSum {ι : Type*} (s : Finset ι) (g : ι → ℂ → ℂ) (c : ℂ) {R : ℝ}
-    (hR : 0 ≤ R) (hg : ∀ i ∈ s, ContinuousOn (g i) (sphere c R)) :
-    (∮ w in C(c, R), ∑ i ∈ s, g i w) = ∑ i ∈ s, ∮ w in C(c, R), g i w := by
-  unfold circleIntegral
-  rw [show (fun θ : ℝ => deriv (circleMap c R) θ • ∑ i ∈ s, g i (circleMap c R θ))
-      = fun θ => ∑ i ∈ s, deriv (circleMap c R) θ • g i (circleMap c R θ) by
-    funext θ; rw [Finset.smul_sum]]
-  have hderiv : Continuous (fun θ => deriv (circleMap c R) θ) := by
-    simp_rw [deriv_circleMap]; fun_prop
-  refine intervalIntegral.integral_finsetSum (fun i hi => ?_)
-  exact (hderiv.smul ((hg i hi).comp_continuous (continuous_circleMap c R)
-    (fun θ => circleMap_mem_sphere c hR θ))).intervalIntegrable 0 (2 * Real.pi)
 
 /-- The circle integral of `z^m` around its own center: `2πi` if `m = -1`, else `0`. -/
 theorem circleIntegral_zpow_eq (r : ℝ) (hr : 0 < r) (m : ℤ) :
     (∮ z in C(0, r), z ^ m) = if m = -1 then 2 * Real.pi * I else 0 := by
   split_ifs with hm
   · subst hm
-    rw [show (fun z : ℂ => z ^ (-1 : ℤ)) = fun z => (z - 0)⁻¹ by funext z; simp]
+    rw [show (fun z : ℂ ↦ z ^ (-1 : ℤ)) = fun z ↦ (z - 0)⁻¹ by funext z; simp]
     exact circleIntegral.integral_sub_inv_of_mem_ball (by simpa using hr)
   · simpa using circleIntegral.integral_sub_zpow_of_ne (w := 0) hm 0 r
 
@@ -175,7 +125,7 @@ theorem circleIntegral_negSucc_mul_add_pow (r x0 : ℝ) (hr : 0 < r) (m k : ℕ)
     intro w hw
     rw [mem_sphere_zero_iff_norm] at hw
     have hw0 : w ≠ 0 := by rintro rfl; simp at hw; linarith
-    simp only
+    dsimp only
     rw [hexpand w, Finset.mul_sum]
     apply Finset.sum_congr rfl
     intro j hj
@@ -187,28 +137,28 @@ theorem circleIntegral_negSucc_mul_add_pow (r x0 : ℝ) (hr : 0 < r) (m k : ℕ)
         (k.choose j : ℂ)) =
         (x0 : ℂ) ^ j * (k.choose j : ℂ) * (w ^ (-(m : ℤ) - 1) * w ^ ((k : ℤ) - (j : ℤ))) by ring,
       ← zpow_add₀ hw0]
-  rw [hcongr, circleIntegral_finsetSum _ _ _ hr.le (fun j _ => by
-    have h1 : ContinuousOn (fun w : ℂ => w ^ (-(m : ℤ) - 1 + ((k : ℤ) - (j : ℤ))))
+  rw [hcongr, circleIntegral.integral_fun_sum (fun j _ ↦ ContinuousOn.circleIntegrable hr.le (by
+    have h1 : ContinuousOn (fun w : ℂ ↦ w ^ (-(m : ℤ) - 1 + ((k : ℤ) - (j : ℤ))))
         (sphere (0 : ℂ) r) :=
-      (continuousOn_zpow₀ _).mono (fun w hw => by
+      (continuousOn_zpow₀ _).mono (fun w hw ↦ by
         rw [mem_sphere_zero_iff_norm] at hw; rintro rfl; simp at hw; linarith)
-    exact continuousOn_const.mul h1)]
+    exact continuousOn_const.mul h1))]
   have hval : ∀ j : ℕ,
       (∮ w in C(0, r), (x0 : ℂ) ^ j * (k.choose j : ℂ) * w ^ (-(m : ℤ) - 1 + ((k : ℤ) - (j : ℤ)))) =
       if -(m : ℤ) - 1 + ((k : ℤ) - (j : ℤ)) = -1 then
         (x0 : ℂ) ^ j * (k.choose j : ℂ) * (2 * Real.pi * I)
       else 0 := by
     intro j
-    rw [show (fun w : ℂ => (x0 : ℂ) ^ j * (k.choose j : ℂ) * w ^ (-(m : ℤ) - 1 + ((k : ℤ) -
+    rw [show (fun w : ℂ ↦ (x0 : ℂ) ^ j * (k.choose j : ℂ) * w ^ (-(m : ℤ) - 1 + ((k : ℤ) -
         (j : ℤ)))) =
-        fun w => ((x0 : ℂ) ^ j * (k.choose j : ℂ)) • w ^ (-(m : ℤ) - 1 + ((k : ℤ) - (j : ℤ))) by
+        fun w ↦ ((x0 : ℂ) ^ j * (k.choose j : ℂ)) • w ^ (-(m : ℤ) - 1 + ((k : ℤ) - (j : ℤ))) by
       funext w; rw [smul_eq_mul]]
     rw [circleIntegral.integral_smul, circleIntegral_zpow_eq r hr]
     split_ifs with h <;> simp [smul_eq_mul]
   by_cases hmk : m ≤ k
   · simp only [hmk, ite_true]
     have hj0 : k - m ∈ Finset.range (k + 1) := Finset.mem_range.mpr (by omega)
-    refine Finset.sum_eq_single (k - m) (fun j hj hjne => ?_) (fun h => absurd hj0 h) |>.trans ?_
+    refine Finset.sum_eq_single (k - m) (fun j hj hjne ↦ ?_) (fun h ↦ absurd hj0 h) |>.trans ?_
     · rw [hval j]
       simp only [show ¬ (-(m : ℤ) - 1 + ((k : ℤ) - (j : ℤ)) = -1) from (by
         intro heq
@@ -233,13 +183,13 @@ theorem circleIntegral_negSucc_mul_add_pow (r x0 : ℝ) (hr : 0 < r) (m k : ℕ)
 translated nonnegative power series: it is the convergent Taylor-recentering series
 `∑ₖ a_k C(k, n) x0^(k - n)`. -/
 theorem circleLaurentCoeff_translate_eq (a : ℕ → ℝ) (ha : ∀ n, 0 ≤ a n) (x0 r : ℝ)
-    (hx0 : 0 ≤ x0) (hr : 0 < r) (hconv : Summable (fun k => a k * (x0 + r) ^ k)) (m : ℕ) :
-    circleLaurentCoeff (fun w => ∑' k, (a k : ℂ) * ((x0 : ℂ) + w) ^ k) r (m : ℤ) =
+    (hx0 : 0 ≤ x0) (hr : 0 < r) (hconv : Summable (fun k ↦ a k * (x0 + r) ^ k)) (m : ℕ) :
+    circleLaurentCoeff (fun w ↦ ∑' k, (a k : ℂ) * ((x0 : ℂ) + w) ^ k) r (m : ℤ) =
       ((∑' k, if m ≤ k then a k * (k.choose m : ℝ) * x0 ^ (k - m) else 0 : ℝ) : ℂ) := by
   unfold circleLaurentCoeff
   have hint := circleIntegral_zpow_mul_tsum_add_eq a ha x0 r hx0 hr hconv (-(m : ℤ) - 1)
-  rw [show (fun w : ℂ => w ^ (-(m : ℤ) - 1) • (∑' k, (a k : ℂ) * ((x0 : ℂ) + w) ^ k)) =
-    (fun w : ℂ => w ^ (-(m : ℤ) - 1) * (∑' k, (a k : ℂ) * ((x0 : ℂ) + w) ^ k)) from rfl]
+  rw [show (fun w : ℂ ↦ w ^ (-(m : ℤ) - 1) • (∑' k, (a k : ℂ) * ((x0 : ℂ) + w) ^ k)) =
+    (fun w : ℂ ↦ w ^ (-(m : ℤ) - 1) * (∑' k, (a k : ℂ) * ((x0 : ℂ) + w) ^ k)) from rfl]
   rw [hint]
   have hval : ∀ k, (a k : ℂ) * ∮ w in C(0, r), w ^ (-(m : ℤ) - 1) * ((x0 : ℂ) + w) ^ k =
       ((if m ≤ k then a k * (k.choose m : ℝ) * x0 ^ (k - m) else 0 : ℝ) : ℂ) *
@@ -256,14 +206,14 @@ theorem circleLaurentCoeff_translate_eq (a : ℕ → ℝ) (ha : ∀ n, 0 ≤ a n
 /-- Each translated coefficient of a nonnegative power series converges when the series
 converges at a strictly larger positive argument. -/
 private theorem summable_translated_coefficients (a : ℕ → ℝ) (ha : ∀ n, 0 ≤ a n)
-    {x r : ℝ} (hx : 0 ≤ x) (hr : 0 < r) (hconv : Summable fun k => a k * (x + r) ^ k)
-    (n : ℕ) : Summable fun k =>
+    {x r : ℝ} (hx : 0 ≤ x) (hr : 0 < r) (hconv : Summable fun k ↦ a k * (x + r) ^ k)
+    (n : ℕ) : Summable fun k ↦
       if n ≤ k then a k * (k.choose n : ℝ) * x ^ (k - n) else 0 := by
-  refine Summable.of_nonneg_of_le (fun k => by
+  refine Summable.of_nonneg_of_le (fun k ↦ by
       split_ifs with h
       · exact mul_nonneg (mul_nonneg (ha k) (Nat.cast_nonneg _)) (pow_nonneg hx _)
       · exact le_refl 0)
-    (f := fun k => a k * (x + r) ^ k * (r ^ n)⁻¹) (fun k => ?_) (hconv.mul_right _)
+    (f := fun k ↦ a k * (x + r) ^ k * (r ^ n)⁻¹) (fun k ↦ ?_) (hconv.mul_right _)
   split_ifs with h
   · have hbin : (k.choose n : ℝ) * x ^ (k - n) * r ^ n ≤ (x + r) ^ k := by
       have hexp := add_pow r x k
@@ -271,8 +221,8 @@ private theorem summable_translated_coefficients (a : ℕ → ℝ) (ha : ∀ n, 
       calc (k.choose n : ℝ) * x ^ (k - n) * r ^ n
           = r ^ n * x ^ (k - n) * (k.choose n : ℝ) := by ring
         _ ≤ ∑ m ∈ Finset.range (k + 1), r ^ m * x ^ (k - m) * (k.choose m : ℝ) :=
-            Finset.single_le_sum (f := fun m => r ^ m * x ^ (k - m) * (k.choose m : ℝ))
-              (fun m _ => by positivity) hmem
+            Finset.single_le_sum (f := fun m ↦ r ^ m * x ^ (k - m) * (k.choose m : ℝ))
+              (fun m _ ↦ by positivity) hmem
         _ = (r + x) ^ k := hexp.symm
         _ = (x + r) ^ k := by ring
     have hrn : (0 : ℝ) < r ^ n := by positivity
@@ -290,12 +240,12 @@ private theorem tsum_binomial_translate (c x t : ℝ) (k : ℕ) :
   calc
     _ = ∑ n ∈ Finset.range (k + 1),
         t ^ n * (if n ≤ k then c * (k.choose n : ℝ) * x ^ (k - n) else 0) :=
-      tsum_eq_sum (fun n hn => by
+      tsum_eq_sum (fun n hn ↦ by
         have hnk : ¬n ≤ k := by simpa only [Finset.mem_range, Nat.lt_succ_iff] using hn
         simp only [ite_eq_right hnk, mul_zero])
     _ = c * (x + t) ^ k := by
       rw [add_comm x t, add_pow, Finset.mul_sum]
-      refine Finset.sum_congr rfl fun n hn => ?_
+      refine Finset.sum_congr rfl fun n hn ↦ ?_
       rw [ite_eq_left (by simpa only [Finset.mem_range, Nat.lt_succ_iff] using hn)]
       ring
 
@@ -303,21 +253,21 @@ private theorem tsum_binomial_translate (c x t : ℝ) (k : ℕ) :
 column sums. -/
 private theorem summable_tsum_transpose {v : ℕ → ℕ → ℝ}
     (hv : ∀ n k, 0 ≤ v n k) (hrows : ∀ n, Summable (v n))
-    (hsum : Summable fun n => ∑' k, v n k) : Summable fun k => ∑' n, v n k := by
+    (hsum : Summable fun n ↦ ∑' k, v n k) : Summable fun k ↦ ∑' n, v n k := by
   have hprod : Summable (Function.uncurry v) :=
-    (summable_prod_of_nonneg (fun p => hv p.1 p.2)).mpr ⟨hrows, hsum⟩
+    (summable_prod_of_nonneg (fun p ↦ hv p.1 p.2)).mpr ⟨hrows, hsum⟩
   exact hprod.prod_symm.prod
 
 /-- Summability of a nonnegative translated binomial series implies summability of the
 original series at the sum of the two arguments. -/
 private theorem summable_binomial_of_summable_translate (a : ℕ → ℝ) (ha : ∀ k, 0 ≤ a k)
     {x t : ℝ} (hx : 0 ≤ x) (ht : 0 ≤ t)
-    (hrows : ∀ n, Summable fun k =>
+    (hrows : ∀ n, Summable fun k ↦
       if n ≤ k then a k * (k.choose n : ℝ) * x ^ (k - n) else 0)
-    (hsum : Summable fun n => t ^ n *
+    (hsum : Summable fun n ↦ t ^ n *
       ∑' k, if n ≤ k then a k * (k.choose n : ℝ) * x ^ (k - n) else 0) :
-    Summable fun k => a k * (x + t) ^ k := by
-  let b : ℕ → ℕ → ℝ := fun n k => t ^ n *
+    Summable fun k ↦ a k * (x + t) ^ k := by
+  let b : ℕ → ℕ → ℝ := fun n k ↦ t ^ n *
     (if n ≤ k then a k * (k.choose n : ℝ) * x ^ (k - n) else 0)
   have hb : ∀ n k, 0 ≤ b n k := by
     intro n k
@@ -325,9 +275,9 @@ private theorem summable_binomial_of_summable_translate (a : ℕ → ℝ) (ha : 
     split_ifs
     · exact mul_nonneg (mul_nonneg (ha _) (Nat.cast_nonneg _)) (pow_nonneg hx _)
     · exact le_rfl
-  have hcol : Summable fun k => ∑' n, b n k := summable_tsum_transpose hb
-    (fun n => (hrows n).mul_left (t ^ n)) (by simpa only [b, tsum_mul_left] using hsum)
-  exact hcol.congr fun k => tsum_binomial_translate (a k) x t k
+  have hcol : Summable fun k ↦ ∑' n, b n k := summable_tsum_transpose hb
+    (fun n ↦ (hrows n).mul_left (t ^ n)) (by simpa only [b, tsum_mul_left] using hsum)
+  exact hcol.congr fun k ↦ tsum_binomial_translate (a k) x t k
 
 /-- **The Pringsheim–Vivanti theorem.** If the sum of a power series `∑ a_n z^n` with
 nonnegative coefficients and radius of convergence `R` (`0 < R`) extends holomorphically to a
@@ -337,11 +287,11 @@ finite radius of convergence `R` always has `R` itself as a singular point: it c
 continued holomorphically across any neighborhood of `R`. -/
 theorem exists_gt_summable_of_forall_nonneg_of_differentiableOn_union_ball
     (a : ℕ → ℝ) (ha : ∀ n, 0 ≤ a n) {R : ℝ} (hR : 0 < R)
-    (hconv : ∀ r, 0 ≤ r → r < R → Summable (fun n => a n * r ^ n))
+    (hconv : ∀ r, 0 ≤ r → r < R → Summable (fun n ↦ a n * r ^ n))
     {ρ : ℝ} (hρ : 0 < ρ) {F : ℂ → ℂ}
     (hF : DifferentiableOn ℂ F (ball 0 R ∪ ball (R : ℂ) ρ))
     (hFeq : ∀ z ∈ ball (0 : ℂ) R, F z = ∑' n, (a n : ℂ) * z ^ n) :
-    ∃ z0 : ℝ, R < z0 ∧ Summable (fun n => a n * z0 ^ n) := by
+    ∃ z0 : ℝ, R < z0 ∧ Summable (fun n ↦ a n * z0 ^ n) := by
   set δ : ℝ := min ρ R / 4 with hδ_def
   have hδpos : 0 < δ := by positivity
   have hδR : δ < R := by
@@ -360,7 +310,7 @@ theorem exists_gt_summable_of_forall_nonneg_of_differentiableOn_union_ball
     closedBall_subset_ball' (by rw [hdist]; dsimp [s']; linarith)
   have hcontain : closedBall (x0 : ℂ) s' ⊆ ball (0 : ℂ) R ∪ ball (R : ℂ) ρ :=
     hnear.trans subset_union_right
-  set G : ℂ → ℂ := fun w => F ((x0 : ℂ) + w) with hG_def
+  set G : ℂ → ℂ := fun w ↦ F ((x0 : ℂ) + w) with hG_def
   have hFanBig : AnalyticOnNhd ℂ F (ball (0 : ℂ) R ∪ ball (R : ℂ) ρ) :=
     hF.analyticOnNhd (isOpen_ball.union isOpen_ball)
   have hFanS' : AnalyticOnNhd ℂ F (closedBall (x0 : ℂ) s') := hFanBig.mono hcontain
@@ -386,17 +336,17 @@ theorem exists_gt_summable_of_forall_nonneg_of_differentiableOn_union_ball
     calc 3 * δ / 2 ≤ 3 * ρ / 8 := h2
       _ < ρ / 2 := h3
       _ = s' := hs'_def.symm
-  have hGeqOn : Set.EqOn G (fun w => ∑' k, (a k : ℂ) * ((x0 : ℂ) + w) ^ k) (sphere 0 r) := by
+  have hGeqOn : Set.EqOn G (fun w ↦ ∑' k, (a k : ℂ) * ((x0 : ℂ) + w) ^ k) (sphere 0 r) := by
     intro w hw
     rw [mem_sphere_zero_iff_norm] at hw
     rw [hG_def]
-    simp only
+    dsimp only
     rw [hFeq]
     rw [mem_ball_zero_iff]
     calc ‖(x0 : ℂ) + w‖ ≤ ‖(x0 : ℂ)‖ + ‖w‖ := norm_add_le _ _
       _ = x0 + r := by rw [Complex.norm_real, Real.norm_of_nonneg hx0pos.le, hw]
       _ < R := by rw [hx0_def]; linarith
-  have hLC_eq : circleLaurentCoeff G r = circleLaurentCoeff (fun w => ∑' k, (a k : ℂ) *
+  have hLC_eq : circleLaurentCoeff G r = circleLaurentCoeff (fun w ↦ ∑' k, (a k : ℂ) *
       ((x0 : ℂ) + w) ^ k) r := by
     funext n
     unfold circleLaurentCoeff
@@ -404,14 +354,14 @@ theorem exists_gt_summable_of_forall_nonneg_of_differentiableOn_union_ball
     apply circleIntegral.integral_congr hrpos.le
     intro w hw
     simp only [hGeqOn hw]
-  have hconvxr : Summable (fun k => a k * (x0 + r) ^ k) := hconv (x0 + r) (by positivity)
+  have hconvxr : Summable (fun k ↦ a k * (x0 + r) ^ k) := hconv (x0 + r) (by positivity)
     (by rw [hx0_def, hr_def]; linarith)
   have hLC_nonneg : ∀ n : ℕ, circleLaurentCoeff G r (n : ℤ) =
       ((∑' k, if n ≤ k then a k * (k.choose n : ℝ) * x0 ^ (k - n) else 0 : ℝ) : ℂ) := by
     intro n
     rw [hLC_eq]
     exact circleLaurentCoeff_translate_eq a ha x0 r hx0pos.le hrpos hconvxr n
-  have hHS : HasSum (fun k : ℤ => ((z0 - x0 : ℝ) : ℂ) ^ k • circleLaurentCoeff G r k) (F z0) := by
+  have hHS : HasSum (fun k : ℤ ↦ ((z0 - x0 : ℝ) : ℂ) ^ k • circleLaurentCoeff G r k) (F z0) := by
     have hann : AnalyticOnNhd ℂ G (closedBall 0 s' \ ball 0 r) := hGanS'.mono Set.sdiff_subset
     have := hasSum_circleLaurentCoeff_annulus hrpos
       (z := ((z0 - x0 : ℝ) : ℂ)) (r := r) (R := s') (by
@@ -423,15 +373,15 @@ theorem exists_gt_summable_of_forall_nonneg_of_differentiableOn_union_ball
       rw [hG_def]; simp only
       rw [show (x0 : ℂ) + ((z0 - x0 : ℝ) : ℂ) = (z0 : ℂ) by push_cast; ring]] at this
     exact this
-  have hsummableZ : Summable (fun k : ℤ => ((z0 - x0 : ℝ) : ℂ) ^ k • circleLaurentCoeff G r k) :=
+  have hsummableZ : Summable (fun k : ℤ ↦ ((z0 - x0 : ℝ) : ℂ) ^ k • circleLaurentCoeff G r k) :=
     hHS.summable
   have hsummableN :
-      Summable (fun n : ℕ => ((z0 - x0 : ℝ) : ℂ) ^ (n : ℤ) • circleLaurentCoeff G r (n : ℤ)) :=
-    hsummableZ.comp_injective (fun a b hab => by exact_mod_cast hab)
-  have hsummableN' : Summable (fun n : ℕ =>
+      Summable (fun n : ℕ ↦ ((z0 - x0 : ℝ) : ℂ) ^ (n : ℤ) • circleLaurentCoeff G r (n : ℤ)) :=
+    hsummableZ.comp_injective (fun a b hab ↦ by exact_mod_cast hab)
+  have hsummableN' : Summable (fun n : ℕ ↦
       (z0 - x0) ^ n * (∑' k, if n ≤ k then a k * (k.choose n : ℝ) * x0 ^ (k - n) else 0)) := by
-    have heq : (fun n : ℕ => ((z0 - x0 : ℝ) : ℂ) ^ (n : ℤ) • circleLaurentCoeff G r (n : ℤ)) =
-        fun n : ℕ => (((z0 - x0) ^ n *
+    have heq : (fun n : ℕ ↦ ((z0 - x0 : ℝ) : ℂ) ^ (n : ℤ) • circleLaurentCoeff G r (n : ℤ)) =
+        fun n : ℕ ↦ (((z0 - x0) ^ n *
           (∑' k, if n ≤ k then a k * (k.choose n : ℝ) * x0 ^ (k - n) else 0) : ℝ) : ℂ) := by
       funext n
       rw [hLC_nonneg n, zpow_natCast, smul_eq_mul]
@@ -439,9 +389,9 @@ theorem exists_gt_summable_of_forall_nonneg_of_differentiableOn_union_ball
       ring
     rw [heq] at hsummableN
     have h2 := Complex.reCLM.summable hsummableN
-    have heq2 : (fun n : ℕ => (Complex.reCLM (((z0 - x0) ^ n *
+    have heq2 : (fun n : ℕ ↦ (Complex.reCLM (((z0 - x0) ^ n *
         (∑' k, if n ≤ k then a k * (k.choose n : ℝ) * x0 ^ (k - n) else 0) : ℝ) : ℂ))) =
-        fun n : ℕ => (z0 - x0) ^ n *
+        fun n : ℕ ↦ (z0 - x0) ^ n *
           (∑' k, if n ≤ k then a k * (k.choose n : ℝ) * x0 ^ (k - n) else 0) := by
       funext n
       rw [Complex.reCLM_apply, Complex.ofReal_re]

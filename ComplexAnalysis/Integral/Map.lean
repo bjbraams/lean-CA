@@ -40,16 +40,16 @@ theorem contDiffOn_path_map' {a b : ℂ} (γ : Path a b) {U : Set ℂ} (hU : IsO
     ContDiffOn ℝ n (γ.map' (hg.continuousOn.mono hγU)).extend I := by
   have hg' : ContDiffOn ℝ n g U :=
     (hg.analyticOnNhd hU).contDiffOn_of_completeSpace.restrict_scalars ℝ
-  exact hg'.comp hγ (fun t _ => hγU ⟨projIcc 0 1 zero_le_one t, rfl⟩)
+  exact hg'.comp hγ (fun t _ ↦ hγU ⟨projIcc 0 1 zero_le_one t, rfl⟩)
 
 /-- Holomorphic change of variables for a complex Banach-valued curve integral. -/
 theorem curveIntegral_map' {F : Type*} [NormedAddCommGroup F] [NormedSpace ℂ F]
     {a b : ℂ} (γ : Path a b) {U : Set ℂ} (hU : IsOpen U)
     {g : ℂ → ℂ} (hg : DifferentiableOn ℂ g U) (hγU : range γ ⊆ U)
     (hγ : DifferentiableOn ℝ γ.extend I) (f : ℂ → F) :
-    curveIntegral (fun z => ContinuousLinearMap.toSpanSingleton ℂ (f z))
+    curveIntegral (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ (f z))
         (γ.map' (hg.continuousOn.mono hγU)) =
-      curveIntegral (fun z => ContinuousLinearMap.toSpanSingleton ℂ (deriv g z • f (g z))) γ := by
+      curveIntegral (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ (deriv g z • f (g z))) γ := by
   rw [curveIntegral_def, curveIntegral_def]
   apply intervalIntegral.integral_congr
   intro t ht

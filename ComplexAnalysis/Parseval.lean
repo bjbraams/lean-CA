@@ -67,7 +67,7 @@ theorem circleMap_zero_mem_ball (hr : 0 ≤ r) (hrR : r < R) (θ : ℝ) :
 /-- The Taylor series of `f` at a point of the circle of radius `r`. -/
 theorem hasSum_taylorCoeff_circleMap (hf : DifferentiableOn ℂ f (ball 0 R)) (hr : 0 ≤ r)
     (hrR : r < R) (θ : ℝ) :
-    HasSum (fun n : ℕ => taylorCoeff f n * r ^ n * exp (n * (θ * I)))
+    HasSum (fun n : ℕ ↦ taylorCoeff f n * r ^ n * exp (n * (θ * I)))
       (f (circleMap 0 r θ)) := by
   have h := hasSum_taylorSeries_on_ball hf (circleMap_zero_mem_ball hr hrR θ)
   convert h using 2 with n
@@ -110,7 +110,7 @@ theorem integral_exp_neg_mul (n : ℕ) (hn : n ≠ 0) :
     ∫ θ in (0 : ℝ)..2 * π, exp (-(n * (θ * I))) = 0 := by
   have hc : -((n : ℂ) * I) ≠ 0 :=
     neg_ne_zero.mpr (mul_ne_zero (Nat.cast_ne_zero.mpr hn) I_ne_zero)
-  have hpt : ∀ θ : ℝ, exp (-(n * (θ * I))) = exp (-((n : ℂ) * I) * θ) := fun θ => by
+  have hpt : ∀ θ : ℝ, exp (-(n * (θ * I))) = exp (-((n : ℂ) * I) * θ) := fun θ ↦ by
     congr 1
     ring
   simp_rw [hpt]
@@ -132,20 +132,20 @@ theorem integral_exp_neg_mul (n : ℕ) (hn : n ≠ 0) :
 /-- Taylor coefficients are additive. -/
 theorem taylorCoeff_add {g : ℂ → ℂ} (hf : DifferentiableOn ℂ f (ball 0 R))
     (hg : DifferentiableOn ℂ g (ball 0 R)) (hR : 0 < R) (n : ℕ) :
-    taylorCoeff (fun z => f z + g z) n = taylorCoeff f n + taylorCoeff g n := by
+    taylorCoeff (fun z ↦ f z + g z) n = taylorCoeff f n + taylorCoeff g n := by
   have hr : 0 < R / 2 := by positivity
   have hsub : closedBall (0 : ℂ) (R / 2) ⊆ ball 0 R := closedBall_subset_ball (by linarith)
   have h1 := integral_exp_neg_mul_circleMap (hf.mono hsub) hr n
   have h2 := integral_exp_neg_mul_circleMap (hg.mono hsub) hr n
-  have h3 := integral_exp_neg_mul_circleMap (f := fun z => f z + g z) ((hf.add hg).mono hsub) hr n
+  have h3 := integral_exp_neg_mul_circleMap (f := fun z ↦ f z + g z) ((hf.add hg).mono hsub) hr n
   have hmem := circleMap_zero_mem_ball hr.le (by linarith : R / 2 < R)
-  have hfc : Continuous fun θ : ℝ => exp (-(n * (θ * I))) * f (circleMap 0 (R / 2) θ) :=
-    (by fun_prop : Continuous fun θ : ℝ => exp (-(n * (θ * I)))).mul
+  have hfc : Continuous fun θ : ℝ ↦ exp (-(n * (θ * I))) * f (circleMap 0 (R / 2) θ) :=
+    (by fun_prop : Continuous fun θ : ℝ ↦ exp (-(n * (θ * I)))).mul
       (hf.continuousOn.comp_continuous (continuous_circleMap _ _) hmem)
-  have hgc : Continuous fun θ : ℝ => exp (-(n * (θ * I))) * g (circleMap 0 (R / 2) θ) :=
-    (by fun_prop : Continuous fun θ : ℝ => exp (-(n * (θ * I)))).mul
+  have hgc : Continuous fun θ : ℝ ↦ exp (-(n * (θ * I))) * g (circleMap 0 (R / 2) θ) :=
+    (by fun_prop : Continuous fun θ : ℝ ↦ exp (-(n * (θ * I)))).mul
       (hg.continuousOn.comp_continuous (continuous_circleMap _ _) hmem)
-  rw [integral_congr (fun θ _ => mul_add _ _ _),
+  rw [integral_congr (fun θ _ ↦ mul_add _ _ _),
     integral_add (hfc.intervalIntegrable _ _) (hgc.intervalIntegrable _ _), h1, h2] at h3
   have hne : (2 * π * ((R / 2 : ℝ) : ℂ) ^ n) ≠ 0 := by
     have : ((R / 2 : ℝ) : ℂ) ≠ 0 := by exact_mod_cast hr.ne'
@@ -168,7 +168,7 @@ theorem taylorCoeff_dslope_zero (hf : DifferentiableOn ℂ f (ball 0 R)) (hR : 0
   have h2 := integral_exp_neg_mul_circleMap (hf.mono hsub) hr (n + 1)
   have h3 := integral_exp_neg_mul (n + 1) n.succ_ne_zero
   have hmem := circleMap_zero_mem_ball hr.le (by linarith : R / 2 < R)
-  have hcm : ∀ θ : ℝ, circleMap 0 (R / 2) θ ≠ 0 := fun θ => circleMap_ne_center hr.ne'
+  have hcm : ∀ θ : ℝ, circleMap 0 (R / 2) θ ≠ 0 := fun θ ↦ circleMap_ne_center hr.ne'
   have hpt : ∀ θ : ℝ, exp (-(n * (θ * I))) * dslope f 0 (circleMap 0 (R / 2) θ) =
       ((R / 2 : ℝ) : ℂ)⁻¹ * (exp (-((n + 1 : ℕ) * (θ * I))) * f (circleMap 0 (R / 2) θ) -
         f 0 * exp (-((n + 1 : ℕ) * (θ * I)))) := by
@@ -182,12 +182,12 @@ theorem taylorCoeff_dslope_zero (hf : DifferentiableOn ℂ f (ball 0 R)) (hR : 0
       ring
     rw [hexp]
     field_simp
-  have hfc : Continuous fun θ : ℝ => exp (-((n + 1 : ℕ) * (θ * I))) * f (circleMap 0 (R / 2) θ) :=
-    (by fun_prop : Continuous fun θ : ℝ => exp (-((n + 1 : ℕ) * (θ * I)))).mul
+  have hfc : Continuous fun θ : ℝ ↦ exp (-((n + 1 : ℕ) * (θ * I))) * f (circleMap 0 (R / 2) θ) :=
+    (by fun_prop : Continuous fun θ : ℝ ↦ exp (-((n + 1 : ℕ) * (θ * I)))).mul
       (hf.continuousOn.comp_continuous (continuous_circleMap _ _) hmem)
-  rw [integral_congr (fun θ _ => hpt θ), integral_const_mul,
+  rw [integral_congr (fun θ _ ↦ hpt θ), integral_const_mul,
     integral_sub (hfc.intervalIntegrable _ _)
-    ((by fun_prop : Continuous fun θ : ℝ => f 0 * exp (-((n + 1 : ℕ) * (θ * I)))).intervalIntegrable
+    ((by fun_prop : Continuous fun θ : ℝ ↦ f 0 * exp (-((n + 1 : ℕ) * (θ * I)))).intervalIntegrable
       _ _), h2, integral_const_mul, h3, mul_zero, sub_zero] at h1
   have hne : (2 * π * ((R / 2 : ℝ) : ℂ) ^ n) ≠ 0 := by
     have h2π : (2 * π : ℂ) ≠ 0 := by exact_mod_cast (by positivity : (2 * π : ℝ) ≠ 0)
@@ -198,11 +198,11 @@ theorem taylorCoeff_dslope_zero (hf : DifferentiableOn ℂ f (ball 0 R)) (hR : 0
 
 /-- Multiplying by `z ^ m` shifts the Taylor coefficients by `m`. -/
 theorem taylorCoeff_pow_mul {K : ℂ → ℂ} (hK : DifferentiableOn ℂ K (ball 0 R)) (hR : 0 < R)
-    (m n : ℕ) : taylorCoeff (fun z => z ^ m * K z) (n + m) = taylorCoeff K n := by
+    (m n : ℕ) : taylorCoeff (fun z ↦ z ^ m * K z) (n + m) = taylorCoeff K n := by
   have hr : 0 < R / 2 := by positivity
   have hr' : ((R / 2 : ℝ) : ℂ) ≠ 0 := by exact_mod_cast hr.ne'
   have hsub : closedBall (0 : ℂ) (R / 2) ⊆ ball 0 R := closedBall_subset_ball (by linarith)
-  have h1 := integral_exp_neg_mul_circleMap (f := fun z => z ^ m * K z)
+  have h1 := integral_exp_neg_mul_circleMap (f := fun z ↦ z ^ m * K z)
     (((differentiableOn_pow m).mul hK).mono hsub) hr (n + m)
   have h2 := integral_exp_neg_mul_circleMap (hK.mono hsub) hr n
   have hpt : ∀ θ : ℝ, exp (-((n + m : ℕ) * (θ * I))) *
@@ -219,7 +219,7 @@ theorem taylorCoeff_pow_mul {K : ℂ → ℂ} (hK : DifferentiableOn ℂ K (ball
     have he : exp (m * (θ * I)) ≠ 0 := exp_ne_zero _
     rw [hexp]
     field_simp
-  rw [integral_congr (fun θ _ => hpt θ), integral_const_mul, h2] at h1
+  rw [integral_congr (fun θ _ ↦ hpt θ), integral_const_mul, h2] at h1
   have hne : (2 * π * ((R / 2 : ℝ) : ℂ) ^ (n + m)) ≠ 0 := by
     have h2π : (2 * π : ℂ) ≠ 0 := by exact_mod_cast (by positivity : (2 * π : ℝ) ≠ 0)
     exact mul_ne_zero h2π (pow_ne_zero _ hr')
@@ -229,14 +229,14 @@ theorem taylorCoeff_pow_mul {K : ℂ → ℂ} (hK : DifferentiableOn ℂ K (ball
 
 /-- The Taylor coefficients of `f` are summable against `r ^ n` for `r` below the radius. -/
 theorem summable_norm_taylorCoeff_mul_pow (hf : DifferentiableOn ℂ f (ball 0 R)) (hr : 0 ≤ r)
-    (hrR : r < R) : Summable fun n : ℕ => ‖taylorCoeff f n‖ * r ^ n := by
+    (hrR : r < R) : Summable fun n : ℕ ↦ ‖taylorCoeff f n‖ * r ^ n := by
   obtain ⟨r', hrr', hr'R⟩ := exists_between hrR
   have hr'0 : 0 < r' := hr.trans_lt hrr'
   have hz : (r' : ℂ) ∈ ball (0 : ℂ) R := by
     rw [mem_ball_zero_iff, norm_real, Real.norm_eq_abs, abs_of_pos hr'0]
     exact hr'R
   have hsum := hasSum_taylorSeries_on_ball hf hz
-  have hterm : Tendsto (fun n : ℕ =>
+  have hterm : Tendsto (fun n : ℕ ↦
       ‖(n.factorial : ℂ)⁻¹ • ((r' : ℂ) - 0) ^ n • iteratedDeriv n f 0‖) atTop (𝓝 0) := by
     simpa using hsum.summable.tendsto_atTop_zero.norm
   obtain ⟨C, hC⟩ := hterm.bddAbove_range
@@ -252,7 +252,7 @@ theorem summable_norm_taylorCoeff_mul_pow (hf : DifferentiableOn ℂ f (ball 0 R
       _ ≤ C := this
   have hq : 0 ≤ r / r' := div_nonneg hr hr'0.le
   have hq1 : r / r' < 1 := (div_lt_one hr'0).mpr hrr'
-  refine Summable.of_nonneg_of_le (fun n => by positivity) (fun n => ?_)
+  refine Summable.of_nonneg_of_le (fun n ↦ by positivity) (fun n ↦ ?_)
     ((summable_geometric_of_lt_one hq hq1).mul_left C)
   calc ‖taylorCoeff f n‖ * r ^ n = ‖taylorCoeff f n‖ * r' ^ n * (r / r') ^ n := by
         rw [div_pow, mul_assoc, mul_div_cancel₀ _ (pow_ne_zero _ hr'0.ne')]
@@ -263,7 +263,7 @@ circle is the sum of the conjugate Taylor coefficients against the Fourier coeff
 `G`. -/
 theorem hasSum_conj_taylorCoeff_mul_integral {G : ℝ → ℂ} (hf : DifferentiableOn ℂ f (ball 0 R))
     (hr : 0 ≤ r) (hrR : r < R) (hG : Continuous G) :
-    HasSum (fun n : ℕ => (starRingEnd ℂ) (taylorCoeff f n) * r ^ n *
+    HasSum (fun n : ℕ ↦ (starRingEnd ℂ) (taylorCoeff f n) * r ^ n *
         ∫ θ in (0 : ℝ)..2 * π, exp (-(n * (θ * I))) * G θ)
       (∫ θ in (0 : ℝ)..2 * π, (starRingEnd ℂ) (f (circleMap 0 r θ)) * G θ) := by
   obtain ⟨M, hM⟩ : ∃ M, ∀ θ ∈ uIcc (0 : ℝ) (2 * π), ‖G θ‖ ≤ M :=
@@ -273,7 +273,7 @@ theorem hasSum_conj_taylorCoeff_mul_integral {G : ℝ → ℂ} (hf : Differentia
     intro n θ
     rw [map_mul, map_mul, map_natCast, conj_ofReal, conj_I]
     ring
-  have hpt : ∀ θ : ℝ, HasSum (fun n : ℕ => (starRingEnd ℂ) (taylorCoeff f n) * r ^ n *
+  have hpt : ∀ θ : ℝ, HasSum (fun n : ℕ ↦ (starRingEnd ℂ) (taylorCoeff f n) * r ^ n *
       (exp (-(n * (θ * I))) * G θ)) ((starRingEnd ℂ) (f (circleMap 0 r θ)) * G θ) := by
     intro θ
     have h := (hasSum_conj'.mpr (hasSum_taylorCoeff_circleMap hf hr hrR θ)).mul_right (G θ)
@@ -286,15 +286,15 @@ theorem hasSum_conj_taylorCoeff_mul_integral {G : ℝ → ℂ} (hf : Differentia
     simp
   have hdom := intervalIntegral.hasSum_integral_of_dominated_convergence
     (μ := MeasureTheory.volume) (a := 0) (b := 2 * π)
-    (F := fun (n : ℕ) (θ : ℝ) => (starRingEnd ℂ) (taylorCoeff f n) * r ^ n *
+    (F := fun (n : ℕ) (θ : ℝ) ↦ (starRingEnd ℂ) (taylorCoeff f n) * r ^ n *
       (exp (-(n * (θ * I))) * G θ))
-    (bound := fun n _ => ‖taylorCoeff f n‖ * r ^ n * M)
-    (fun n => (by fun_prop : Continuous fun θ : ℝ => (starRingEnd ℂ) (taylorCoeff f n) * r ^ n *
+    (bound := fun n _ ↦ ‖taylorCoeff f n‖ * r ^ n * M)
+    (fun n ↦ (by fun_prop : Continuous fun θ : ℝ ↦ (starRingEnd ℂ) (taylorCoeff f n) * r ^ n *
       (exp (-(n * (θ * I))) * G θ)).aestronglyMeasurable)
-    (fun n => MeasureTheory.ae_of_all _ fun θ hθ => ?_)
-    (MeasureTheory.ae_of_all _ fun θ _ => hsum.mul_right M)
+    (fun n ↦ MeasureTheory.ae_of_all _ fun θ hθ ↦ ?_)
+    (MeasureTheory.ae_of_all _ fun θ _ ↦ hsum.mul_right M)
     intervalIntegrable_const
-    (MeasureTheory.ae_of_all _ fun θ _ => hpt θ)
+    (MeasureTheory.ae_of_all _ fun θ _ ↦ hpt θ)
   · simp_rw [integral_const_mul] at hdom
     exact hdom
   · rw [norm_mul, norm_mul, norm_mul, Complex.norm_conj, norm_pow, norm_real, Real.norm_eq_abs,
@@ -310,16 +310,16 @@ theorem integral_exp_neg_mul_circleMap_mul_deriv (hf : DifferentiableOn ℂ f (b
         (circleMap 0 r θ * deriv f (circleMap 0 r θ)) =
       n * ∫ θ in (0 : ℝ)..2 * π, exp (-(n * (θ * I))) * f (circleMap 0 r θ) := by
   have hmem := circleMap_zero_mem_ball hr.le hrR
-  have hfd : ∀ θ : ℝ, HasDerivAt f (deriv f (circleMap 0 r θ)) (circleMap 0 r θ) := fun θ =>
+  have hfd : ∀ θ : ℝ, HasDerivAt f (deriv f (circleMap 0 r θ)) (circleMap 0 r θ) := fun θ ↦
     (hf.differentiableAt (isOpen_ball.mem_nhds (hmem θ))).hasDerivAt
   have hderiv : ContinuousOn (deriv f) (ball 0 R) :=
     (hf.analyticOnNhd isOpen_ball).deriv.continuousOn
-  have hu : ∀ θ ∈ uIcc (0 : ℝ) (2 * π), HasDerivAt (fun θ : ℝ => exp (-(n * (θ * I))))
+  have hu : ∀ θ ∈ uIcc (0 : ℝ) (2 * π), HasDerivAt (fun θ : ℝ ↦ exp (-(n * (θ * I))))
       (-(n * I) * exp (-(n * (θ * I)))) θ := by
     intro θ _
     have h := ((hasDerivAt_id θ).ofReal_comp.const_mul (-(n * I))).cexp
-    have h1 : (fun y : ℝ => exp (-(n * I) * ((id y : ℝ) : ℂ))) =
-        fun θ : ℝ => exp (-(n * (θ * I))) := by
+    have h1 : (fun y : ℝ ↦ exp (-(n * I) * ((id y : ℝ) : ℂ))) =
+        fun θ : ℝ ↦ exp (-(n * (θ * I))) := by
       funext y
       simp only [id]
       congr 1
@@ -329,15 +329,15 @@ theorem integral_exp_neg_mul_circleMap_mul_deriv (hf : DifferentiableOn ℂ f (b
     simp only [id, ofReal_one]
     rw [show -(n * I) * (θ : ℂ) = -(n * (θ * I)) by ring]
     ring
-  have hv : ∀ θ ∈ uIcc (0 : ℝ) (2 * π), HasDerivAt (fun θ : ℝ => f (circleMap 0 r θ))
-      (deriv f (circleMap 0 r θ) * (circleMap 0 r θ * I)) θ := fun θ _ =>
+  have hv : ∀ θ ∈ uIcc (0 : ℝ) (2 * π), HasDerivAt (fun θ : ℝ ↦ f (circleMap 0 r θ))
+      (deriv f (circleMap 0 r θ) * (circleMap 0 r θ * I)) θ := fun θ _ ↦
     (hfd θ).comp θ (hasDerivAt_circleMap 0 r θ)
-  have hcont : Continuous fun θ : ℝ => deriv f (circleMap 0 r θ) :=
+  have hcont : Continuous fun θ : ℝ ↦ deriv f (circleMap 0 r θ) :=
     hderiv.comp_continuous (continuous_circleMap 0 r) hmem
   have hibp := integral_mul_deriv_eq_deriv_mul hu hv
-    ((by fun_prop : Continuous fun θ : ℝ => -(n * I) * exp (-(n * (θ * I)))).intervalIntegrable
+    ((by fun_prop : Continuous fun θ : ℝ ↦ -(n * I) * exp (-(n * (θ * I)))).intervalIntegrable
       _ _)
-    ((by fun_prop : Continuous fun θ : ℝ => deriv f (circleMap 0 r θ) *
+    ((by fun_prop : Continuous fun θ : ℝ ↦ deriv f (circleMap 0 r θ) *
       (circleMap 0 r θ * I)).intervalIntegrable _ _)
   have hper : circleMap 0 r (2 * π) = circleMap 0 r 0 := by
     have := periodic_circleMap 0 r 0
@@ -357,7 +357,7 @@ theorem integral_exp_neg_mul_circleMap_mul_deriv (hf : DifferentiableOn ℂ f (b
   simp_rw [hI]
   rw [integral_const_mul, hibp]
   have h2 : ∀ θ : ℝ, -(n * I) * exp (-(n * (θ * I))) * f (circleMap 0 r θ) =
-      -(n * I) * (exp (-(n * (θ * I))) * f (circleMap 0 r θ)) := fun θ => mul_assoc _ _ _
+      -(n * I) * (exp (-(n * (θ * I))) * f (circleMap 0 r θ)) := fun θ ↦ mul_assoc _ _ _
   simp_rw [h2]
   rw [integral_const_mul]
   linear_combination
@@ -366,10 +366,10 @@ theorem integral_exp_neg_mul_circleMap_mul_deriv (hf : DifferentiableOn ℂ f (b
 /-- **Parseval's identity** for the Taylor coefficients on the circle of radius `r`. -/
 theorem hasSum_norm_taylorCoeff_sq (hf : DifferentiableOn ℂ f (ball 0 R)) (hr : 0 < r)
     (hrR : r < R) :
-    HasSum (fun n : ℕ => 2 * π * (‖taylorCoeff f n‖ ^ 2 * r ^ (2 * n)))
+    HasSum (fun n : ℕ ↦ 2 * π * (‖taylorCoeff f n‖ ^ 2 * r ^ (2 * n)))
       (∫ θ in (0 : ℝ)..2 * π, ‖f (circleMap 0 r θ)‖ ^ 2) := by
   have hmem := circleMap_zero_mem_ball hr.le hrR
-  have hG : Continuous fun θ : ℝ => f (circleMap 0 r θ) :=
+  have hG : Continuous fun θ : ℝ ↦ f (circleMap 0 r θ) :=
     hf.continuousOn.comp_continuous (continuous_circleMap 0 r) hmem
   have hcl : DifferentiableOn ℂ f (closedBall 0 r) := hf.mono (closedBall_subset_ball hrR)
   have h := hasSum_conj_taylorCoeff_mul_integral hf hr.le hrR hG
@@ -399,20 +399,20 @@ theorem tsum_norm_taylorCoeff_sq_le (hf : DifferentiableOn ℂ f (ball 0 R)) (hr
     (hrR : r < R) {M : ℝ} (hM : ∀ z ∈ sphere (0 : ℂ) r, ‖f z‖ ≤ M) :
     ∑' n : ℕ, ‖taylorCoeff f n‖ ^ 2 * r ^ (2 * n) ≤ M ^ 2 := by
   have hmem := circleMap_zero_mem_ball hr.le hrR
-  have hsph : ∀ θ : ℝ, circleMap 0 r θ ∈ sphere (0 : ℂ) r := fun θ =>
+  have hsph : ∀ θ : ℝ, circleMap 0 r θ ∈ sphere (0 : ℂ) r := fun θ ↦
     circleMap_mem_sphere 0 hr.le θ
   have hpi : (2 * π)⁻¹ * (2 * π) = 1 := inv_mul_cancel₀ (by positivity)
-  have h : HasSum (fun n : ℕ => ‖taylorCoeff f n‖ ^ 2 * r ^ (2 * n))
+  have h : HasSum (fun n : ℕ ↦ ‖taylorCoeff f n‖ ^ 2 * r ^ (2 * n))
       ((2 * π)⁻¹ * ∫ θ in (0 : ℝ)..2 * π, ‖f (circleMap 0 r θ)‖ ^ 2) := by
     convert (hasSum_norm_taylorCoeff_sq hf hr hrR).mul_left (2 * π)⁻¹ using 2 with n
     rw [← mul_assoc, hpi, one_mul]
   rw [h.tsum_eq]
-  have hG : Continuous fun θ : ℝ => f (circleMap 0 r θ) :=
+  have hG : Continuous fun θ : ℝ ↦ f (circleMap 0 r θ) :=
     hf.continuousOn.comp_continuous (continuous_circleMap 0 r) hmem
   have hint : ∫ θ in (0 : ℝ)..2 * π, ‖f (circleMap 0 r θ)‖ ^ 2 ≤
       ∫ _ in (0 : ℝ)..2 * π, M ^ 2 := by
     refine integral_mono_on (by positivity) ((hG.norm.pow 2).intervalIntegrable _ _)
-      intervalIntegrable_const fun θ _ => ?_
+      intervalIntegrable_const fun θ _ ↦ ?_
     have h1 := hM _ (hsph θ)
     have h0 := norm_nonneg (f (circleMap 0 r θ))
     nlinarith
@@ -425,13 +425,13 @@ theorem tsum_norm_taylorCoeff_sq_le (hf : DifferentiableOn ℂ f (ball 0 R)) (hr
 `∫₀^{2π} conj (f) (z f') dθ = 2π ∑ n ‖c n‖² r ^ (2n)`. -/
 theorem hasSum_mul_norm_taylorCoeff_sq (hf : DifferentiableOn ℂ f (ball 0 R)) (hr : 0 < r)
     (hrR : r < R) :
-    HasSum (fun n : ℕ => ((2 * π * (n * (‖taylorCoeff f n‖ ^ 2 * r ^ (2 * n))) : ℝ) : ℂ))
+    HasSum (fun n : ℕ ↦ ((2 * π * (n * (‖taylorCoeff f n‖ ^ 2 * r ^ (2 * n))) : ℝ) : ℂ))
       (∫ θ in (0 : ℝ)..2 * π, (starRingEnd ℂ) (f (circleMap 0 r θ)) *
         (circleMap 0 r θ * deriv f (circleMap 0 r θ))) := by
   have hmem := circleMap_zero_mem_ball hr.le hrR
   have hderiv : ContinuousOn (deriv f) (ball 0 R) :=
     (hf.analyticOnNhd isOpen_ball).deriv.continuousOn
-  have hG : Continuous fun θ : ℝ => circleMap 0 r θ * deriv f (circleMap 0 r θ) :=
+  have hG : Continuous fun θ : ℝ ↦ circleMap 0 r θ * deriv f (circleMap 0 r θ) :=
     (continuous_circleMap 0 r).mul (hderiv.comp_continuous (continuous_circleMap 0 r) hmem)
   have hcl : DifferentiableOn ℂ f (closedBall 0 r) := hf.mono (closedBall_subset_ball hrR)
   have h := hasSum_conj_taylorCoeff_mul_integral hf hr.le hrR hG
@@ -447,10 +447,10 @@ theorem hasSum_mul_norm_taylorCoeff_sq (hf : DifferentiableOn ℂ f (ball 0 R)) 
 /-- The weighted squares `n ‖c n‖² r ^ (2n)` of the Taylor coefficients are summable. -/
 theorem summable_mul_norm_taylorCoeff_sq_mul_pow (hf : DifferentiableOn ℂ f (ball 0 R))
     (hr : 0 < r) (hrR : r < R) :
-    Summable fun n : ℕ => (n : ℝ) * (‖taylorCoeff f n‖ ^ 2 * r ^ (2 * n)) := by
+    Summable fun n : ℕ ↦ (n : ℝ) * (‖taylorCoeff f n‖ ^ 2 * r ^ (2 * n)) := by
   have h := (summable_ofReal.mp (hasSum_mul_norm_taylorCoeff_sq hf hr hrR).summable).mul_left
     (2 * π)⁻¹
-  refine h.congr fun n => ?_
+  refine h.congr fun n ↦ ?_
   rw [← mul_assoc, inv_mul_cancel₀ (by positivity), one_mul]
 
 end Complex

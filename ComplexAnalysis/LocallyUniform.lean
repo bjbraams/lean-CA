@@ -40,7 +40,7 @@ functions, evaluated at any point of the domain. -/
 theorem tendsto_iteratedDeriv_of_tendstoLocallyUniformlyOn {V : Set ℂ} (hV : IsOpen V) (j : ℕ) :
     ∀ (F : ℕ → ℂ → ℂ) (f' : ℂ → ℂ), TendstoLocallyUniformlyOn F f' atTop V →
       (∀ n, DifferentiableOn ℂ (F n) V) → ∀ {x : ℂ}, x ∈ V →
-      Tendsto (fun n => iteratedDeriv j (F n) x) atTop (𝓝 (iteratedDeriv j f' x)) := by
+      Tendsto (fun n ↦ iteratedDeriv j (F n) x) atTop (𝓝 (iteratedDeriv j f' x)) := by
   induction j with
   | zero =>
     intro F f' hF _hFa x hx
@@ -49,7 +49,7 @@ theorem tendsto_iteratedDeriv_of_tendstoLocallyUniformlyOn {V : Set ℂ} (hV : I
     intro F f' hF hFa x hx
     have hderiv : TendstoLocallyUniformlyOn (deriv ∘ F) (deriv f') atTop V :=
       hF.deriv (Filter.Eventually.of_forall hFa) hV
-    have hderivDiff : ∀ n, DifferentiableOn ℂ (deriv (F n)) V := fun n =>
+    have hderivDiff : ∀ n, DifferentiableOn ℂ (deriv (F n)) V := fun n ↦
       (DifferentiableOn.analyticOnNhd (hFa n) hV).deriv.differentiableOn
     have := ih (deriv ∘ F) (deriv f') hderiv hderivDiff hx
     simpa [iteratedDeriv_succ', Function.comp_def] using this

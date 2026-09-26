@@ -59,7 +59,7 @@ theorem isClosed_rungeHull (U : Set ℂ) (R δ : ℝ) : IsClosed (rungeHull U R 
     ext z
     simp
   rw [this]
-  exact isClosed_biInter fun u _ =>
+  exact isClosed_biInter fun u _ ↦
     isClosed_le continuous_const (continuous_id.dist continuous_const)
 
 /-- Each set used for the Runge exhaustion is compact. -/
@@ -79,7 +79,7 @@ theorem rungeHull_subset {U : Set ℂ} {R δ : ℝ} (hδ : 0 < δ) : rungeHull U
 set. -/
 theorem rungeHull_mono {U : Set ℂ} {R R' δ δ' : ℝ} (hR : R ≤ R') (hδ : δ' ≤ δ) :
     rungeHull U R δ ⊆ rungeHull U R' δ' :=
-  fun _ hz => ⟨closedBall_subset_closedBall hR hz.1, fun u hu => hδ.trans (hz.2 u hu)⟩
+  fun _ hz ↦ ⟨closedBall_subset_closedBall hR hz.1, fun u hu ↦ hδ.trans (hz.2 u hu)⟩
 
 /-- Every compact subset of an open set lies in a hole-free hull. -/
 theorem exists_subset_rungeHull {U K : Set ℂ} (hU : IsOpen U) (hK : IsCompact K) (hKU : K ⊆ U) :
@@ -88,12 +88,12 @@ theorem exists_subset_rungeHull {U K : Set ℂ} (hU : IsOpen U) (hK : IsCompact 
   rcases K.eq_empty_or_nonempty with hKe | hKne
   · exact ⟨R, 1, one_pos, by simp [hKe]⟩
   rcases (Uᶜ).eq_empty_or_nonempty with hUe | hUne
-  · exact ⟨R, 1, one_pos, fun z hz => ⟨hR hz, fun u hu => by simp [hUe] at hu⟩⟩
-  have hcont : ContinuousOn (fun z => infDist z Uᶜ) K := (continuous_infDist_pt _).continuousOn
+  · exact ⟨R, 1, one_pos, fun z hz ↦ ⟨hR hz, fun u hu ↦ by simp [hUe] at hu⟩⟩
+  have hcont : ContinuousOn (fun z ↦ infDist z Uᶜ) K := (continuous_infDist_pt _).continuousOn
   obtain ⟨z₀, hz₀, hmin⟩ := hK.exists_isMinOn hKne hcont
   have hpos : 0 < infDist z₀ Uᶜ :=
     (hU.isClosed_compl.notMem_iff_infDist_pos hUne).mp (by simpa using hKU hz₀)
-  refine ⟨R, infDist z₀ Uᶜ, hpos, fun z hz => ⟨hR hz, fun u hu => ?_⟩⟩
+  refine ⟨R, infDist z₀ Uᶜ, hpos, fun z hz ↦ ⟨hR hz, fun u hu ↦ ?_⟩⟩
   exact (hmin hz).trans (infDist_le_dist_of_mem hu)
 
 /-- A bounded component of the complement of a hull meets the complement of `U`. -/
@@ -107,7 +107,7 @@ theorem exists_compl_mem_connectedComponentIn_rungeHull {U : Set ℂ} {R δ : �
       push Not at h
       exact hw ⟨hwR, h⟩
     obtain ⟨u, hu, hwu⟩ := this
-    set L : Set ℂ := (fun t : ℝ => w + (t : ℂ) * (u - w)) '' Icc 0 1 with hL_def
+    set L : Set ℂ := (fun t : ℝ ↦ w + (t : ℂ) * (u - w)) '' Icc 0 1 with hL_def
     have hLc : IsPreconnected L := isPreconnected_Icc.image _ (by fun_prop)
     have hwL : w ∈ L := ⟨0, ⟨le_rfl, zero_le_one⟩, by simp⟩
     have huL : u ∈ L := ⟨1, ⟨zero_le_one, le_rfl⟩, by simp⟩
@@ -125,7 +125,7 @@ theorem exists_compl_mem_connectedComponentIn_rungeHull {U : Set ℂ} {R δ : �
     exact ⟨u, hu, hLc.subset_connectedComponentIn hwL hLsub huL⟩
   · exfalso
     have hwR' : R < ‖w‖ := by simpa using hwR
-    set L : Set ℂ := (fun t : ℝ => (t : ℂ) * w) '' Ici 1 with hL_def
+    set L : Set ℂ := (fun t : ℝ ↦ (t : ℂ) * w) '' Ici 1 with hL_def
     have hLc : IsPreconnected L := isPreconnected_Ici.image _ (by fun_prop)
     have hwL : w ∈ L := ⟨1, le_rfl, by simp⟩
     have hLsub : L ⊆ (rungeHull U R δ)ᶜ := by
@@ -151,7 +151,7 @@ theorem exists_compl_mem_connectedComponentIn_rungeHull {U : Set ℂ} {R δ : �
         exact NormedSpace.unbounded_univ ℝ ℂ
           (hb.subset (isPreconnected_univ.subset_connectedComponentIn (mem_univ w) subset_rfl))
       · exact norm_pos_iff.mpr hw0
-    set t : ℝ := max 1 ((r + 1) / ‖w‖) with ht_def
+    set t : ℝ := max 1 ((r + 1) / ‖w‖)
     have htL : (t : ℂ) * w ∈ L := ⟨t, le_max_left _ _, rfl⟩
     have := hr (hLW htL)
     rw [mem_closedBall, dist_zero_right, norm_mul, Complex.norm_real, Real.norm_eq_abs,
@@ -170,9 +170,9 @@ theorem runge_isOpen {U : Set ℂ} (hU : IsOpen U) {A : Set ℂ} (hAU : A ⊆ U�
     {f : ℂ → ℂ} (hf : DifferentiableOn ℂ f U) {K : Set ℂ} (hK : IsCompact K) (hKU : K ⊆ U) :
     UniformApproxOn K (Algebra.adjoin ℂ (rungeGenerators A)) f := by
   obtain ⟨R, δ, hδ, hKH⟩ := exists_subset_rungeHull hU hK hKU
-  set H := rungeHull U R δ with hH_def
+  set H := rungeHull U R δ
   have hHU : H ⊆ U := rungeHull_subset hδ
-  have hAH : Disjoint A H := disjoint_left.mpr fun a ha haH => hAU ha (hHU haH)
+  have hAH : Disjoint A H := disjoint_left.mpr fun a ha haH ↦ hAU ha (hHU haH)
   have hA' : ∀ w ∉ H, Bornology.IsBounded (connectedComponentIn Hᶜ w) →
       ∃ a ∈ A, a ∈ connectedComponentIn Hᶜ w := by
     intro w hw hb
@@ -186,14 +186,14 @@ theorem runge_isOpen {U : Set ℂ} (hU : IsOpen U) {A : Set ℂ} (hAU : A ⊆ U�
     exact ⟨a, haA, hCW haC⟩
   intro ε hε
   obtain ⟨r, hr, hrε⟩ := runge (isCompact_rungeHull U R δ) hAH hA' hU hHU hf ε hε
-  exact ⟨r, hr, fun z hz => hrε z (hKH hz)⟩
+  exact ⟨r, hr, fun z hz ↦ hrε z (hKH hz)⟩
 
 /-- The exhaustion of `U` by hole-free hulls. -/
 theorem exists_forall_subset_rungeHull_nat {U K : Set ℂ} (hU : IsOpen U) (hK : IsCompact K)
     (hKU : K ⊆ U) : ∃ m : ℕ, ∀ n, m ≤ n → K ⊆ rungeHull U n (1 / (n + 1)) := by
   obtain ⟨R, δ, hδ, hKH⟩ := exists_subset_rungeHull hU hK hKU
   obtain ⟨m, hm⟩ := exists_nat_gt (max R (1 / δ))
-  refine ⟨m, fun n hn => hKH.trans (rungeHull_mono ?_ ?_)⟩
+  refine ⟨m, fun n hn ↦ hKH.trans (rungeHull_mono ?_ ?_)⟩
   · calc R ≤ max R (1 / δ) := le_max_left _ _
       _ ≤ m := hm.le
       _ ≤ n := by exact_mod_cast hn
@@ -212,7 +212,7 @@ theorem exists_seq_tendstoLocallyUniformlyOn_runge {U : Set ℂ} (hU : IsOpen U)
     ∃ r : ℕ → ℂ → ℂ, (∀ n, r n ∈ Algebra.adjoin ℂ (rungeGenerators A)) ∧
       TendstoLocallyUniformlyOn r f atTop U := by
   have hchoice : ∀ n : ℕ, ∃ r ∈ Algebra.adjoin ℂ (rungeGenerators A),
-      ∀ z ∈ rungeHull U n (1 / (n + 1)), ‖f z - r z‖ ≤ 1 / (n + 1) := fun n =>
+      ∀ z ∈ rungeHull U n (1 / (n + 1)), ‖f z - r z‖ ≤ 1 / (n + 1) := fun n ↦
     runge_isOpen hU hAU hA hf (isCompact_rungeHull U n _)
       (rungeHull_subset (by positivity)) (1 / (n + 1)) (by positivity)
   choose r hr hrε using hchoice
@@ -222,7 +222,7 @@ theorem exists_seq_tendstoLocallyUniformlyOn_runge {U : Set ℂ} (hU : IsOpen U)
   obtain ⟨m, hm⟩ := exists_forall_subset_rungeHull_nat hU hK hKU
   rw [Metric.tendstoUniformlyOn_iff]
   intro ε hε
-  have hlim : Tendsto (fun n : ℕ => (1 : ℝ) / (n + 1)) atTop (𝓝 0) :=
+  have hlim : Tendsto (fun n : ℕ ↦ (1 : ℝ) / (n + 1)) atTop (𝓝 0) :=
     tendsto_one_div_add_atTop_nhds_zero_nat
   filter_upwards [eventually_ge_atTop m, (hlim.eventually (gt_mem_nhds hε))] with n hn hnε z hz
   rw [dist_eq_norm]
@@ -233,20 +233,20 @@ unbounded, every function holomorphic on `U` is a locally uniform limit of polyn
 theorem exists_polynomial_tendstoLocallyUniformlyOn {U : Set ℂ} (hU : IsOpen U)
     (hUc : ∀ w ∉ U, ¬ Bornology.IsBounded (connectedComponentIn Uᶜ w))
     {f : ℂ → ℂ} (hf : DifferentiableOn ℂ f U) :
-    ∃ p : ℕ → Polynomial ℂ, TendstoLocallyUniformlyOn (fun n z => (p n).eval z) f atTop U := by
+    ∃ p : ℕ → Polynomial ℂ, TendstoLocallyUniformlyOn (fun n z ↦ (p n).eval z) f atTop U := by
   obtain ⟨r, hr, hlim⟩ := exists_seq_tendstoLocallyUniformlyOn_runge hU (A := ∅)
-    (empty_subset _) (fun w hw hb => absurd hb (hUc w hw)) hf
-  have hgen : rungeGenerators ∅ = {fun z : ℂ => z} := by simp [rungeGenerators]
+    (empty_subset _) (fun w hw hb ↦ absurd hb (hUc w hw)) hf
+  have hgen : rungeGenerators ∅ = {fun z : ℂ ↦ z} := by simp [rungeGenerators]
   have hpoly : ∀ n, ∃ p : Polynomial ℂ, ∀ z, r n z = p.eval z := by
     intro n
     have h := hr n
     rw [hgen, Algebra.adjoin_singleton_eq_range_aeval, AlgHom.mem_range] at h
     obtain ⟨p, hp⟩ := h
-    refine ⟨p, fun z => ?_⟩
+    refine ⟨p, fun z ↦ ?_⟩
     rw [← hp, Polynomial.aeval_fn_apply, Polynomial.coe_aeval_eq_eval]
   choose p hp using hpoly
   refine ⟨p, ?_⟩
-  have : (fun n z => (p n).eval z) = r := by
+  have : (fun n z ↦ (p n).eval z) = r := by
     ext n z
     exact (hp n z).symm
   rw [this]

@@ -58,9 +58,9 @@ theorem mul_compactifiedRay (q : ℂ → ℂ) (t : ℂ) {u : ℂ} (hu : u ≠ 0)
 
 /-- The scaled exterior path has a finite limit equal to its initial direction. -/
 theorem tendsto_mul_compactifiedRay {q : ℂ → ℂ} (hq : ContinuousAt q 0) (t : ℂ) :
-    Tendsto (fun u => u * compactifiedRay q t u) (𝓝[≠] 0) (𝓝 (q 0)) := by
-  have h : Tendsto (fun u : ℂ => u * t + (1 - u) * q u) (𝓝 0) (𝓝 (q 0)) := by
-    have hc : ContinuousAt (fun u : ℂ => u * t + (1 - u) * q u) 0 := by fun_prop
+    Tendsto (fun u ↦ u * compactifiedRay q t u) (𝓝[≠] 0) (𝓝 (q 0)) := by
+  have h : Tendsto (fun u : ℂ ↦ u * t + (1 - u) * q u) (𝓝 0) (𝓝 (q 0)) := by
+    have hc : ContinuousAt (fun u : ℂ ↦ u * t + (1 - u) * q u) 0 := by fun_prop
     simpa using hc.tendsto
   apply (h.mono_left inf_le_left).congr'
   filter_upwards [self_mem_nhdsWithin] with u hu
@@ -69,7 +69,7 @@ theorem tendsto_mul_compactifiedRay {q : ℂ → ℂ} (hq : ContinuousAt q 0) (t
 /-- A nonzero initial direction makes the exterior path escape every bounded set. -/
 theorem tendsto_norm_compactifiedRay {q : ℂ → ℂ} (hq : ContinuousAt q 0)
     (hq0 : q 0 ≠ 0) (t : ℂ) :
-    Tendsto (fun u => ‖compactifiedRay q t u‖) (𝓝[≠] 0) atTop := by
+    Tendsto (fun u ↦ ‖compactifiedRay q t u‖) (𝓝[≠] 0) atTop := by
   apply ((tendsto_mul_compactifiedRay hq t).norm.pos_mul_atTop
     (norm_pos_iff.mpr hq0) tendsto_norm_inv_nhdsNE_zero_atTop).congr'
   filter_upwards [self_mem_nhdsWithin] with u hu

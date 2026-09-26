@@ -43,15 +43,15 @@ namespace Complex
 /-- The generators of the algebra of rational functions with poles in `A` and polynomials:
 the identity and the simple poles `(a - z)⁻¹` for `a ∈ A`. -/
 def rungeGenerators (A : Set ℂ) : Set (ℂ → ℂ) :=
-  insert (fun z => z) ((fun a => fun z : ℂ => (a - z)⁻¹) '' A)
+  insert (fun z ↦ z) ((fun a ↦ fun z : ℂ ↦ (a - z)⁻¹) '' A)
 
 /-- The generators are continuous on a set disjoint from the poles. -/
 theorem continuousOn_rungeGenerators {K A : Set ℂ} (hAK : Disjoint A K) :
     ∀ g ∈ rungeGenerators A, ContinuousOn g K := by
   rintro g (rfl | ⟨a, ha, rfl⟩)
   · exact continuousOn_id
-  · exact (continuousOn_const.sub continuousOn_id).inv₀ fun z hz =>
-      sub_ne_zero.mpr fun h => hAK.notMem_of_mem_left ha ((show a = z from h) ▸ hz)
+  · exact (continuousOn_const.sub continuousOn_id).inv₀ fun z hz ↦
+      sub_ne_zero.mpr fun h ↦ hAK.notMem_of_mem_left ha ((show a = z from h) ▸ hz)
 
 /-- **Runge's theorem.** Let `K` be compact and `A` a set disjoint from `K` that meets every
 bounded component of the complement of `K`. Every function holomorphic on an open neighborhood
@@ -62,19 +62,19 @@ theorem runge {K : Set ℂ} (hK : IsCompact K) {A : Set ℂ} (hAK : Disjoint A K
       ∃ a ∈ A, a ∈ connectedComponentIn Kᶜ w)
     {U : Set ℂ} (hU : IsOpen U) (hKU : K ⊆ U) {f : ℂ → ℂ} (hf : DifferentiableOn ℂ f U) :
     UniformApproxOn K (Algebra.adjoin ℂ (rungeGenerators A)) f := by
-  set S : Subalgebra ℂ (ℂ → ℂ) := Algebra.adjoin ℂ (rungeGenerators A) with hS_def
-  have hS : ∀ r ∈ S, ContinuousOn r K := fun r hr =>
+  set S : Subalgebra ℂ (ℂ → ℂ) := Algebra.adjoin ℂ (rungeGenerators A)
+  have hS : ∀ r ∈ S, ContinuousOn r K := fun r hr ↦
     continuousOn_of_mem_adjoin (continuousOn_rungeGenerators hAK) hr
-  have hid : (fun z : ℂ => z) ∈ S := Algebra.subset_adjoin (mem_insert _ _)
+  have hid : (fun z : ℂ ↦ z) ∈ S := Algebra.subset_adjoin (mem_insert _ _)
   obtain ⟨R, hR⟩ := hK.isBounded.subset_closedBall 0
   have hR0 : 0 ≤ max R 0 := le_max_right _ _
   have hKR : K ⊆ closedBall 0 (max R 0) :=
     hR.trans (closedBall_subset_closedBall (le_max_left _ _))
-  have hpole : ∀ c, c ∉ K → UniformApproxOn K S (fun z => (c - z)⁻¹) := by
+  have hpole : ∀ c, c ∉ K → UniformApproxOn K S (fun z ↦ (c - z)⁻¹) := by
     intro c hc
-    set W : Set ℂ := connectedComponentIn Kᶜ c with hW_def
+    set W : Set ℂ := connectedComponentIn Kᶜ c
     have hWc : IsPreconnected W := isPreconnected_connectedComponentIn
-    have hWK : Disjoint W K := disjoint_left.mpr fun w hw => connectedComponentIn_subset _ _ hw
+    have hWK : Disjoint W K := disjoint_left.mpr fun w hw ↦ connectedComponentIn_subset _ _ hw
     have hcW : c ∈ W := mem_connectedComponentIn hc
     by_cases hb : Bornology.IsBounded W
     · obtain ⟨a, haA, haW⟩ := hA c hc hb
@@ -84,18 +84,18 @@ theorem runge {K : Set ℂ} (hK : IsCompact K) {A : Set ℂ} (hAK : Disjoint A K
         by_contra h
         push Not at h
         exact hb ((Metric.isBounded_iff_subset_closedBall 0).mpr
-          ⟨max R 0, fun a ha => by simpa using h a ha⟩)
+          ⟨max R 0, fun a ha ↦ by simpa using h a ha⟩)
       exact UniformApproxOn.inv_sub_of_isPreconnected S hK hS hWc hWK haW
         (UniformApproxOn.inv_sub_of_norm_gt S hK hS hid hR0 hKR haR) hcW
   apply UniformApproxOn.of_forall_exists
   intro ε hε
   obtain ⟨n, c, a, hc, happrox⟩ := exists_finset_pole_approx hK hU hKU hf hε
-  refine ⟨fun z => ∑ i, a i * (c i - z)⁻¹, ?_, happrox⟩
-  have heq : (fun z => ∑ i, a i * (c i - z)⁻¹) = ∑ i, a i • (fun z => (c i - z)⁻¹) := by
+  refine ⟨fun z ↦ ∑ i, a i * (c i - z)⁻¹, ?_, happrox⟩
+  have heq : (fun z ↦ ∑ i, a i * (c i - z)⁻¹) = ∑ i, a i • (fun z ↦ (c i - z)⁻¹) := by
     ext z
     simp [Finset.sum_apply, smul_eq_mul]
   rw [heq]
-  exact UniformApproxOn.finsetSum S _ fun i _ => UniformApproxOn.smul S _ (hpole (c i) (hc i).2)
+  exact UniformApproxOn.finsetSum S _ fun i _ ↦ UniformApproxOn.smul S _ (hpole (c i) (hc i).2)
 
 /-- **Polynomial approximation.** If the complement of the compact set `K` is connected, every
 function holomorphic on an open neighborhood of `K` is uniformly approximable on `K` by
@@ -114,11 +114,11 @@ theorem exists_polynomial_approx_of_isPreconnected_compl {K : Set ℂ} (hK : IsC
       exact hb.union hK.isBounded
     exact NormedSpace.unbounded_univ ℝ ℂ huniv
   obtain ⟨r, hr, hrε⟩ := runge hK (empty_disjoint K) hA hU hKU hf ε hε
-  have hgen : rungeGenerators ∅ = {fun z : ℂ => z} := by
+  have hgen : rungeGenerators ∅ = {fun z : ℂ ↦ z} := by
     simp [rungeGenerators]
   rw [SetLike.mem_coe, hgen, Algebra.adjoin_singleton_eq_range_aeval, AlgHom.mem_range] at hr
   obtain ⟨p, hp⟩ := hr
-  refine ⟨p, fun z hz => ?_⟩
+  refine ⟨p, fun z hz ↦ ?_⟩
   have := hrε z hz
   rwa [← hp, Polynomial.aeval_fn_apply, Polynomial.coe_aeval_eq_eval] at this
 

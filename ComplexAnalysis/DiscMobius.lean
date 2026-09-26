@@ -117,7 +117,7 @@ theorem norm_discMobius_le_one (ha : ‖a‖ < 1) (hz : ‖z‖ ≤ 1) : ‖disc
 
 /-- A disc Möbius map with parameter in the open unit disc maps that disc into itself. -/
 theorem mapsTo_discMobius_ball (ha : ‖a‖ < 1) :
-    MapsTo (discMobius a) (ball 0 1) (ball 0 1) := fun z hz => by
+    MapsTo (discMobius a) (ball 0 1) (ball 0 1) := fun z hz ↦ by
   rw [mem_ball_zero_iff] at hz ⊢
   exact norm_discMobius_lt_one ha hz
 
@@ -150,7 +150,7 @@ theorem discMobius_injOn (ha : ‖a‖ < 1) : InjOn (discMobius a) (closedBall 0
 
 /-- The disc Möbius transformation maps the open disc onto itself. -/
 theorem discMobius_image_ball (ha : ‖a‖ < 1) : discMobius a '' ball 0 1 = ball 0 1 := by
-  refine Subset.antisymm (mapsTo_discMobius_ball ha).image_subset fun w hw => ?_
+  refine Subset.antisymm (mapsTo_discMobius_ball ha).image_subset fun w hw ↦ ?_
   have hna : ‖-a‖ < 1 := by simpa using ha
   refine ⟨discMobius (-a) w, mapsTo_discMobius_ball hna hw, ?_⟩
   have := discMobius_neg_discMobius hna (mem_ball_zero_iff.mp hw).le
@@ -159,8 +159,8 @@ theorem discMobius_image_ball (ha : ‖a‖ < 1) : discMobius a '' ball 0 1 = ba
 /-- The derivative of the disc Möbius transformation. -/
 theorem hasDerivAt_discMobius (h : 1 - conj a * z ≠ 0) :
     HasDerivAt (discMobius a) ((1 - normSq a) / (1 - conj a * z) ^ 2) z := by
-  have h1 : HasDerivAt (fun z => z - a) 1 z := (hasDerivAt_id z).sub_const a
-  have h2 : HasDerivAt (fun z => 1 - conj a * z) (-(conj a * 1)) z :=
+  have h1 : HasDerivAt (fun z ↦ z - a) 1 z := (hasDerivAt_id z).sub_const a
+  have h2 : HasDerivAt (fun z ↦ 1 - conj a * z) (-(conj a * 1)) z :=
     ((hasDerivAt_id z).const_mul (conj a)).const_sub 1
   have := h1.div h2 h
   convert this using 1
@@ -176,7 +176,7 @@ theorem differentiableAt_discMobius (h : 1 - conj a * z ≠ 0) :
 /-- A disc Möbius map with parameter in the open unit disc is differentiable on the closed unit
 disc. -/
 theorem differentiableOn_discMobius_closedBall (ha : ‖a‖ < 1) :
-    DifferentiableOn ℂ (discMobius a) (closedBall 0 1) := fun _ hz =>
+    DifferentiableOn ℂ (discMobius a) (closedBall 0 1) := fun _ hz ↦
   (differentiableAt_discMobius (one_sub_conj_mul_ne_zero ha (mem_closedBall_zero_iff.mp hz)))
     |>.differentiableWithinAt
 

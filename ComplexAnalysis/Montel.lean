@@ -59,7 +59,7 @@ theorem exists_subseq_tendstoLocallyUniformlyOn_of_bounded_on_compacts
     (hf : ∀ n, DifferentiableOn ℂ (f n) U)
     (hb : ∀ K ⊆ U, IsCompact K → ∃ M : ℝ, ∀ n, ∀ z ∈ K, ‖f n z‖ ≤ M) :
     ∃ (g : ℂ → F) (φ : ℕ → ℕ), StrictMono φ ∧ DifferentiableOn ℂ g U ∧
-      TendstoLocallyUniformlyOn (fun n => f (φ n)) g atTop U := by
+      TendstoLocallyUniformlyOn (fun n ↦ f (φ n)) g atTop U := by
   let V : TopologicalSpace.Opens ℂ := ⟨U, hU⟩
   let s (n : ℕ) := holomorphicMapOfAnalyticOnNhd V (f n) ((hf n).analyticOnNhd hU)
   obtain ⟨g, φ, hφ, hlim⟩ :=
@@ -67,11 +67,11 @@ theorem exists_subseq_tendstoLocallyUniformlyOn_of_bounded_on_compacts
       (isClosed_holomorphicSubmodule V) s (by
         intro K hKU hK
         obtain ⟨M, hM⟩ := hb K hKU hK
-        refine ⟨M, fun n z hz => ?_⟩
+        refine ⟨M, fun n z hz ↦ ?_⟩
         rw [openExtension_apply V _ (hKU hz)]
         exact hM n z hz)
   refine ⟨openExtension V g.val, φ, hφ, g.property.differentiableOn, ?_⟩
-  exact (holomorphicMap_tendsto_iff.mp hlim).congr (fun n z hz => by
+  exact (holomorphicMap_tendsto_iff.mp hlim).congr (fun n z hz ↦ by
     rw [openExtension_apply V _ hz]; rfl)
 
 end Complex

@@ -53,11 +53,11 @@ namespace Complex
 Cauchy-kernel integral. Integer-valuedness requires regularity and avoidance hypotheses. -/
 @[expose] def curveIndex {a : ℂ} (γ : Path a a) (w : ℂ) : ℂ :=
   (2 * (Real.pi : ℂ) * Complex.I)⁻¹ *
-    curveIntegral (fun z => ContinuousLinearMap.toSpanSingleton ℂ ((z - w)⁻¹)) γ
+    curveIntegral (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ ((z - w)⁻¹)) γ
 
 /-- Recover the Cauchy-kernel integral from the curve index. -/
 theorem curveIntegral_sub_inv_eq_two_pi_I_mul_curveIndex {a : ℂ} (γ : Path a a) (w : ℂ) :
-    curveIntegral (fun z => ContinuousLinearMap.toSpanSingleton ℂ ((z - w)⁻¹)) γ =
+    curveIntegral (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ ((z - w)⁻¹)) γ =
       (2 * (Real.pi : ℂ) * Complex.I) * curveIndex γ w := by
   rw [curveIndex, ← mul_assoc, mul_inv_cancel₀ two_pi_I_ne_zero, one_mul]
 
@@ -82,8 +82,8 @@ theorem exists_int_curveIndex {a w : ℂ} (γ : Path a a)
 /-- Concatenating loops adds their indices, provided both kernel integrals exist.
 This form also applies when the concatenation is not `C¹` at its join. -/
 theorem curveIndex_trans {a w : ℂ} {γ δ : Path a a}
-    (hγ : CurveIntegrable (fun z => ContinuousLinearMap.toSpanSingleton ℂ ((z - w)⁻¹)) γ)
-    (hδ : CurveIntegrable (fun z => ContinuousLinearMap.toSpanSingleton ℂ ((z - w)⁻¹)) δ) :
+    (hγ : CurveIntegrable (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ ((z - w)⁻¹)) γ)
+    (hδ : CurveIntegrable (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ ((z - w)⁻¹)) δ) :
     curveIndex (γ.trans δ) w = curveIndex γ w + curveIndex δ w := by
   simp only [curveIndex, curveIntegral_trans hγ hδ, mul_add]
 
@@ -93,8 +93,8 @@ theorem curveIndex_eq_zero_of_isSimplyConnected {U : Set ℂ} (hU : IsOpen U)
     (hUc : IsSimplyConnected U) {a w : ℂ} {γ : Path a a}
     (hγ : ContDiffOn ℝ 1 γ.extend I) (hγU : ∀ t, γ t ∈ U) (hw : w ∉ U) :
     curveIndex γ w = 0 := by
-  have hf : DifferentiableOn ℂ (fun z => (z - w)⁻¹) U :=
-    (differentiableOn_id.sub_const w).inv (fun z hz => sub_ne_zero.mpr (ne_of_mem_of_not_mem hz hw))
+  have hf : DifferentiableOn ℂ (fun z ↦ (z - w)⁻¹) U :=
+    (differentiableOn_id.sub_const w).inv (fun z hz ↦ sub_ne_zero.mpr (ne_of_mem_of_not_mem hz hw))
   rw [curveIndex, curveIntegral_eq_zero_of_differentiableOn_isSimplyConnected hU hUc hf
     (hγ.differentiableOn one_ne_zero) hγU
     (curveIntegrable_of_continuousOn hf.continuousOn hγ hγU), mul_zero]
@@ -109,11 +109,11 @@ theorem curveIndex_circle_of_mem_ball {c w : ℂ} {R : ℝ} (hw : w ∈ ball c R
 The statement includes the degenerate circle of radius zero. -/
 theorem curveIndex_circle_of_notMem_closedBall {c w : ℂ} {R : ℝ} (hR : 0 ≤ R)
     (hw : w ∉ closedBall c R) : curveIndex (Path.circle c R) w = 0 := by
-  have hf : DifferentiableOn ℂ (fun z => (z - w)⁻¹) (closedBall c R) :=
+  have hf : DifferentiableOn ℂ (fun z ↦ (z - w)⁻¹) (closedBall c R) :=
     (differentiableOn_id.sub_const w).inv
-      (fun z hz => sub_ne_zero.mpr (ne_of_mem_of_not_mem hz hw))
+      (fun z hz ↦ sub_ne_zero.mpr (ne_of_mem_of_not_mem hz hw))
   have hz := circleIntegral_eq_zero_of_differentiable_on_off_countable hR countable_empty
-    hf.continuousOn (fun z hz =>
+    hf.continuousOn (fun z hz ↦
       (hf z (ball_subset_closedBall hz.1)).differentiableAt
         (mem_nhds_iff.mpr ⟨ball c R, ball_subset_closedBall, isOpen_ball, hz.1⟩))
   rw [curveIndex, curveIntegral_circle, hz, mul_zero]
@@ -127,7 +127,7 @@ theorem two_pi_I_inv_smul_curveIntegral_sub_inv_smul_eq_curveIndex_smul
     {a : ℂ} {γ : Path a a} (hγ : ContDiffOn ℝ 1 γ.extend I)
     (hγU : ∀ t, γ t ∈ U) (hγw : ∀ t, γ t ≠ w) :
     (2 * (Real.pi : ℂ) * Complex.I)⁻¹ •
-      curveIntegral (fun z => ContinuousLinearMap.toSpanSingleton ℂ ((z - w)⁻¹ • f z)) γ =
+      curveIntegral (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ ((z - w)⁻¹ • f z)) γ =
         curveIndex γ w • f w := by
   rw [curveIntegral_sub_inv_smul_of_isSimplyConnected hU hUc hf hw hγ hγU hγw,
     smul_smul, curveIndex]
