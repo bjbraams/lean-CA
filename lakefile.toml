@@ -1,6 +1,7 @@
 name = "LeanCA"
 version = "0.2.0"
 defaultTargets = ["LeanCA"]
+buildDir = ".lake/build-CA"
 
 [[lean_lib]]
 name = "LeanCA"

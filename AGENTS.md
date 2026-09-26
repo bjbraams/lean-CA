@@ -8,6 +8,12 @@
 - Never run lake build from a subdirectory as if it were the package root.
 - Never copy Mathlib or .lake onto NFS ($HOME).
 - Do not “fix” the link because it points outside the repo. That is intentional.
+- That lake directory is shared with the companion projects (lean-SCV, lean-codes, lean-AAR,
+  lean-LCS). They share `.lake/packages` (all pin the same Mathlib), but this project writes
+  its own build outputs to `.lake/build-CA` (`buildDir` in `lakefile.toml`), because Lake's
+  build traces include the package name and modules with equal names (`ComplexAnalysis.*`,
+  `ToMathlib.*`) would otherwise overwrite each other. Keep that `buildDir` setting; never
+  write to or delete another project's build directory.
 - Do not set `LEAN_PATH`, `LAKE_HOME`, or a custom cache dir unless asked.
 - If `.lake` is missing or is no longer a symlink to the path above, stop and ask. Do not repair it.
 - After every Lean edit: `lake build` from the Lake root.
@@ -72,6 +78,11 @@ The following are concerns to be kept in mind and addressed throughout the devel
 - If a new Lean file is created, provide it with a documentation header section.
 - If a new Lean statement (definition, theorem, lemma or other) is introduced, provide it with
   a brief docstring.
+- This project is the master copy of the `ComplexAnalysis` files. The companion project
+  `../lean-SCV` holds exact copies of the subset it imports, and its `ToMathlib` files that
+  share a name with ones here have identical content and path. Changes to a file used there
+  are propagated by copying; renaming or removing declarations in such a file requires a
+  matching update in lean-SCV.
 
 ## Validation
 
