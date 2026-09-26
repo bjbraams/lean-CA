@@ -42,6 +42,9 @@ $$
 
 where $S$ is a finite set of isolated singularities and the contour avoids $S$. Essential
 singularities are allowed. The library also proves the total residue identity including infinity.
+Closed curves made of $C^1$ pieces meeting at corners, such as polygons, rectangles and keyhole
+contours, are reparametrized into $C^1$ cycles, so these theorems apply to them with the
+integrals and indices computed piece by piece.
 
 Laurent expansions on annuli, coefficient estimates, independence from the integration radius,
 and pole formulas connect residues to local series. The isolated-singularity theory includes
@@ -169,8 +172,8 @@ Fourier-type transform of integrable data supported in a bounded interval; it do
 the full $L^2$ characterization.
 
 Entire doubly periodic functions are constant. The period-parallelogram index and cancellation
-of opposite-edge integrals are also proved, but cancellation currently assumes global
-continuity. The meromorphic residue-sum and equal-zero/pole-count theorems for elliptic
+of opposite-edge integrals are also proved, for Banach-valued periodic functions continuous
+on the boundary of the parallelogram. The meromorphic residue-sum and equal-zero/pole-count theorems for elliptic
 functions remain unassembled.
 
 Other substantial topics in the references that this library does not develop include Picard,

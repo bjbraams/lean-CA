@@ -6,17 +6,18 @@ Authors: Bastiaan J Braams
 module
 
 public import ComplexAnalysis.CurveIndex.Homotopy
+public import ComplexAnalysis.Cycle.Piecewise
 public import Mathlib.Analysis.SpecialFunctions.SmoothTransition
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.ArctanDeriv
 
 /-!
 # The boundary of a parallelogram as a smooth cycle, and its index
 
-The boundary of the parallelogram with vertices `c, c + w1, c + w1 + w2, c + w2` is realized
-as a single `C^∞` closed curve, by gluing the four edges with `Real.smoothTransition`: each
-edge is traversed with a reparametrization that is flat (all derivatives vanish) at its two
-endpoints, so the concatenation is smooth across the corners with no case analysis on
-differentiability there.
+The boundary of the parallelogram with vertices `c, c + w1, c + w1 + w2, c + w2` is the closed
+polygon through these vertices (`Complex.Loop.polygon`), a single `C^∞` closed curve: the four
+edges are smoothly concatenated with reparametrizations that are flat at the corners. Curve
+integrals around it are sums of four straight edge integrals over `[0, 1]`
+(`Complex.curveIntegral_parallelogramLoop`).
 
 For a point `w` outside the closed parallelogram, the analytic index of the boundary about
 `w` vanishes: `parallelogramLoop` is nullhomotopic within the closed (convex) parallelogram
@@ -24,7 +25,7 @@ by coning it toward the vertex `c`, a straight-line homotopy that avoids every e
 automatically, by convexity.
 
 For `w1, w2` positively oriented (`Im (conj w1 * w2) > 0`) and `w` strictly inside the open
-parallelogram, the index is `1`. Each of the four edges'
+parallelogram, the index is `1`. Each of the four straight edges'
 contribution to the real "turning" integral `∫ Im [γ'/(γ - w)]` is computed as an explicit
 `Real.arctan` antiderivative (justified by the Lagrange identity, which makes the relevant
 quadratic denominator positive-definite); `Real.arctan`'s range bound then gives, for free,
@@ -34,8 +35,11 @@ exactly `1` without ever computing the total directly or gluing branches across 
 
 ## Main definitions
 
-* `Complex.parallelogramFun c w1 w2`: the `C^∞` parametrization `ℝ → ℂ`.
-* `Complex.parallelogramLoop c w1 w2`: the parallelogram boundary as a `Path c c`.
+* `Complex.parallelogramVertex c w1 w2`: the vertices, in order of traversal.
+* `Complex.parallelogramLoop c w1 w2`: the parallelogram boundary as a `Path c c`, the closed
+  polygon through the vertices.
+* `Complex.parallelogramFun c w1 w2`: its `C^∞` parametrization `ℝ → ℂ`.
+* `Complex.parallelogramBoundary c w1 w2`: the union of the four edges.
 * `Complex.closedParallelogram c w1 w2`: the closed (filled) parallelogram.
 
 ## Main results
@@ -44,173 +48,111 @@ exactly `1` without ever computing the total directly or gluing branches across 
   vanishes at every point outside the closed parallelogram.
 * `Complex.curveIndex_parallelogramLoop_eq_one`: **the index of the parallelogram boundary is
   `1` at every point of the open parallelogram**, for positively oriented `w1, w2`.
+* `Complex.curveIntegral_parallelogramLoop`: integrals around the parallelogram as sums of four
+  straight edge integrals.
 
 ## References
 
 * J. B. Conway, *Functions of One Complex Variable I*, Section IV.2 (polygons as chains).
 -/
 
-public noncomputable section
+@[expose] public noncomputable section
 
 open Set Metric Filter
 open scoped Topology unitInterval ComplexConjugate
 
 namespace Complex
 
-/-- The `C^∞` parametrization of the parallelogram boundary with vertices
-`c, c + w1, c + w1 + w2, c + w2`, traversed in the indicated vertex order. The traversal is
-counterclockwise when `0 < (conj w1 * w2).im`. Each of the four terms is flat (all derivatives
-vanish) at its own transition, so the sum glues smoothly across the corners. -/
-def parallelogramFun (c w1 w2 : ℂ) (s : ℝ) : ℂ :=
-  c + ((Real.smoothTransition (4 * s - 0) - Real.smoothTransition (4 * s - 2) : ℝ) : ℂ) * w1
-    + ((Real.smoothTransition (4 * s - 1) - Real.smoothTransition (4 * s - 3) : ℝ) : ℂ) * w2
+/-- The vertices `c, c + w1, c + w1 + w2, c + w2, c` of the parallelogram boundary, listed in
+the order of traversal and closing up at index `4`. -/
+def parallelogramVertex (c w1 w2 : ℂ) : ℕ → ℂ
+  | 0 => c
+  | 1 => c + w1
+  | 2 => c + w1 + w2
+  | 3 => c + w2
+  | _ => c
+
+/-- The parallelogram boundary with vertices `c, c + w1, c + w1 + w2, c + w2`, as the closed
+polygon through these vertices (`Complex.Loop.polygon`), a `C^∞` closed path. The traversal is
+counterclockwise when `0 < (conj w1 * w2).im`. -/
+def parallelogramLoop (c w1 w2 : ℂ) : Path c c :=
+  (Loop.polygon (n := 4) (parallelogramVertex c w1 w2) rfl).2
+
+/-- The boundary of the parallelogram, as the union of its four edges. -/
+def parallelogramBoundary (c w1 w2 : ℂ) : Set ℂ :=
+  ⋃ i : Fin 4, segment ℝ (parallelogramVertex c w1 w2 i) (parallelogramVertex c w1 w2 (i + 1))
+
+/-- Each edge lies in the boundary of the parallelogram. -/
+theorem segment_subset_parallelogramBoundary (c w1 w2 : ℂ) (i : Fin 4) :
+    segment ℝ (parallelogramVertex c w1 w2 i) (parallelogramVertex c w1 w2 (i + 1)) ⊆
+      parallelogramBoundary c w1 w2 :=
+  subset_iUnion (fun i : Fin 4 ↦ segment ℝ (parallelogramVertex c w1 w2 i)
+    (parallelogramVertex c w1 w2 (i + 1))) i
+
+/-- **Integrals around the parallelogram.** The curve integral of a one-form continuous on the
+boundary is the sum of the four edge integrals in the affine parametrization over `[0, 1]`. -/
+theorem curveIntegral_parallelogramLoop {F : Type*} [NormedAddCommGroup F] [NormedSpace ℂ F]
+    {c w1 w2 : ℂ} (ω : ℂ → ℂ →L[ℂ] F) (hω : ContinuousOn ω (parallelogramBoundary c w1 w2)) :
+    curveIntegral ω (parallelogramLoop c w1 w2) = ∑ i : Fin 4,
+      ∫ t in (0 : ℝ)..1, ω (AffineMap.lineMap (parallelogramVertex c w1 w2 i)
+        (parallelogramVertex c w1 w2 (i + 1)) t)
+        (parallelogramVertex c w1 w2 (i + 1) - parallelogramVertex c w1 w2 i) :=
+  Loop.curveIntegral_polygon _ ω fun i ↦ hω.mono (segment_subset_parallelogramBoundary c w1 w2 i)
+
+/-- The parametrization `ℝ → ℂ` of the parallelogram boundary: the smooth concatenation of the
+four edges, each traversed on a quarter of `[0, 1]`. -/
+def parallelogramFun (c w1 w2 : ℂ) : ℝ → ℂ :=
+  Path.smoothConcatFun (parallelogramVertex c w1 w2) fun _ : Fin 4 ↦ Path.segment _ _
+
+/-- The explicit form of the parametrization: each of the four terms is flat (all derivatives
+vanish) at its own transition. -/
+theorem parallelogramFun_eq (c w1 w2 : ℂ) (s : ℝ) :
+    parallelogramFun c w1 w2 s =
+      c + ((Real.smoothTransition (4 * s - 0) - Real.smoothTransition (4 * s - 2) : ℝ) : ℂ) * w1
+        + ((Real.smoothTransition (4 * s - 1) - Real.smoothTransition (4 * s - 3) : ℝ) : ℂ) *
+          w2 := by
+  have hseg : ∀ a b : ℂ, ∀ s : ℝ, (Path.segment a b).extend (Real.smoothTransition s) =
+      a + (Real.smoothTransition s : ℂ) * (b - a) := fun a b s ↦ by
+    rw [Path.eqOn_extend_segment a b ⟨Real.smoothTransition.nonneg _,
+      Real.smoothTransition.le_one _⟩, AffineMap.lineMap_apply_module']
+    simp only [Complex.real_smul]
+    ring
+  simp only [parallelogramFun, Path.smoothConcatFun, Fin.sum_univ_four, hseg]
+  simp [parallelogramVertex]
+  ring
+
+/-- The extension of the parallelogram loop to `ℝ` is `parallelogramFun`. -/
+theorem parallelogramLoop_extend (c w1 w2 : ℂ) :
+    ((parallelogramLoop c w1 w2).extend : ℝ → ℂ) = parallelogramFun c w1 w2 :=
+  Path.smoothConcat_extend _
+
+/-- The parallelogram loop at a parameter `t ∈ [0, 1]` is `parallelogramFun t`. -/
+@[simp]
+theorem parallelogramLoop_apply (c w1 w2 : ℂ) (t : I) :
+    parallelogramLoop c w1 w2 t = parallelogramFun c w1 w2 t := by
+  rw [← Path.extend_extends', parallelogramLoop_extend]
 
 /-- `parallelogramFun` is `C^∞` on all of `ℝ`. -/
 theorem contDiff_parallelogramFun (c w1 w2 : ℂ) :
-    ContDiff ℝ (⊤ : ℕ∞) (parallelogramFun c w1 w2) := by
-  unfold parallelogramFun
-  have hst : ∀ k : ℝ, ContDiff ℝ (⊤ : ℕ∞) (fun s : ℝ ↦ Real.smoothTransition (4 * s - k)) :=
-    fun k ↦ Real.smoothTransition.contDiff.comp
-      ((contDiff_const.mul contDiff_id).sub contDiff_const)
-  have hor : ∀ k1 k2 : ℝ, ContDiff ℝ (⊤ : ℕ∞)
-      (fun s : ℝ ↦ ((Real.smoothTransition (4 * s - k1)
-        - Real.smoothTransition (4 * s - k2) : ℝ) : ℂ)) :=
-    fun k1 k2 ↦ Complex.ofRealCLM.contDiff.comp ((hst k1).sub (hst k2))
-  exact (contDiff_const.add ((hor 0 2).mul contDiff_const)).add ((hor 1 3).mul contDiff_const)
+    ContDiff ℝ (⊤ : ℕ∞) (parallelogramFun c w1 w2) :=
+  Path.contDiff_smoothConcatFun _ fun _ ↦ Loop.contDiffOn_segment_extend _ _
 
-/-- `parallelogramFun` is continuous, as it is `C^∞`. -/
+/-- `parallelogramFun` is continuous. -/
 theorem continuous_parallelogramFun (c w1 w2 : ℂ) : Continuous (parallelogramFun c w1 w2) :=
-  (contDiff_parallelogramFun c w1 w2).continuous
+  Path.continuous_smoothConcatFun _
 
-/-- `parallelogramFun` is unaffected by clamping its argument into `[0, 1]`: it already takes
-the value at `0` for all `s ≤ 0` and the value at `1` for all `s ≥ 1`. -/
-theorem parallelogramFun_projIcc (c w1 w2 : ℂ) (s : ℝ) :
-    parallelogramFun c w1 w2 (projIcc (0 : ℝ) 1 zero_le_one s) = parallelogramFun c w1 w2 s := by
-  by_cases h0 : (0 : ℝ) ≤ s
-  · by_cases h1 : s ≤ (1 : ℝ)
-    · rw [projIcc_of_mem _ ⟨h0, h1⟩]
-    · have h1' : (1 : ℝ) < s := not_le.mp h1
-      rw [projIcc_of_right_le zero_le_one h1'.le]
-      unfold parallelogramFun
-      congr 2
-      · congr 1
-        · have e1 : (4 : ℝ) * 1 - 0 = 4 := by ring
-          have e2 : (4 : ℝ) * 1 - 2 = 2 := by ring
-          have e3 : (4 : ℝ) * s - 0 = 4 * s := by ring
-          have e4 : (4 : ℝ) * s - 2 = 4 * s - 2 := by ring
-          rw [e1, e2, e3, e4, Real.smoothTransition.one_of_one_le (by norm_num),
-            Real.smoothTransition.one_of_one_le (by norm_num),
-            Real.smoothTransition.one_of_one_le (by linarith),
-            Real.smoothTransition.one_of_one_le (by linarith)]
-      · congr 1
-        · have e1 : (4 : ℝ) * 1 - 1 = 3 := by ring
-          have e2 : (4 : ℝ) * 1 - 3 = 1 := by ring
-          rw [e1, e2, Real.smoothTransition.one_of_one_le (by norm_num),
-            Real.smoothTransition.one_of_one_le (by norm_num),
-            Real.smoothTransition.one_of_one_le (by linarith),
-            Real.smoothTransition.one_of_one_le (by linarith)]
-  · have h0' : s < (0 : ℝ) := not_le.mp h0
-    rw [projIcc_of_le_left zero_le_one h0'.le]
-    unfold parallelogramFun
-    congr 2
-    · congr 1
-      · rw [Real.smoothTransition.zero_of_nonpos (by norm_num : (4 : ℝ) * 0 - 0 ≤ 0),
-          Real.smoothTransition.zero_of_nonpos (by norm_num : (4 : ℝ) * 0 - 2 ≤ 0),
-          Real.smoothTransition.zero_of_nonpos (by linarith : (4 : ℝ) * s - 0 ≤ 0),
-          Real.smoothTransition.zero_of_nonpos (by linarith : (4 : ℝ) * s - 2 ≤ 0)]
-    · congr 1
-      · rw [Real.smoothTransition.zero_of_nonpos (by norm_num : (4 : ℝ) * 0 - 1 ≤ 0),
-          Real.smoothTransition.zero_of_nonpos (by norm_num : (4 : ℝ) * 0 - 3 ≤ 0),
-          Real.smoothTransition.zero_of_nonpos (by linarith : (4 : ℝ) * s - 1 ≤ 0),
-          Real.smoothTransition.zero_of_nonpos (by linarith : (4 : ℝ) * s - 3 ≤ 0)]
+/-- The parametrization starts at the base vertex. -/
+theorem parallelogramFun_zero (c w1 w2 : ℂ) : parallelogramFun c w1 w2 0 = c :=
+  Path.smoothConcatFun_zero _
 
-/-- The value of `parallelogramFun` at the base vertex. -/
-theorem parallelogramFun_zero (c w1 w2 : ℂ) : parallelogramFun c w1 w2 0 = c := by
-  unfold parallelogramFun
-  norm_num
-  rw [Real.smoothTransition.zero_of_nonpos (by norm_num : (-2 : ℝ) ≤ 0),
-    Real.smoothTransition.zero_of_nonpos (by norm_num : (-1 : ℝ) ≤ 0),
-    Real.smoothTransition.zero_of_nonpos (by norm_num : (-3 : ℝ) ≤ 0)]
-  simp
-
-/-- The value of `parallelogramFun` at the second vertex. -/
-theorem parallelogramFun_quarter (c w1 w2 : ℂ) : parallelogramFun c w1 w2 (1 / 4) = c + w1 := by
-  unfold parallelogramFun
-  have e1 : (4 : ℝ) * (1 / 4) - 0 = 1 := by ring
-  have e2 : (4 : ℝ) * (1 / 4) - 2 = -1 := by ring
-  have e3 : (4 : ℝ) * (1 / 4) - 1 = 0 := by ring
-  have e4 : (4 : ℝ) * (1 / 4) - 3 = -2 := by ring
-  rw [e1, e2, e3, e4, Real.smoothTransition.one_of_one_le (le_refl 1),
-    Real.smoothTransition.zero_of_nonpos (by norm_num : (-1 : ℝ) ≤ 0),
-    Real.smoothTransition.zero_of_nonpos (le_refl (0 : ℝ)),
-    Real.smoothTransition.zero_of_nonpos (by norm_num : (-2 : ℝ) ≤ 0)]
-  push_cast
-  ring
-
-/-- The value of `parallelogramFun` at the third vertex. -/
-theorem parallelogramFun_half (c w1 w2 : ℂ) :
-    parallelogramFun c w1 w2 (1 / 2) = c + w1 + w2 := by
-  unfold parallelogramFun
-  have e1 : (4 : ℝ) * (1 / 2) - 0 = 2 := by ring
-  have e2 : (4 : ℝ) * (1 / 2) - 2 = 0 := by ring
-  have e3 : (4 : ℝ) * (1 / 2) - 1 = 1 := by ring
-  have e4 : (4 : ℝ) * (1 / 2) - 3 = -1 := by ring
-  rw [e1, e2, e3, e4, Real.smoothTransition.one_of_one_le (by norm_num : (1 : ℝ) ≤ 2),
-    Real.smoothTransition.zero_of_nonpos (le_refl (0 : ℝ)),
-    Real.smoothTransition.one_of_one_le (le_refl 1),
-    Real.smoothTransition.zero_of_nonpos (by norm_num : (-1 : ℝ) ≤ 0)]
-  push_cast
-  ring
-
-/-- The value of `parallelogramFun` at the fourth vertex. -/
-theorem parallelogramFun_three_quarter (c w1 w2 : ℂ) :
-    parallelogramFun c w1 w2 (3 / 4) = c + w2 := by
-  unfold parallelogramFun
-  have e1 : (4 : ℝ) * (3 / 4) - 0 = 3 := by ring
-  have e2 : (4 : ℝ) * (3 / 4) - 2 = 1 := by ring
-  have e3 : (4 : ℝ) * (3 / 4) - 1 = 2 := by ring
-  have e4 : (4 : ℝ) * (3 / 4) - 3 = 0 := by ring
-  rw [e1, e2, e3, e4, Real.smoothTransition.one_of_one_le (by norm_num : (1 : ℝ) ≤ 3),
-    Real.smoothTransition.one_of_one_le (le_refl 1),
-    Real.smoothTransition.one_of_one_le (by norm_num : (1 : ℝ) ≤ 2),
-    Real.smoothTransition.zero_of_nonpos (le_refl (0 : ℝ))]
-  push_cast
-  ring
-
-/-- The value of `parallelogramFun` back at the base vertex, closing the loop. -/
-theorem parallelogramFun_one (c w1 w2 : ℂ) : parallelogramFun c w1 w2 1 = c := by
-  unfold parallelogramFun
-  have e1 : (4 : ℝ) * 1 - 0 = 4 := by ring
-  have e2 : (4 : ℝ) * 1 - 2 = 2 := by ring
-  have e3 : (4 : ℝ) * 1 - 1 = 3 := by ring
-  have e4 : (4 : ℝ) * 1 - 3 = 1 := by ring
-  rw [e1, e2, e3, e4, Real.smoothTransition.one_of_one_le (by norm_num : (1 : ℝ) ≤ 4),
-    Real.smoothTransition.one_of_one_le (by norm_num : (1 : ℝ) ≤ 2),
-    Real.smoothTransition.one_of_one_le (by norm_num : (1 : ℝ) ≤ 3),
-    Real.smoothTransition.one_of_one_le (le_refl 1)]
-  push_cast
-  ring
-
-/-- The parallelogram boundary with vertices `c, c + w1, c + w1 + w2, c + w2`, as a `C^∞`
-closed path. -/
-def parallelogramLoop (c w1 w2 : ℂ) : Path c c where
-  toFun t := parallelogramFun c w1 w2 (t : ℝ)
-  continuous_toFun := (contDiff_parallelogramFun c w1 w2).continuous.comp continuous_subtype_val
-  source' := parallelogramFun_zero c w1 w2
-  target' := parallelogramFun_one c w1 w2
-
-/-- The extension of the parallelogram loop to `ℝ` is `parallelogramFun` itself, since the
-latter already takes its boundary values outside `[0, 1]`. -/
-theorem parallelogramLoop_extend (c w1 w2 : ℂ) :
-    (parallelogramLoop c w1 w2).extend = parallelogramFun c w1 w2 := by
-  funext s
-  exact parallelogramFun_projIcc c w1 w2 s
+/-- The parametrization returns to the base vertex, closing the loop. -/
+theorem parallelogramFun_one (c w1 w2 : ℂ) : parallelogramFun c w1 w2 1 = c :=
+  Path.smoothConcatFun_one _
 
 /-- The parallelogram loop is `C^1` (indeed `C^∞`) on `[0, 1]`. -/
 theorem contDiffOn_parallelogramLoop_extend (c w1 w2 : ℂ) :
-    ContDiffOn ℝ 1 (parallelogramLoop c w1 w2).extend I := by
-  rw [parallelogramLoop_extend]
-  exact ((contDiff_parallelogramFun c w1 w2).of_le (by norm_num)).contDiffOn
+    ContDiffOn ℝ 1 (parallelogramLoop c w1 w2).extend I :=
+  Loop.contDiffOn_polygon _
 
 /-- The closed (filled) parallelogram with vertices `c, c + w1, c + w1 + w2, c + w2`. -/
 def closedParallelogram (c w1 w2 : ℂ) : Set ℂ :=
@@ -220,6 +162,7 @@ def closedParallelogram (c w1 w2 : ℂ) : Set ℂ :=
 at the vertices. -/
 theorem parallelogramFun_mem_closedParallelogram (c w1 w2 : ℂ) (s : ℝ) :
     parallelogramFun c w1 w2 s ∈ closedParallelogram c w1 w2 := by
+  rw [parallelogramFun_eq]
   refine ⟨(Real.smoothTransition (4 * s - 0) - Real.smoothTransition (4 * s - 2),
     Real.smoothTransition (4 * s - 1) - Real.smoothTransition (4 * s - 3)), ⟨⟨?_, ?_⟩, ?_, ?_⟩,
     rfl⟩
@@ -275,16 +218,16 @@ does the whole homotopy. -/
 def coningHomotopy (c w1 w2 : ℂ) : (parallelogramLoop c w1 w2).Homotopy (Path.refl c) where
   toFun := coningToFun c w1 w2
   continuous_toFun := continuous_coningToFun c w1 w2
-  map_zero_left x := by simp [coningToFun, parallelogramLoop]
+  map_zero_left x := by simp [coningToFun]
   map_one_left x := by simp [coningToFun]
   prop' t x hx := by
-    rcases hx with hx | hx
-    · simp only [coningToFun, hx, parallelogramLoop]
-      norm_num [parallelogramFun_zero]
+    rcases hx with rfl | hx
+    · change coningToFun c w1 w2 (t, 0) = parallelogramLoop c w1 w2 0
+      simp only [coningToFun, Icc.coe_zero, parallelogramFun_zero, Path.source]
       ring
-    · simp only [Set.mem_singleton_iff] at hx
-      simp only [coningToFun, hx, parallelogramLoop]
-      norm_num [parallelogramFun_one]
+    · rw [Set.mem_singleton_iff.mp hx]
+      change coningToFun c w1 w2 (t, 1) = parallelogramLoop c w1 w2 1
+      simp only [coningToFun, Icc.coe_one, parallelogramFun_one, Path.target]
       ring
 
 /-- **The index of the parallelogram boundary vanishes outside the closed parallelogram.** -/
@@ -398,127 +341,56 @@ theorem im_div_eq (v z : ℂ) : (v / z).im = (v * conj z).im / normSq z := by
   rw [Complex.div_im, Complex.mul_im, Complex.conj_re, Complex.conj_im]
   ring
 
-/-- **A single edge's contribution to the total turning lies strictly in `(0, π)`.** For a
-curve `γ = parallelogramFun c w1 w2` that agrees with the affine parametrization
-`t ↦ p + φ (t) • v` throughout the open interval `(a, b)`, with `φ` continuous on `[a, b]`,
-`φ (a) = 0`, `φ (b) = 1`, `v ≠ 0`, and `w` positioned so that `C := Im (v * conj (p - w)) > 0`
-(and never equal to a point of the loop), the contribution of `[a, b]` to the total turning
-`∫ Im (γ' (t) / (γ (t) - w)) dt` lies in `(0, π)`. -/
-theorem im_edge_integral_mem_Ioo {c w1 w2 w p v : ℂ} {a b : ℝ} (hab : a < b) (hv : v ≠ 0)
-    (hC : 0 < (v * conj (p - w)).im) (hwne : ∀ t : ℝ, parallelogramFun c w1 w2 t ≠ w)
-    {φ : ℝ → ℝ} (hφcont : ContinuousOn φ (Icc a b))
-    (hφderiv : ∀ t ∈ Ioo a b, HasDerivAt φ (deriv φ t) t)
-    (hφa : φ a = 0) (hφb : φ b = 1)
-    (heq : Set.EqOn (parallelogramFun c w1 w2) (fun t ↦ p + (φ t : ℂ) * v) (Ioo a b)) :
-    (∫ t in a..b, (deriv (parallelogramFun c w1 w2) t *
-      (parallelogramFun c w1 w2 t - w)⁻¹).im) ∈ Set.Ioo (0:ℝ) Real.pi := by
-  set A := normSq v with hA_def
-  set B := 2 * (conj (p - w) * v).re with hB_def
-  set D' := normSq (p - w) with hD_def
-  set C := (v * conj (p - w)).im with hC_def
-  have hA : 0 < A := by
-    rw [hA_def]; exact normSq_pos.mpr hv
+/-- **A single edge's contribution to the total turning lies strictly in `(0, π)`.** For the
+edge from `p` to `q` and a point `w` strictly to its left, `C := Im ((q - p) * conj (p - w)) > 0`,
+the imaginary part of `∫₀¹ (q - p) / (p + t (q - p) - w) dt` lies in `(0, π)`. -/
+theorem im_integral_segment_mem_Ioo {p q w : ℂ} (hv : q - p ≠ 0)
+    (hC : 0 < ((q - p) * conj (p - w)).im) :
+    (∫ t in (0 : ℝ)..1, (q - p) • (AffineMap.lineMap p q t - w)⁻¹).im ∈
+      Set.Ioo (0 : ℝ) Real.pi := by
+  set v := q - p
+  set A := normSq v
+  set B := 2 * (conj (p - w) * v).re
+  set D' := normSq (p - w)
+  set C := (v * conj (p - w)).im
+  have hA : 0 < A := normSq_pos.mpr hv
   have hLagrange : 4 * A * D' = B ^ 2 + 4 * C ^ 2 := by
-    rw [hA_def, hB_def, hD_def, hC_def]
-    rw [show conj (p - w) * v = v * conj (p - w) by ring]
+    simp only [A, B, D', C, show conj (p - w) * v = v * conj (p - w) by ring]
     exact lagrange_identity v (p - w)
-  -- The integrand, restricted to the open interval, is the derivative of `G ∘ φ`.
-  have hderiv_eq : ∀ t ∈ Ioo a b,
-      HasDerivAt (fun t ↦ Real.arctan ((2 * A * φ t + B) / (2 * C)))
-        ((deriv (parallelogramFun c w1 w2) t * (parallelogramFun c w1 w2 t - w)⁻¹).im) t := by
-    intro t ht
-    have hOpen : IsOpen (Ioo a b) := isOpen_Ioo
-    have heqf : parallelogramFun c w1 w2 =ᶠ[𝓝 t] (fun t ↦ p + (φ t : ℂ) * v) :=
-      Filter.eventually_of_mem (hOpen.mem_nhds ht) heq
-    have hφt := hφderiv t ht
-    have haff : HasDerivAt (fun t ↦ p + (φ t : ℂ) * v) (((deriv φ t : ℝ) : ℂ) * v) t := by
-      have h1 : HasDerivAt (fun t : ℝ ↦ (φ t : ℂ)) ((deriv φ t : ℝ) : ℂ) t := hφt.ofReal_comp
-      simpa using (h1.mul_const v).const_add p
-    have hcurve : HasDerivAt (parallelogramFun c w1 w2) (((deriv φ t : ℝ) : ℂ) * v) t :=
-      haff.congr_of_eventuallyEq heqf
-    have hderivval : deriv (parallelogramFun c w1 w2) t = ((deriv φ t : ℝ) : ℂ) * v := hcurve.deriv
-    have hptval : parallelogramFun c w1 w2 t = p + (φ t : ℂ) * v := heq ht
-    rw [hderivval, hptval]
-    have hne0 : p + (φ t : ℂ) * v - w ≠ 0 := by
-      rw [← hptval]; exact sub_ne_zero.mpr (hwne t)
-    have hden : p + (φ t : ℂ) * v - w = (p - w) + (φ t : ℂ) * v := by ring
-    have hkey : (((deriv φ t : ℝ) : ℂ) * v * (p + (φ t : ℂ) * v - w)⁻¹).im =
-        deriv φ t * (C / (A * φ t ^ 2 + B * φ t + D')) := by
-      rw [show ((deriv φ t : ℝ) : ℂ) * v * (p + (φ t : ℂ) * v - w)⁻¹
-          = ((deriv φ t : ℝ) : ℂ) * (v / (p + (φ t : ℂ) * v - w)) by rw [div_eq_mul_inv]; ring]
-      rw [Complex.mul_im, Complex.ofReal_re, Complex.ofReal_im, zero_mul, add_zero]
-      congr 1
-      rw [im_div_eq, im_mul_conj_add_ofReal_mul_sub, hden, normSq_add_ofReal_mul]
-    rw [hkey]
-    have hchain := (hasDerivAt_arctan_quadratic hA hC hLagrange (φ t)).comp t hφt
-    have hval : deriv φ t * (C / (A * φ t ^ 2 + B * φ t + D')) =
-        C / (A * φ t ^ 2 + B * φ t + D') * deriv φ t := mul_comm _ _
-    rw [hval]
-    convert hchain using 1
-    exact rfl
-  -- Assemble via the fundamental theorem of calculus on `[a, b]`.
-  have hcontG : ContinuousOn (fun t ↦ Real.arctan ((2 * A * φ t + B) / (2 * C))) (Icc a b) := by
-    apply Real.continuous_arctan.comp_continuousOn
-    apply ContinuousOn.div ((continuousOn_const.mul hφcont).add continuousOn_const)
-      continuousOn_const
-    intro t _
-    linarith
-  have hcont1 : Continuous (deriv (parallelogramFun c w1 w2)) :=
-    ((contDiff_parallelogramFun c w1 w2).iterate_deriv 1).continuous
-  have hcont2 : Continuous (fun t ↦ (parallelogramFun c w1 w2 t - w)⁻¹) := by
-    apply Continuous.inv₀ ((continuous_parallelogramFun c w1 w2).sub continuous_const)
-    exact fun t ↦ sub_ne_zero.mpr (hwne t)
-  have hcontI0 : Continuous (fun t ↦ (deriv (parallelogramFun c w1 w2) t *
-      (parallelogramFun c w1 w2 t - w)⁻¹).im) :=
-    Complex.continuous_im.comp (hcont1.mul hcont2)
-  have hcontI : ContinuousOn (fun t ↦ (deriv (parallelogramFun c w1 w2) t *
-      (parallelogramFun c w1 w2 t - w)⁻¹).im) (Icc a b) := hcontI0.continuousOn
-  have hint : IntervalIntegrable (fun t ↦ (deriv (parallelogramFun c w1 w2) t *
-      (parallelogramFun c w1 w2 t - w)⁻¹).im) MeasureTheory.volume a b :=
-    hcontI0.intervalIntegrable a b
-  rw [intervalIntegral.integral_eq_sub_of_hasDerivAt_of_le hab.le hcontG hderiv_eq hint,
-    hφa, hφb]
-  exact arctan_quadratic_one_sub_zero_mem_Ioo hA hC
+  have hline : ∀ t : ℝ, AffineMap.lineMap p q t - w = (p - w) + (t : ℂ) * v := fun t ↦ by
+    rw [AffineMap.lineMap_apply_module', Complex.real_smul]
+    ring
+  -- the integrand's imaginary part is the positive rational function of the `arctan` lemma
+  have him : ∀ t : ℝ, (v • (AffineMap.lineMap p q t - w)⁻¹).im =
+      C / (A * t ^ 2 + B * t + D') := fun t ↦ by
+    rw [smul_eq_mul, ← div_eq_mul_inv, im_div_eq, hline,
+      show (p - w) + (t : ℂ) * v = p + (t : ℂ) * v - w by ring, im_mul_conj_add_ofReal_mul_sub,
+      show p + (t : ℂ) * v - w = (p - w) + (t : ℂ) * v by ring, normSq_add_ofReal_mul]
+  have hne : ∀ t : ℝ, AffineMap.lineMap p q t - w ≠ 0 := fun t h ↦ by
+    have hq := normSq_add_ofReal_mul (p - w) v t
+    rw [← hline, h, map_zero] at hq
+    nlinarith [sq_nonneg (2 * A * t + B), sq_nonneg C, mul_pos hA hC]
+  have hcont : Continuous (fun t : ℝ ↦ v • (AffineMap.lineMap p q t - w)⁻¹) :=
+    (Continuous.inv₀ (f := fun t : ℝ ↦ AffineMap.lineMap p q t - w)
+      ((AffineMap.contDiff_lineMap p q (n := 0)).continuous.sub continuous_const) hne).const_smul v
+  have hint : IntervalIntegrable (fun t : ℝ ↦ v • (AffineMap.lineMap p q t - w)⁻¹)
+      MeasureTheory.volume 0 1 := hcont.intervalIntegrable 0 1
+  rw [← Complex.imCLM_apply, ← imCLM.intervalIntegral_comp_comm hint]
+  simp only [Complex.imCLM_apply, him]
+  exact integral_arctan_quadratic_mem_Ioo hA hC hLagrange
 
-/-- On `t ≤ 1/4`, the loop agrees with the first edge, from `c` in direction `w1`. -/
-theorem parallelogramFun_eq_edge1 (c w1 w2 : ℂ) {t : ℝ} (ht : t ≤ 1 / 4) :
-    parallelogramFun c w1 w2 t = c + (Real.smoothTransition (4 * t) : ℂ) * w1 := by
-  unfold parallelogramFun
-  rw [show (4:ℝ) * t - 0 = 4 * t by ring,
-    Real.smoothTransition.zero_of_nonpos (by linarith : (4:ℝ) * t - 2 ≤ 0),
-    Real.smoothTransition.zero_of_nonpos (by linarith : (4:ℝ) * t - 1 ≤ 0),
-    Real.smoothTransition.zero_of_nonpos (by linarith : (4:ℝ) * t - 3 ≤ 0)]
-  push_cast; ring
-
-/-- On `1/4 ≤ t ≤ 1/2`, the loop agrees with the second edge, from `c + w1` in direction `w2`. -/
-theorem parallelogramFun_eq_edge2 (c w1 w2 : ℂ) {t : ℝ} (ht0 : 1 / 4 ≤ t) (ht1 : t ≤ 1 / 2) :
-    parallelogramFun c w1 w2 t = c + w1 + (Real.smoothTransition (4 * t - 1) : ℂ) * w2 := by
-  unfold parallelogramFun
-  rw [Real.smoothTransition.one_of_one_le (by linarith : (1:ℝ) ≤ 4 * t - 0),
-    Real.smoothTransition.zero_of_nonpos (by linarith : (4:ℝ) * t - 2 ≤ 0),
-    Real.smoothTransition.zero_of_nonpos (by linarith : (4:ℝ) * t - 3 ≤ 0)]
-  push_cast; ring
-
-/-- On `1/2 ≤ t ≤ 3/4`, the loop agrees with the third edge, from `c + w1 + w2` in
-direction `-w1`. -/
-theorem parallelogramFun_eq_edge3 (c w1 w2 : ℂ) {t : ℝ} (ht0 : 1 / 2 ≤ t) (ht1 : t ≤ 3 / 4) :
-    parallelogramFun c w1 w2 t =
-      c + w1 + w2 + (Real.smoothTransition (4 * t - 2) : ℂ) * (-w1) := by
-  unfold parallelogramFun
-  rw [Real.smoothTransition.one_of_one_le (by linarith : (1:ℝ) ≤ 4 * t - 0),
-    Real.smoothTransition.one_of_one_le (by linarith : (1:ℝ) ≤ 4 * t - 1),
-    Real.smoothTransition.zero_of_nonpos (by linarith : (4:ℝ) * t - 3 ≤ 0)]
-  push_cast; ring
-
-/-- On `3/4 ≤ t ≤ 1`, the loop agrees with the fourth edge, from `c + w2` in direction
-`-w2`. -/
-theorem parallelogramFun_eq_edge4 (c w1 w2 : ℂ) {t : ℝ} (ht0 : 3 / 4 ≤ t) :
-    parallelogramFun c w1 w2 t = c + w2 + (Real.smoothTransition (4 * t - 3) : ℂ) * (-w2) := by
-  unfold parallelogramFun
-  rw [Real.smoothTransition.one_of_one_le (by linarith : (1:ℝ) ≤ 4 * t - 0),
-    Real.smoothTransition.one_of_one_le (by linarith : (1:ℝ) ≤ 4 * t - 2),
-    Real.smoothTransition.one_of_one_le (by linarith : (1:ℝ) ≤ 4 * t - 1)]
-  push_cast; ring
+/-- A point strictly to the left of the edge from `p` to `q` does not lie on that edge. -/
+theorem ne_of_mem_segment_of_im_pos {p q w z : ℂ} (hC : 0 < ((q - p) * conj (p - w)).im)
+    (hz : z ∈ segment ℝ p q) : z ≠ w := by
+  intro h
+  subst h
+  rw [segment_eq_image_lineMap] at hz
+  obtain ⟨t, -, rfl⟩ := hz
+  rw [AffineMap.lineMap_apply_module', Complex.real_smul,
+    show p - ((t : ℂ) * (q - p) + p) = ((-t : ℝ) : ℂ) * (q - p) by push_cast; ring, map_mul,
+    conj_ofReal, show (q - p) * (((-t : ℝ) : ℂ) * conj (q - p)) =
+      ((-t : ℝ) : ℂ) * ((q - p) * conj (q - p)) by ring, mul_conj] at hC
+  simp at hC
 
 /-- `Im (conj w1 * (r • w1 + s • w2)) = s * Im (conj w1 * w2)`. -/
 theorem im_conj_w1_mul_combo (w1 w2 : ℂ) (r s : ℝ) :
@@ -547,68 +419,10 @@ theorem im_conj_w2_w1_eq_neg (w1 w2 : ℂ) : (conj w2 * w1).im = -(conj w1 * w2)
   rw [show conj w2 * w1 = conj (conj w1 * w2) by simp [mul_comm]]
   simp only [Complex.conj_im, Complex.mul_im, Complex.conj_re]
 
-/-- **The parallelogram boundary avoids every strictly interior point.** -/
-theorem parallelogramFun_ne_of_mem_Ioo {c w1 w2 : ℂ} (hD : 0 < (conj w1 * w2).im)
-    {x y : ℝ} (hx0 : 0 < x) (hx1 : x < 1) (hy0 : 0 < y) (hy1 : y < 1) (t : ℝ) :
-    parallelogramFun c w1 w2 t ≠ c + (x : ℂ) * w1 + (y : ℂ) * w2 := by
-  intro heq
-  by_cases ht : t ≤ 1/4
-  · rw [parallelogramFun_eq_edge1 c w1 w2 ht] at heq
-    have h0 : (conj w1 *
-        ((c + (Real.smoothTransition (4 * t) : ℂ) * w1) -
-          (c + (x : ℂ) * w1 + (y : ℂ) * w2))).im = 0 := by rw [heq]; simp
-    rw [show (c + (Real.smoothTransition (4 * t) : ℂ) * w1) -
-        (c + (x : ℂ) * w1 + (y : ℂ) * w2) =
-        ((Real.smoothTransition (4 * t) - x : ℝ) : ℂ) * w1 + ((-y : ℝ) : ℂ) * w2 by push_cast; ring,
-      im_conj_w1_mul_combo] at h0
-    nlinarith
-  push Not at ht
-  by_cases ht2 : t ≤ 1/2
-  · rw [parallelogramFun_eq_edge2 c w1 w2 ht.le ht2] at heq
-    have h0 : (conj w2 *
-        ((c + w1 + (Real.smoothTransition (4 * t - 1) : ℂ) * w2) -
-          (c + (x : ℂ) * w1 + (y : ℂ) * w2))).im = 0 := by rw [heq]; simp
-    rw [show (c + w1 + (Real.smoothTransition (4 * t - 1) : ℂ) * w2) -
-        (c + (x : ℂ) * w1 + (y : ℂ) * w2) =
-        ((1 - x : ℝ) : ℂ) * w1 + ((Real.smoothTransition (4 * t - 1) - y : ℝ) : ℂ) * w2 by
-        push_cast; ring,
-      im_conj_w2_mul_combo, im_conj_w2_w1_eq_neg] at h0
-    nlinarith
-  push Not at ht2
-  by_cases ht3 : t ≤ 3/4
-  · rw [parallelogramFun_eq_edge3 c w1 w2 ht2.le ht3] at heq
-    have h0 : (conj w1 *
-        ((c + w1 + w2 + (Real.smoothTransition (4 * t - 2) : ℂ) * (-w1)) -
-          (c + (x : ℂ) * w1 + (y : ℂ) * w2))).im = 0 := by rw [heq]; simp
-    rw [show (c + w1 + w2 + (Real.smoothTransition (4 * t - 2) : ℂ) * (-w1)) -
-        (c + (x : ℂ) * w1 + (y : ℂ) * w2) =
-        ((1 - Real.smoothTransition (4 * t - 2) - x : ℝ) : ℂ) * w1 + ((1 - y : ℝ) : ℂ) * w2 by
-        push_cast; ring,
-      im_conj_w1_mul_combo] at h0
-    nlinarith
-  · push Not at ht3
-    rw [parallelogramFun_eq_edge4 c w1 w2 ht3.le] at heq
-    have h0 : (conj w2 *
-        ((c + w2 + (Real.smoothTransition (4 * t - 3) : ℂ) * (-w2)) -
-          (c + (x : ℂ) * w1 + (y : ℂ) * w2))).im = 0 := by rw [heq]; simp
-    rw [show (c + w2 + (Real.smoothTransition (4 * t - 3) : ℂ) * (-w2)) -
-        (c + (x : ℂ) * w1 + (y : ℂ) * w2) =
-        ((-x : ℝ) : ℂ) * w1 + ((1 - Real.smoothTransition (4 * t - 3) - y : ℝ) : ℂ) * w2 by
-        push_cast; ring,
-      im_conj_w2_mul_combo, im_conj_w2_w1_eq_neg] at h0
-    nlinarith
-
 /-- `Im (v * conj z) = -Im (conj v * z)`. -/
 theorem im_mul_conj_eq_neg_im_conj_mul (v z : ℂ) : (v * conj z).im = -(conj v * z).im := by
   rw [show v * conj z = conj (conj v * z) by rw [map_mul, Complex.conj_conj]]
   simp only [Complex.conj_im]
-
-/-- The reparametrization `t ↦ smoothTransition (4 t - k)` is differentiable on all of `ℝ`,
-for any shift `k`. -/
-theorem differentiable_smoothTransition_sub (k : ℝ) :
-    Differentiable ℝ (fun t : ℝ ↦ Real.smoothTransition (4 * t - k)) :=
-  ((Real.smoothTransition.contDiff (n := ⊤)).comp
-    ((contDiff_const.mul contDiff_id).sub contDiff_const)).differentiable (by norm_num)
 
 /-- An interior point lies strictly to the left of each oriented edge of a positively
 oriented parallelogram. -/
@@ -651,131 +465,56 @@ private theorem parallelogram_edge_crossProducts_pos {c w1 w2 w : ℂ}
       ring
     rw [h1]; positivity
 
-/-- The logarithmic-derivative integrand of a smooth parallelogram loop is continuous
-when the evaluation point avoids the loop. -/
-private theorem continuous_parallelogram_logDeriv {c w1 w2 w : ℂ}
-    (hwne : ∀ t : ℝ, parallelogramFun c w1 w2 t ≠ w) :
-    Continuous (fun t ↦ deriv (parallelogramFun c w1 w2) t *
-      (parallelogramFun c w1 w2 t - w)⁻¹) := by
-  have hcont1 : Continuous (deriv (parallelogramFun c w1 w2)) :=
-    ((contDiff_parallelogramFun c w1 w2).iterate_deriv 1).continuous
-  have hcont2 : Continuous (fun t ↦ (parallelogramFun c w1 w2 t - w)⁻¹) := by
-    apply Continuous.inv₀ ((continuous_parallelogramFun c w1 w2).sub continuous_const)
-    exact fun t ↦ sub_ne_zero.mpr (hwne t)
-  have hcontF : Continuous (fun t ↦ deriv (parallelogramFun c w1 w2) t *
-      (parallelogramFun c w1 w2 t - w)⁻¹) := hcont1.mul hcont2
-  exact hcontF
-
-/-- The total turning integral of the positively oriented parallelogram about an interior
-point lies strictly between zero and `4π`. -/
-private theorem parallelogram_turning_integral_mem_Ioo {c w1 w2 : ℂ}
-    (hD : 0 < (conj w1 * w2).im) {x y : ℝ}
-    (hx0 : 0 < x) (hx1 : x < 1) (hy0 : 0 < y) (hy1 : y < 1) :
-    (∫ t in (0 : ℝ)..1, (deriv (parallelogramFun c w1 w2) t *
-      (parallelogramFun c w1 w2 t - (c + (x : ℂ) * w1 + (y : ℂ) * w2))⁻¹).im) ∈
-      Set.Ioo (0 : ℝ) (4 * Real.pi) := by
-  set w := c + (x : ℂ) * w1 + (y : ℂ) * w2 with hw_def
-  have hwne : ∀ t : ℝ, parallelogramFun c w1 w2 t ≠ w :=
-    parallelogramFun_ne_of_mem_Ioo hD hx0 hx1 hy0 hy1
-  have hv1 : w1 ≠ 0 := fun h ↦ by simp [h] at hD
-  have hv2 : w2 ≠ 0 := fun h ↦ by simp [h] at hD
-  have hcontF := continuous_parallelogram_logDeriv hwne
-  obtain ⟨hC1, hC2, hC3, hC4⟩ :=
-    parallelogram_edge_crossProducts_pos hD hx0 hx1 hy0 hy1 hw_def
-  -- The four edges' contributions.
-  have hI1 := im_edge_integral_mem_Ioo (c := c) (w1 := w1) (w2 := w2) (w := w) (p := c)
-    (v := w1) (a := 0) (b := 1/4) (by norm_num) hv1
-    hC1
-    hwne (φ := fun t ↦ Real.smoothTransition (4 * t - 0))
-    (differentiable_smoothTransition_sub 0).continuous.continuousOn
-    (fun t _ ↦ (differentiable_smoothTransition_sub 0).differentiableAt.hasDerivAt)
-    (Real.smoothTransition.zero_of_nonpos (by norm_num))
-    (Real.smoothTransition.one_of_one_le (by norm_num))
-    (fun t ht ↦ by
-      simp only [parallelogramFun_eq_edge1 c w1 w2 ht.2.le, sub_zero])
-  have hI2 := im_edge_integral_mem_Ioo (c := c) (w1 := w1) (w2 := w2) (w := w) (p := c + w1)
-    (v := w2) (a := 1/4) (b := 1/2) (by norm_num) hv2
-    hC2
-    hwne (φ := fun t ↦ Real.smoothTransition (4 * t - 1))
-    (differentiable_smoothTransition_sub 1).continuous.continuousOn
-    (fun t _ ↦ (differentiable_smoothTransition_sub 1).differentiableAt.hasDerivAt)
-    (Real.smoothTransition.zero_of_nonpos (by norm_num))
-    (Real.smoothTransition.one_of_one_le (by norm_num))
-    (fun t ht ↦ parallelogramFun_eq_edge2 c w1 w2 ht.1.le ht.2.le)
-  have hI3 := im_edge_integral_mem_Ioo (c := c) (w1 := w1) (w2 := w2) (w := w) (p := c + w1 + w2)
-    (v := -w1) (a := 1/2) (b := 3/4) (by norm_num) (neg_ne_zero.mpr hv1)
-    hC3
-    hwne (φ := fun t ↦ Real.smoothTransition (4 * t - 2))
-    (differentiable_smoothTransition_sub 2).continuous.continuousOn
-    (fun t _ ↦ (differentiable_smoothTransition_sub 2).differentiableAt.hasDerivAt)
-    (Real.smoothTransition.zero_of_nonpos (by norm_num))
-    (Real.smoothTransition.one_of_one_le (by norm_num))
-    (fun t ht ↦ parallelogramFun_eq_edge3 c w1 w2 ht.1.le ht.2.le)
-  have hI4 := im_edge_integral_mem_Ioo (c := c) (w1 := w1) (w2 := w2) (w := w) (p := c + w2)
-    (v := -w2) (a := 3/4) (b := 1) (by norm_num) (neg_ne_zero.mpr hv2)
-    hC4
-    hwne (φ := fun t ↦ Real.smoothTransition (4 * t - 3))
-    (differentiable_smoothTransition_sub 3).continuous.continuousOn
-    (fun t _ ↦ (differentiable_smoothTransition_sub 3).differentiableAt.hasDerivAt)
-    (Real.smoothTransition.zero_of_nonpos (by norm_num))
-    (Real.smoothTransition.one_of_one_le (by norm_num))
-    (fun t ht ↦ parallelogramFun_eq_edge4 c w1 w2 ht.1.le)
-  have hcontIm : Continuous (fun t ↦ (deriv (parallelogramFun c w1 w2) t *
-      (parallelogramFun c w1 w2 t - w)⁻¹).im) := Complex.continuous_im.comp hcontF
-  have hIntIm : ∀ a b : ℝ, IntervalIntegrable (fun t ↦ (deriv (parallelogramFun c w1 w2) t *
-      (parallelogramFun c w1 w2 t - w)⁻¹).im) MeasureTheory.volume a b :=
-    fun a b ↦ hcontIm.intervalIntegrable a b
-  have hsplit1 := intervalIntegral.integral_add_adjacent_intervals
-    (hIntIm 0 (1/4)) (hIntIm (1/4) (1/2))
-  have hsplit2 := intervalIntegral.integral_add_adjacent_intervals
-    (hIntIm 0 (1/2)) (hIntIm (1/2) (3/4))
-  have hsplit3 := intervalIntegral.integral_add_adjacent_intervals
-    (hIntIm 0 (3/4)) (hIntIm (3/4) 1)
-  have hTotalBound : (∫ t in (0:ℝ)..1, (deriv (parallelogramFun c w1 w2) t *
-      (parallelogramFun c w1 w2 t - w)⁻¹).im) ∈ Set.Ioo (0:ℝ) (4 * Real.pi) := by
-    rw [← hsplit3, ← hsplit2, ← hsplit1]
-    exact ⟨by linarith [hI1.1, hI2.1, hI3.1, hI4.1], by linarith [hI1.2, hI2.2, hI3.2, hI4.2]⟩
-  exact hTotalBound
+/-- The parallelogram loop lies on the boundary of the parallelogram. -/
+theorem range_parallelogramLoop_subset (c w1 w2 : ℂ) :
+    Set.range (parallelogramLoop c w1 w2) ⊆ parallelogramBoundary c w1 w2 :=
+  Loop.range_polygon_subset _ (by norm_num)
 
 /-- **The index of the parallelogram boundary is `1` at every point of the open
 parallelogram**, given `w1, w2` positively oriented (`Im (conj w1 * w2) > 0`). -/
 theorem curveIndex_parallelogramLoop_eq_one {c w1 w2 : ℂ} (hD : 0 < (conj w1 * w2).im)
     {x y : ℝ} (hx0 : 0 < x) (hx1 : x < 1) (hy0 : 0 < y) (hy1 : y < 1) :
     curveIndex (parallelogramLoop c w1 w2) (c + (x : ℂ) * w1 + (y : ℂ) * w2) = 1 := by
-  set w := c + (x : ℂ) * w1 + (y : ℂ) * w2
-  have hwne : ∀ t : ℝ, parallelogramFun c w1 w2 t ≠ w :=
-    parallelogramFun_ne_of_mem_Ioo hD hx0 hx1 hy0 hy1
-  have hcontF := continuous_parallelogram_logDeriv hwne
-  have hTotalBound := parallelogram_turning_integral_mem_Ioo (c := c) hD hx0 hx1 hy0 hy1
-  have hwneI : ∀ t : I, parallelogramLoop c w1 w2 t ≠ w := fun t ↦ hwne (t : ℝ)
-  obtain ⟨n, hn⟩ := exists_int_curveIndex (parallelogramLoop c w1 w2)
-    (contDiffOn_parallelogramLoop_extend c w1 w2) hwneI
+  set w := c + (x : ℂ) * w1 + (y : ℂ) * w2 with hw_def
+  have hv1 : w1 ≠ 0 := fun h ↦ by simp [h] at hD
+  have hv2 : w2 ≠ 0 := fun h ↦ by simp [h] at hD
+  obtain ⟨hC1, hC2, hC3, hC4⟩ := parallelogram_edge_crossProducts_pos hD hx0 hx1 hy0 hy1 hw_def
+  -- the four edges, from `v i` to `v (i + 1)`, with `w` strictly to the left of each
+  have hC : ∀ i : Fin 4, 0 < ((parallelogramVertex c w1 w2 (i + 1) -
+      parallelogramVertex c w1 w2 i) * conj (parallelogramVertex c w1 w2 i - w)).im := by
+    intro i
+    fin_cases i
+    · simpa [parallelogramVertex] using hC1
+    · simpa [parallelogramVertex, show c + w1 + w2 - (c + w1) = w2 by ring] using hC2
+    · simpa [parallelogramVertex, show c + w2 - (c + w1 + w2) = -w1 by ring] using hC3
+    · simpa [parallelogramVertex, show c - (c + w2) = -w2 by ring] using hC4
+  have hv : ∀ i : Fin 4, parallelogramVertex c w1 w2 (i + 1) - parallelogramVertex c w1 w2 i ≠ 0 :=
+    fun i h ↦ by simpa [h] using hC i
+  have hwB : w ∉ parallelogramBoundary c w1 w2 := fun hw ↦ by
+    obtain ⟨i, hi⟩ := mem_iUnion.mp hw
+    exact ne_of_mem_segment_of_im_pos (hC i) hi rfl
+  -- the index is an integer `n`, and `2πi n` is the sum of the four edge integrals
+  obtain ⟨n, hn⟩ := exists_int_curveIndex (w := w) (parallelogramLoop c w1 w2)
+    (contDiffOn_parallelogramLoop_extend c w1 w2)
+    fun t h ↦ hwB (by rw [← h]; exact range_parallelogramLoop_subset c w1 w2 (mem_range_self t))
   have hCI := curveIntegral_sub_inv_eq_two_pi_I_mul_curveIndex (parallelogramLoop c w1 w2) w
-  rw [hn] at hCI
-  have hCIeq : curveIntegral (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ ((z - w)⁻¹))
-      (parallelogramLoop c w1 w2) =
-      ∫ t in (0:ℝ)..1, deriv (parallelogramFun c w1 w2) t *
-        (parallelogramFun c w1 w2 t - w)⁻¹ := by
-    rw [curveIntegral_eq_intervalIntegral_deriv, parallelogramLoop_extend]
-    simp [ContinuousLinearMap.toSpanSingleton_apply, smul_eq_mul]
-  rw [hCIeq] at hCI
-  have hInt : IntervalIntegrable (fun t ↦ deriv (parallelogramFun c w1 w2) t *
-      (parallelogramFun c w1 w2 t - w)⁻¹) MeasureTheory.volume 0 1 := hcontF.intervalIntegrable 0 1
-  have himeq : (∫ t in (0:ℝ)..1, (deriv (parallelogramFun c w1 w2) t *
-      (parallelogramFun c w1 w2 t - w)⁻¹).im) = (2 * (Real.pi : ℂ) * Complex.I * (n : ℂ)).im := by
-    have h := intervalIntegral.intervalIntegral_im hInt
-    simp only [RCLike.im_eq_complex_im] at h
-    rw [h, hCI]
-  have hRHS : (2 * (Real.pi : ℂ) * Complex.I * (n : ℂ)).im = 2 * Real.pi * (n : ℝ) := by
+  rw [hn, curveIntegral_parallelogramLoop
+    (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ ((z - w)⁻¹))
+    ((ContinuousLinearMap.toSpanSingletonLIE ℂ ℂ).continuous.comp_continuousOn
+      (ContinuousOn.inv₀ (f := fun z : ℂ ↦ z - w) (by fun_prop)
+        fun z hz ↦ sub_ne_zero.mpr fun h ↦ hwB (h ▸ hz)))] at hCI
+  simp only [ContinuousLinearMap.toSpanSingleton_apply] at hCI
+  -- the imaginary part of the total lies in `(0, 4π)`, so `n = 1`
+  have hIm := congrArg Complex.im hCI
+  have hR : (2 * (Real.pi : ℂ) * Complex.I * (n : ℂ)).im = 2 * Real.pi * n := by
     simp [Complex.mul_im, Complex.I_re, Complex.I_im]
-  rw [hRHS] at himeq
-  rw [himeq] at hTotalBound
-  have hnbound : (0:ℝ) < (n:ℝ) ∧ (n:ℝ) < 2 := by
-    constructor
-    · nlinarith [hTotalBound.1, Real.pi_pos]
-    · nlinarith [hTotalBound.2, Real.pi_pos]
+  rw [hR, Complex.im_sum, Fin.sum_univ_four] at hIm
+  have hbound := fun i : Fin 4 ↦ im_integral_segment_mem_Ioo (hv i) (hC i)
+  have hnbound : (0 : ℝ) < n ∧ (n : ℝ) < 2 := by
+    constructor <;> nlinarith [(hbound 0).1, (hbound 1).1, (hbound 2).1, (hbound 3).1,
+      (hbound 0).2, (hbound 1).2, (hbound 2).2, (hbound 3).2, Real.pi_pos]
   have : n = 1 := by
-    have h1 : (0:ℤ) < n := by exact_mod_cast hnbound.1
+    have h1 : (0 : ℤ) < n := by exact_mod_cast hnbound.1
     have h2 : n < 2 := by exact_mod_cast hnbound.2
     omega
   rw [hn, this]

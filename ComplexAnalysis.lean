@@ -68,6 +68,7 @@ public import ComplexAnalysis.Cycle.Cauchy
 public import ComplexAnalysis.Cycle.Residue
 public import ComplexAnalysis.Cycle.ArgumentPrinciple
 public import ComplexAnalysis.Cycle.Parallelogram
+public import ComplexAnalysis.Cycle.Piecewise
 public import ComplexAnalysis.Runge.Kernel
 public import ComplexAnalysis.Runge.Cutoff
 public import ComplexAnalysis.Runge.Basic
@@ -188,8 +189,12 @@ and `Topology` libraries.
   families of closed `C¹` curves, their integrals and indices, and the homology forms of
   Cauchy's theorem and formula (Dixon's proof), of the residue theorem, and of the argument
   principle for cycles whose index vanishes outside the domain.
-* `Cycle.Parallelogram`: the boundary of a parallelogram as a single `C^∞` closed curve
-  (gluing the four edges with `Real.smoothTransition`, flat at the corners), with its index
+* `Cycle.Piecewise`: closed curves made of `C¹` pieces meeting at corners (polygons, rectangles,
+  keyhole contours) as `C¹` cycles, by smooth concatenation; Cauchy's theorem and formula and
+  the residue theorem for such curves, stated in terms of integrals over the pieces.
+* `Cycle.Parallelogram`: the boundary of a parallelogram as the closed polygon through its
+  vertices (`Cycle.Piecewise`), with curve integrals as sums of straight edge integrals and its
+  index
   shown to vanish outside the closed parallelogram by a convexity-coning nullhomotopy and
   to equal `1` in the open interior when the edge vectors are positively oriented.
 * `Runge.Kernel`, `Runge.Cutoff`, `Runge.Basic`, `Runge.PolePushing`, `Runge.Theorem`:
@@ -272,8 +277,8 @@ and `Topology` libraries.
 * `SphericalDerivative`: the spherical derivative `f#(z) = ‖f' z‖ / (1 + ‖f z‖²)`, the local
   chordal-metric distortion factor of a holomorphic function, and its invariance under the
   inversion `w ↦ 1/w`.
-* `EllipticResidue`: the boundary integral of a doubly periodic continuous function over a
-  period parallelogram vanishes, by cancellation of opposite edges — one is the periodic
+* `EllipticResidue`: the boundary integral of a doubly periodic function, continuous on the
+  boundary, over a period parallelogram vanishes, by cancellation of opposite edges — one is the periodic
   translate of the other, traversed oppositely. Combined with
   `curveIndex_parallelogramLoop_eq_one`/`_eq_zero` (`Cycle.Parallelogram`), this is the
   elementary half of Liouville's second and third theorems for elliptic functions; assembling

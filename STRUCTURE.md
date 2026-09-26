@@ -42,6 +42,9 @@ Zero counting, conformal mapping, and factorization use scalar-valued functions.
 `Complex.Cycle` represents a finite family of closed paths. The homological Cauchy and residue
 theorems impose `IsC1`, containment of the cycle range, and vanishing of its index outside the
 domain. They do not require a chosen Jordan interior or a homology-group construction.
+Piecewise-`C¹` closed curves enter through `Loop.piecewise` and `Loop.polygon` (`Cycle.Piecewise`),
+built on `Path.smoothConcat` (`Analysis.Integral.CurveIntegral.SmoothConcat`); the corresponding
+Cauchy and residue theorems are stated with integrals over the pieces.
 Meromorphic orders and divisors use Mathlib's APIs.
 
 `Complex.HolomorphicMap` in `Analysis.Holomorphic.FunctionSpace` carries the compact-open
@@ -113,7 +116,7 @@ The following distinctions matter when reusing results or preparing an upstream 
   coefficients and no nondegeneracy conclusion; it should not be advertised as a setwise
   circle-preservation theorem.
 - `EllipticLiouville` proves constancy of entire doubly periodic functions. `EllipticResidue`
-  proves cancellation for globally continuous periodic functions; the meromorphic residue-sum
+  proves cancellation for periodic functions continuous on the boundary; the meromorphic residue-sum
   and equal-zero/pole-count theorems are not assembled.
 
 ## Relationship to Mathlib and documentation

@@ -11,6 +11,7 @@ public import Analysis.Integral.CompactSupport
 public import Analysis.Integral.CurveIntegral
 public import Analysis.Integral.CurveIntegral.Map
 public import Analysis.Integral.CurveIntegral.Improper
+public import Analysis.Integral.CurveIntegral.SmoothConcat
 public import Analysis.TaylorBounds
 
 /-!
@@ -18,7 +19,8 @@ public import Analysis.TaylorBounds
 
 Spaces of holomorphic maps with the compact-open topology and the shared Montel and Vitali
 arguments, integration of compactly supported and weighted functions, curve integration of
-exact one-forms (pullback along mapped paths and improper endpoint formulas), and elementary
+exact one-forms (pullback along mapped paths, improper endpoint formulas, and smooth
+concatenation of paths), and elementary
 real Taylor-remainder bounds. Declarations use the namespaces of their underlying Mathlib
 APIs. This library depends only on Mathlib.
 
@@ -34,5 +36,7 @@ This module re-exports the following developments:
 * `Analysis.Integral.CurveIntegral.Map`: Pullback of one-forms along mapped paths.
 * `Analysis.Integral.CurveIntegral.Improper`: Endpoint formulas for improper integrals of exact
   one-forms.
+* `Analysis.Integral.CurveIntegral.SmoothConcat`: Smooth concatenation of chains of paths, with
+  additivity of curve integrals.
 * `Analysis.TaylorBounds`: Elementary bounds for Taylor remainders.
 -/
