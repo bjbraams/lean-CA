@@ -6,7 +6,7 @@ Authors: Bastiaan J Braams
 import ComplexAnalysis
 
 /-!
-# Principal theorems of lean-CA: Palomar solution
+# Principal theorems of lean-CA: proofs
 
 Proofs of the 45 statements in Challenge.lean, using the substantive development in
 ComplexAnalysis. The declarations have the same names and types as the challenge; the two

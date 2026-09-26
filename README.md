@@ -76,9 +76,13 @@ See [SYNOPSIS.md](SYNOPSIS.md).
 * [Si] Simon, *A Comprehensive Course in Analysis*, Part 2A (2015), Chapters 2–4.
 * [SS] Stein, Shakarchi, *Complex Analysis* (2003), Chapters 2–3.
 
-## Palomar registry statement
+## Headline results
 
-To follow.
+`Challenge.lean` states 45 headline results over Mathlib alone, with copies of the few
+supporting definitions they need, and `Solution.lean` proves them from the library. The Lean
+comparator, configured by `comparator.json`, checks that the two files state the same theorems
+and that the proofs use only the standard axioms. `formalization.yaml` records the source of
+each result in the references and the corresponding library declaration.
 
 ## Related formalizations and credits
 

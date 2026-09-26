@@ -8,11 +8,13 @@ module
 public import Mathlib
 
 /-!
-# Principal theorems of lean-CA: Palomar challenge
+# Principal theorems of lean-CA: statements
 
-45 results from `ComplexAnalysis`, selected from SYNOPSIS.md. This file imports only Mathlib.
-The supporting definitions below reproduce the library definitions; only the 45 theorem
-proofs are left as challenge holes. The matching proofs are in Solution.lean.
+45 headline results from `ComplexAnalysis`, selected from SYNOPSIS.md, stated over Mathlib
+alone: this file imports only Mathlib. The supporting definitions below reproduce the library
+definitions; only the 45 theorem proofs are left as holes. The matching proofs are in
+Solution.lean, and the pair can be checked with the Lean comparator (`comparator.json`), which
+confirms that each statement here is proved by the library with only the standard axioms.
 
 Integration and singularities (1–16), convergence and approximation (17–23), products and
 factorization (24–28), conformal mapping (29–35), potential theory (36–42), and boundary

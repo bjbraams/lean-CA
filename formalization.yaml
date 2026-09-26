@@ -1,5 +1,5 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/mathlib-initiative/formalization.yaml/main/schema/formalization.schema.json
-# Palomar submission draft: all compared statements are listed in alignment.
+# Project metadata: the 45 headline results of Challenge.lean and Solution.lean are listed in alignment.
 version: v0.4
 
 project:
@@ -236,12 +236,12 @@ related_formalizations:
 
 status:
   scope: >-
-    The submission selects 45 principal results from ComplexAnalysis; supporting Analysis and
+    The headline set selects 45 principal results from ComplexAnalysis; supporting Analysis and
     Topology modules are used by the proofs but contribute no separately selected theorem. The
     library contains further contour, approximation, continuation and growth theory described in
     SYNOPSIS.md. This is not a complete formalization of the cited books. Full Picard theory,
     general boundary extension of conformal maps and a full Hardy-space inner–outer theory are
-    outside the submission. The counts below concern the substantive library and Solution.lean;
+    outside the headline set. The counts below concern the substantive library and Solution.lean;
     Challenge.lean intentionally has 45 theorem-proof holes and no definition holes.
   sorry_count: 0
   sorry_in_definitions: 0
@@ -251,7 +251,7 @@ automation:
   methods:
     - method: manual
       tool_setup: Human choice of scope, references and conventions, direction of development, and
-        responsibility for the submission.
+        responsibility for the project.
     - method: agent
       framework: Codex
       models:
@@ -299,9 +299,9 @@ fidelity:
 review:
   status: agent-reviewed
   notes: >-
-    Validated on 26 September 2026 at commit 0bd13723292f with Lean and Mathlib v4.35.0-rc2.
-    The library passes lake build;
-    the submission passes lake build Challenge Solution and lake env lean on each new Lean file. The
+    Validated on 26 September 2026 at commit 622f8d599b1f (tag v0.1.0) with Lean and Mathlib
+    v4.35.0-rc2. The library passes lake build;
+    the Challenge/Solution pair passes lake build Challenge Solution and lake env lean on each new Lean file. The
     only proof holes are the 45 deliberate Challenge theorem bodies; the library and Solution contain
     none. The metadata passes the v0.4 schema. All 45 solution theorems use only propext, Classical.choice
     and Quot.sound. Comparator accepts all 45 comparisons and the supporting definitions, and Lean’s
@@ -311,8 +311,7 @@ review:
     Comparator’s theorem, axiom and primitive roots; lake comparator checked those exports through
     its supported --challenge-from-export and --solution-from-export options, with its kernel sandboxes
     enabled. Statement selection, hypotheses, copied definitions and credits were reviewed by a coding
-    agent. Palomar editorial review is pending; no independent human peer review or source-author
-    endorsement is claimed.
+    agent. No independent human peer review or source-author endorsement is claimed.
 
 alignment:
   namespace: LeanCA
