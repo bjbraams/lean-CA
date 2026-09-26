@@ -5,14 +5,16 @@ Mathlib and is written as a potential Mathlib contribution.
 
 ## Organization
 
-There are three main directories.
+There are two main directories.
 
-- `Analysis/`.
-Spaces of holomorphic maps, shared normal-family arguments, curve integration of exact
-one-forms, compactly supported integration, and Taylor-remainder estimates.
-
-- `Topology/`.
-Gluing of locally constant differences, frontier lemmas, and semicontinuity support.
+- `ToMathlib/`.
+General support material that is not specific to complex analysis and is intended for
+Mathlib, in two parts. `ToMathlib/Analysis/`: spaces of holomorphic maps, shared
+normal-family arguments, curve integration of exact one-forms (including smooth
+concatenation of paths), compactly supported integration, and Taylor-remainder estimates.
+`ToMathlib/Topology/`: gluing of locally constant differences, frontier lemmas, simple
+connectedness of convex sets, and semicontinuity. Module names start with `ToMathlib`;
+declarations use the namespaces of the corresponding Mathlib APIs.
 
 - `ComplexAnalysis/`.
 Single-variable complex analysis: holomorphic branches, Banach-valued primitives and
@@ -28,12 +30,12 @@ differentiable, integrable boundary paths, index invariance for continuous based
 homotopies of `C¹` loops, and continuous logarithm tracking. Moving-endpoint identities
 pass to improper limits when the endpoint-track integrals vanish.
 Exterior-path support proves escape to infinity and endpoint formulas for exact integrals;
-general pullback and improper-integration results live in `Analysis`.
+general pullback and improper-integration results live in `ToMathlib.Analysis`.
 
-`Analysis` and `Topology` depend only on Mathlib. `ComplexAnalysis` builds on them.
-The support libraries extend the corresponding Mathlib namespaces.
+`ToMathlib` depends only on Mathlib. `ComplexAnalysis` builds on it.
 
-Each directory has a matching umbrella module. `LeanCA.lean` imports all three.
+Each directory has a matching umbrella module (`ToMathlib.lean`, with `ToMathlib/Analysis.lean`
+and `ToMathlib/Topology.lean`, and `ComplexAnalysis.lean`). `LeanCA.lean` imports both.
 
 The file [STRUCTURE.md](STRUCTURE.md) provides a more detailed description of the project
 organization. It is written for potential future developers.

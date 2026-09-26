@@ -5,27 +5,20 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Analysis
-public import Topology
+public import ToMathlib
 public import ComplexAnalysis
 
 /-!
 # LeanCA: complex analysis of one variable
 
-This umbrella module imports the project’s mathematical libraries: analytic and topological
-foundations, and analysis in one complex variable. Its results are supplied by
-the imported modules.
+This umbrella module imports the project’s mathematical libraries: the general analytic and
+topological support intended for Mathlib (`ToMathlib`), and analysis in one complex variable.
+Its results are supplied by the imported modules.
 
 ## Main results
 
 This module re-exports the following developments:
 
-* `Analysis`: General analysis support.
-* `Topology`: General topology support.
+* `ToMathlib`: General analysis and topology support, intended for Mathlib.
 * `ComplexAnalysis`: Single-variable complex analysis.
-
-## References
-
-* `Analysis`: formal background used by this module.
-* `Topology`: formal background used by this module.
 -/

@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Analysis.Integral.CurveIntegral
+public import ToMathlib.Analysis.Integral.CurveIntegral
 
 /-!
 # Pullback of one-forms along mapped paths
@@ -24,7 +24,7 @@ integrability assumption. The map need only be differentiable along the path.
 
 ## References
 
-* `Analysis.Integral.CurveIntegral`: formal background used by this module.
+* `ToMathlib.Analysis.Integral.CurveIntegral`: formal background used by this module.
 -/
 
 public section

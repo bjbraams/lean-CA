@@ -6,7 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import Mathlib.Analysis.Calculus.ParametricIntegral
-public import Analysis.Integral.CompactSupport
+public import ToMathlib.Analysis.Integral.CompactSupport
 
 /-!
 # Differentiation of compact integrals in one complex parameter

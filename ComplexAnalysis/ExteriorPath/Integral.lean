@@ -6,7 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import ComplexAnalysis.ExteriorPath
-public import Analysis.Integral.CurveIntegral.Improper
+public import ToMathlib.Analysis.Integral.CurveIntegral.Improper
 public import Mathlib.Analysis.Complex.RealDeriv
 
 /-!

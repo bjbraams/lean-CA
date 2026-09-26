@@ -178,7 +178,7 @@ does not propose replacing our more general statements with them.
 - **Vincent Beffara's [Curvint](https://github.com/vbeffara/Curvint)** builds a
   covering space from local holomorphic primitives and defines `ContourIntegral`
   by lifting a continuous path. This is closely related to our
-  [LocallyConstantGluing.lean](Topology/LocallyConstantGluing.lean),
+  [LocallyConstantGluing.lean](ToMathlib/Topology/LocallyConstantGluing.lean),
   [HasPrimitives.lean](ComplexAnalysis/HasPrimitives.lean), and pullback theory.
   Its `DifferentiableOn.exists_primitive` in `Primitive.lean` is a star-convex-domain
   result, not the general simply connected theorem.

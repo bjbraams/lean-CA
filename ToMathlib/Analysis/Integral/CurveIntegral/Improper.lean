@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Analysis.Integral.CurveIntegral.Map
+public import ToMathlib.Analysis.Integral.CurveIntegral.Map
 public import Mathlib.MeasureTheory.Integral.IntegralEqImproper
 
 /-!

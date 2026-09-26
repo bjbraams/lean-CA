@@ -6,7 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import ComplexAnalysis.BranchLog
-public import Analysis.Integral.CurveIntegral
+public import ToMathlib.Analysis.Integral.CurveIntegral
 public import ComplexAnalysis.HasPrimitives
 public import Mathlib.MeasureTheory.Integral.CurveIntegral.Poincare
 

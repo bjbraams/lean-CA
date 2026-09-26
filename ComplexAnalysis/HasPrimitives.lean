@@ -7,7 +7,7 @@ module
 
 public import Mathlib.Analysis.Complex.HasPrimitives
 public import Mathlib.Analysis.Calculus.MeanValue
-public import Topology.LocallyConstantGluing
+public import ToMathlib.Topology.LocallyConstantGluing
 
 /-!
 # Primitives on simply connected open domains

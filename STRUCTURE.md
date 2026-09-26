@@ -9,15 +9,19 @@ kept separate from the complex-specific results.
 
 Lean and Mathlib are pinned to `v4.35.0-rc2` in [lean-toolchain](lean-toolchain) and
 [lakefile.toml](lakefile.toml). The Lake package and default library target are named `LeanCA`.
-The three source roots have matching umbrella modules:
+The two source roots have matching umbrella modules; `ToMathlib` has two parts:
 
 | Root | Role | Project dependencies |
 | --- | --- | --- |
-| [Topology](Topology.lean) | Gluing, frontiers, simple connectedness of convex sets, and semicontinuity | None |
-| [Analysis](Analysis.lean) | Differentiation, integration, normed-space tools, and holomorphic function spaces | None outside `Analysis` |
-| [ComplexAnalysis](ComplexAnalysis.lean) | Function theory of one complex variable | `Analysis`, `Topology` |
+| [ToMathlib.Topology](ToMathlib/Topology.lean) | Gluing, frontiers, simple connectedness of convex sets, and semicontinuity | None |
+| [ToMathlib.Analysis](ToMathlib/Analysis.lean) | Integration, curve integrals and smooth concatenation of paths, Taylor bounds, and holomorphic function spaces | None outside `ToMathlib.Analysis` |
+| [ComplexAnalysis](ComplexAnalysis.lean) | Function theory of one complex variable | `ToMathlib` |
 
-All three use Mathlib. [LeanCA.lean](LeanCA.lean) imports their umbrellas. `ComplexAnalysis` has no
+All use Mathlib. `ToMathlib` collects general support intended for Mathlib; its module names
+start with `ToMathlib` to avoid clashes with other packages, while its declarations use Mathlib's
+namespaces, so they would move to Mathlib without renaming. [ToMathlib.lean](ToMathlib.lean)
+imports its two parts, and [LeanCA.lean](LeanCA.lean) imports `ToMathlib` and
+`ComplexAnalysis`. `ComplexAnalysis` has no
 import dependency on Carlson applications, several complex variables, or simplex integration.
 For downstream use, import the individual
 topic modules needed, or `ComplexAnalysis` for the complete complex-analysis library.
@@ -43,12 +47,12 @@ Zero counting, conformal mapping, and factorization use scalar-valued functions.
 theorems impose `IsC1`, containment of the cycle range, and vanishing of its index outside the
 domain. They do not require a chosen Jordan interior or a homology-group construction.
 Piecewise-`C¹` closed curves enter through `Loop.piecewise` and `Loop.polygon` (`Cycle.Piecewise`),
-built on `Path.smoothConcat` (`Analysis.Integral.CurveIntegral.SmoothConcat`); the corresponding
+built on `Path.smoothConcat` (`ToMathlib.Analysis.Integral.CurveIntegral.SmoothConcat`); the corresponding
 Cauchy and residue theorems are stated with integrals over the pieces.
 Meromorphic orders and divisors use Mathlib's APIs.
 
-`Complex.HolomorphicMap` in `Analysis.Holomorphic.FunctionSpace` carries the compact-open
-structure. `Analysis.Holomorphic.NormalFamily` takes closedness and uniqueness hypotheses as
+`Complex.HolomorphicMap` in `ToMathlib.Analysis.Holomorphic.FunctionSpace` carries the compact-open
+structure. `ToMathlib.Analysis.Holomorphic.NormalFamily` takes closedness and uniqueness hypotheses as
 inputs; `ComplexAnalysis.FunctionSpace`, `Montel`, and `Vitali` supply the one-variable
 specializations. Compactness and the stated Vitali theorems require finite-dimensional targets.
 `Complex.SubharmonicOn` is real-valued: it does not admit the value `−∞`.
@@ -60,7 +64,7 @@ family of modules; consult its source files for the individual declarations.
 
 | Development | Main modules | Interface and dependencies |
 | --- | --- | --- |
-| Primitives and branches | `HasPrimitives`, `HasPrimitives/Pullback`, `BranchLog`, `BranchLog/` | Local-to-global primitives use `Topology.LocallyConstantGluing`; logarithms use Mathlib covering-space machinery. Includes normalized logarithms, roots, parameter dependence, and homotopy lifts. |
+| Primitives and branches | `HasPrimitives`, `HasPrimitives/Pullback`, `BranchLog`, `BranchLog/` | Local-to-global primitives use `ToMathlib.Topology.LocallyConstantGluing`; logarithms use Mathlib covering-space machinery. Includes normalized logarithms, roots, parameter dependence, and homotopy lifts. |
 | Contours and Cauchy theory | `CauchyIntegral`, `CauchyFormula`, `CurveIndex`, `CurveIndex/`, `Integral/`, `Cycle`, `Cycle/`, `PolygonIntegral` | Endpoint and deformation identities, winding numbers, and Cauchy theory on simply connected sets and null-homologous cycles. |
 | Local theory and residues | `CauchyDerivatives`, `CauchyEstimates`, `CauchySeries`, `LaurentSeries`, `LaurentSeries/`, `Residue`, `Residue/`, `ResidueAtInfinity`, `EssentialSingularity` | Banach-valued expansions and estimates; isolated singularities, principal parts, and residues, including infinity. |
 | Zeros and convergence | `ArgumentPrinciple`, `Rouche`, `Hurwitz`, `Injective`, `ZeroPersistence`, `LocalMapping`, `LocallyUniform`, `FunctionSpace`, `Montel`, `Vitali` | Divisor counts, local multiplicity, persistence of zeros, derivative convergence, and normal families. |
@@ -73,7 +77,7 @@ family of modules; consult its source files for the individual declarations.
 | Continuation and boundary phenomena | `RemovableSingularity`, `RemovableLine`, `Reflection`, `CircleReflection`, `AnalyticContinuation`, `NaturalBoundary`, `PringsheimVivanti` | Removal and reflection, uniqueness along a fixed path, an explicit natural boundary, and the positive-coefficient boundary singularity theorem. |
 | Further interfaces | `ThreeCircles`, `MobiusGeometry`, `ChordalMetric`, `SphericalDerivative`, `SokhotskiPlemelj`, `PaleyWiener`, `EllipticLiouville`, `EllipticResidue` | The three-circles theorem (via Mathlib's three-lines theorem) and selected geometric, boundary-integral, Fourier-transform, and periodic-function results; scope restrictions below. |
 
-`Analysis.Integral` contains the general pullback and improper-integral endpoint formulas.
+`ToMathlib.Analysis.Integral` contains the general pullback and improper-integral endpoint formulas.
 `ExteriorPath` and `ExteriorPath/Integral` specialize these tools to complex paths escaping to
 infinity. `ParametricIntegral` and `HolomorphicIntegral` handle complex parameter integrals;
 `HalfPlane`, `Pow`, and `RealUniqueness` supply branch geometry and uniqueness tools.

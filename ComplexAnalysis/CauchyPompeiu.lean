@@ -11,7 +11,7 @@ public import Mathlib.Analysis.Complex.RealDeriv
 public import Mathlib.Analysis.SpecialFunctions.Complex.Circle
 public import Mathlib.Analysis.SpecialFunctions.PolarCoord
 public import Mathlib.MeasureTheory.Integral.IntegralEqImproper
-public import Analysis.Integral.CompactSupport
+public import ToMathlib.Analysis.Integral.CompactSupport
 
 /-!
 # The Cauchy–Pompeiu identity

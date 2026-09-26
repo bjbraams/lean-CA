@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Analysis.Holomorphic.FunctionSpace
+public import ToMathlib.Analysis.Holomorphic.FunctionSpace
 public import Mathlib.Analysis.Complex.LocallyUniformLimit
 
 /-!

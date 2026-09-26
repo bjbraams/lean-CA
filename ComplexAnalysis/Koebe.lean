@@ -7,7 +7,7 @@ module
 
 public import ComplexAnalysis.AreaTheorem
 public import ComplexAnalysis.BranchLog
-public import Topology.SimplyConnected
+public import ToMathlib.Topology.SimplyConnected
 
 /-!
 # Bieberbach's coefficient bound and the Koebe one-quarter theorem

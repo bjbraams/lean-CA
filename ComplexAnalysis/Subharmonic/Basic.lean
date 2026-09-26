@@ -10,7 +10,7 @@ public import Mathlib.MeasureTheory.Integral.CircleAverage
 public import Mathlib.Topology.Semicontinuity.Basic
 public import ComplexAnalysis.Integral.Circle
 public import ComplexAnalysis.Subharmonic.Submean
-public import Topology.UpperSemicontinuous
+public import ToMathlib.Topology.UpperSemicontinuous
 
 /-!
 # Subharmonic functions of one complex variable

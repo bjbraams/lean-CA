@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Analysis.Holomorphic.FunctionSpace
+public import ToMathlib.Analysis.Holomorphic.FunctionSpace
 public import Mathlib.Analysis.Complex.Schwarz
 public import Mathlib.Topology.MetricSpace.Equicontinuity
 public import Mathlib.Topology.UniformSpace.Ascoli

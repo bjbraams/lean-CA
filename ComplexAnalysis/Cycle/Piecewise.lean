@@ -6,7 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import ComplexAnalysis.Cycle.Residue
-public import Analysis.Integral.CurveIntegral.SmoothConcat
+public import ToMathlib.Analysis.Integral.CurveIntegral.SmoothConcat
 public import Mathlib.Analysis.Calculus.AddTorsor.AffineMap
 
 /-!

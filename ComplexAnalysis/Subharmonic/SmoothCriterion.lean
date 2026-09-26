@@ -8,7 +8,7 @@ module
 public import Mathlib.Analysis.Calculus.FDeriv.Symmetric
 public import Mathlib.Analysis.InnerProductSpace.Laplacian
 public import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
-public import Analysis.TaylorBounds
+public import ToMathlib.Analysis.TaylorBounds
 public import ComplexAnalysis.Subharmonic.Majorant
 
 /-!
@@ -30,7 +30,7 @@ References: [Fritzsche–Grauert][FritzscheGrauert2002] (2002), Chapter II, Theo
 
 ## Main results
 
-* `ContDiffAt.exists_taylor_bound` (imported from `Analysis.TaylorBounds`):
+* `ContDiffAt.exists_taylor_bound` (imported from `ToMathlib.Analysis.TaylorBounds`):
   **Uniform second-order Taylor bound.** For a `C²` function on a real normed
   space, the second-order Taylor remainder at a point is bounded by `ε ‖h‖ ^ 2` for all small
   increments `h`.

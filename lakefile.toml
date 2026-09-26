@@ -4,10 +4,9 @@ defaultTargets = ["LeanCA"]
 
 [[lean_lib]]
 name = "LeanCA"
-roots = ["Analysis", "Topology", "ComplexAnalysis"]
+roots = ["ToMathlib", "ComplexAnalysis"]
 globs = [
-  "Analysis", "Analysis.+",
-  "Topology", "Topology.+",
+  "ToMathlib", "ToMathlib.+",
   "ComplexAnalysis", "ComplexAnalysis.+",
 ]
 

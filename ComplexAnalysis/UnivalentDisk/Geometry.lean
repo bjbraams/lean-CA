@@ -6,8 +6,8 @@ Authors: Bastiaan J Braams
 module
 
 public import ComplexAnalysis.Injective
-public import Topology.Frontier
-public import Topology.SimplyConnected
+public import ToMathlib.Topology.Frontier
+public import ToMathlib.Topology.SimplyConnected
 public import Mathlib.AlgebraicTopology.FundamentalGroupoid.SimplyConnected
 
 /-!

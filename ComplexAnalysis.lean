@@ -5,8 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Analysis.Integral.CurveIntegral
-public import Analysis.Integral.CurveIntegral.Improper
+public import ToMathlib.Analysis.Integral.CurveIntegral
+public import ToMathlib.Analysis.Integral.CurveIntegral.Improper
 public import ComplexAnalysis.HasPrimitives
 public import ComplexAnalysis.HasPrimitives.Pullback
 public import ComplexAnalysis.BranchLog
@@ -139,7 +139,7 @@ and `Topology` libraries.
   and invariance of the terminal branch value under continuous deformation.
 * `ExteriorPath`, `ExteriorPath.Integral`: compactified paths escaping to infinity,
   their Jacobians, and Banach-valued endpoint formulas for exact exterior integrals.
-* `Analysis.Integral.CurveIntegral`: the general endpoint formulas for exact one-forms,
+* `ToMathlib.Analysis.Integral.CurveIntegral`: the general endpoint formulas for exact one-forms,
   imported by the complex curve-integral theory.
 * `HasPrimitives`: Banach-valued primitives on simply connected open domains, local-to-global
   exactness, normalization, uniqueness, and the global primitive consequence of Morera's theorem.
@@ -278,8 +278,8 @@ and `Topology` libraries.
   chordal-metric distortion factor of a holomorphic function, and its invariance under the
   inversion `w ↦ 1/w`.
 * `EllipticResidue`: the boundary integral of a doubly periodic function, continuous on the
-  boundary, over a period parallelogram vanishes, by cancellation of opposite edges — one is the periodic
-  translate of the other, traversed oppositely. Combined with
+  boundary, over a period parallelogram vanishes, by cancellation of opposite edges — one is
+  the periodic translate of the other, traversed oppositely. Combined with
   `curveIndex_parallelogramLoop_eq_one`/`_eq_zero` (`Cycle.Parallelogram`), this is the
   elementary half of Liouville's second and third theorems for elliptic functions; assembling
   the two into those theorems (via the residue theorem/argument principle for cycles) is not
@@ -302,7 +302,7 @@ simply connected proper planar domain; transporting contours through it is not y
 
 ## References
 
-* `Analysis.Integral.CurveIntegral`: formal background used by this module.
-* `Analysis.Integral.CurveIntegral.Improper`: formal background used by this module.
+* `ToMathlib.Analysis.Integral.CurveIntegral`: formal background used by this module.
+* `ToMathlib.Analysis.Integral.CurveIntegral.Improper`: formal background used by this module.
 * `ComplexAnalysis.HasPrimitives`: formal background used by this module.
 -/

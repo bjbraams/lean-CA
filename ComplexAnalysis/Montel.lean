@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Analysis.Holomorphic.NormalFamily
+public import ToMathlib.Analysis.Holomorphic.NormalFamily
 public import ComplexAnalysis.FunctionSpace
 
 /-!
