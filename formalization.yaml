@@ -56,7 +56,7 @@ sources:
     type: book
     relationship: formalizes
     note: >-
-      Lang: classical one-variable theory, particularly Chapter XIII §3 for finite-order entire 
+      Lang: classical one-variable theory, particularly Chapter XIII §3 for finite-order entire
       functions and Hadamard factorization; see COVERAGE.md for the wider comparison.
   - title: Complex Analysis
     authors:
@@ -299,7 +299,8 @@ fidelity:
 review:
   status: agent-reviewed
   notes: >-
-    Validated on 26 September 2026 with Lean and Mathlib v4.35.0-rc2. The library passes lake build;
+    Validated on 26 September 2026 at commit 0bd13723292f with Lean and Mathlib v4.35.0-rc2.
+    The library passes lake build;
     the submission passes lake build Challenge Solution and lake env lean on each new Lean file. The
     only proof holes are the 45 deliberate Challenge theorem bodies; the library and Solution contain
     none. The metadata passes the v0.4 schema. All 45 solution theorems use only propext, Classical.choice
