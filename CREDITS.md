@@ -99,8 +99,9 @@ His [Zulip announcement][zulip-hadamard] led to a substantial source-level match
   exponential of a polynomial, an origin power, and an intrinsically indexed
   canonical product. This closely matches our `exists_hadamard_factorization`.
   His growth hypothesis bounds `log (1 + ‖f z‖)` by `C * (1 + ‖z‖)^ρ`, with
-  genus and degree bounded by `floor ρ`. Ours uses `HasOrderLE f ρ` and an integer
-  genus `k` with `ρ < k + 1`.
+  genus and degree bounded by `floor ρ`. Ours uses the order condition
+  `HasOrderLE f ρ` (a bound `A * exp (B * ‖z‖ ^ ρ')` for every `ρ' > ρ`) and an
+  integer genus `k` with `ρ < k + 1`.
 - `hadamard_factorization_of_order` also handles the epsilon-family formulation
   of order. Zero-counting and inverse-power summability results overlap with
   [FiniteOrder.lean](ComplexAnalysis/FiniteOrder.lean).

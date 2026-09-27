@@ -25,9 +25,11 @@ coefficients of `φ`:
 * `Complex.cauchyTypeExterior c z = -∑ₙ c_{-(n+1)} z^{-(n+1)}` (`n : ℕ`), agreeing with `Φ(z)` for
   `‖z‖ > R`.
 
-Since `c` is summable at radius `R` itself, both series converge absolutely at any point `t` of
-the circle, giving natural continuations of `Φ` to the boundary from each side; their difference
-recovers the two-sided Laurent series of `φ` there, which is `φ(t)`. This is the jump relation.
+Since `c` is summable at radius `R` itself, both series converge uniformly on the closed disc
+and on the closed exterior respectively, so they are continuous up to the circle. Hence for
+`‖t‖ = R` they are the one-sided boundary limits `Φ₊(t)` and `Φ₋(t)` of `Φ` from inside and
+from outside. Their difference is the two-sided Laurent series of `φ` at `t`, which is `φ(t)`.
+This is the jump relation `Φ₊(t) - Φ₋(t) = φ(t)`.
 
 The proof identifies `c` with the Laurent coefficients of `φ` on the circle
 (`Complex.circleLaurentCoeff_laurentBoundaryValue`, by term-by-term circle integration and the
@@ -40,7 +42,12 @@ each side.
 
 * `Complex.cauchyTypeInterior_eq_circleIntegral`, `Complex.cauchyTypeExterior_eq_circleIntegral`:
   the one-sided power series agree with the Cauchy-type contour integral of `φ`.
-* `Complex.cauchyTypeInterior_sub_cauchyTypeExterior`: **the Sokhotski–Plemelj jump relation**.
+* `Complex.tendsto_cauchyTypeIntegral_interior`, `Complex.tendsto_cauchyTypeIntegral_exterior`:
+  the one-sided series are the boundary limits of the Cauchy-type integral `cauchyTypeIntegral`.
+* `Complex.cauchyTypeInterior_sub_cauchyTypeExterior`: the algebraic jump identity for the
+  one-sided series.
+* `Complex.tendsto_cauchyTypeIntegral_sub`: **the Sokhotski–Plemelj jump relation** for the
+  boundary limits.
 
 ## References
 
@@ -255,14 +262,84 @@ theorem cauchyTypeExterior_eq_circleIntegral {c : ℤ → ℂ} {R : ℝ} (hR : 0
     hsum, hflip]
   ring
 
-/-- **The Sokhotski–Plemelj jump relation.** The natural continuations to the boundary of the
-interior and exterior Cauchy-type integrals — meaningful as such precisely when `c` is
-absolutely summable at radius `R` and `‖t‖ = R`, by `cauchyTypeInterior_eq_circleIntegral` and
-`cauchyTypeExterior_eq_circleIntegral` — differ by the boundary density itself. -/
+/-- **The jump identity for the one-sided series.** At every point, the interior series minus
+the exterior series is the two-sided Laurent series `laurentBoundaryValue c`. This is an
+algebraic identity of the definitions; the analytic content of the Sokhotski–Plemelj relation
+is that these series are the boundary limits of the Cauchy-type integral from each side
+(`tendsto_cauchyTypeIntegral_sub`). -/
 theorem cauchyTypeInterior_sub_cauchyTypeExterior (c : ℤ → ℂ) (t : ℂ) :
     cauchyTypeInterior c t - cauchyTypeExterior c t = laurentBoundaryValue c t := by
   unfold cauchyTypeInterior cauchyTypeExterior laurentBoundaryValue
   ring
+
+/-- **The Cauchy-type integral** `(2πi)⁻¹ ∮_{|w|=R} φ(w) / (w - z) dw` of the boundary density
+`φ = laurentBoundaryValue c` on the circle of radius `R`. -/
+def cauchyTypeIntegral (c : ℤ → ℂ) (R : ℝ) (z : ℂ) : ℂ :=
+  (2 * Real.pi * I : ℂ)⁻¹ * ∮ w in C(0, R), (w - z)⁻¹ * laurentBoundaryValue c w
+
+section BoundaryLimits
+
+variable {c : ℤ → ℂ} {R : ℝ}
+
+/-- The interior series is continuous on the closed disc of radius `R` when `c` is absolutely
+summable at radius `R`. -/
+theorem continuousOn_cauchyTypeInterior (hc : Summable (fun k : ℤ ↦ ‖c k‖ * R ^ k)) :
+    ContinuousOn (cauchyTypeInterior c) (closedBall (0 : ℂ) R) := by
+  refine continuousOn_tsum (fun k ↦ ?_) (summable_norm_nat_of_summable_norm_int hc)
+    fun k z hz ↦ ?_
+  · simp only [zpow_natCast]
+    fun_prop
+  · rw [mem_closedBall_zero_iff] at hz
+    rw [norm_mul, norm_zpow, zpow_natCast, zpow_natCast]
+    gcongr
+
+/-- The exterior series is continuous on the closed exterior `{z | R ≤ ‖z‖}` of the circle of
+radius `R > 0` when `c` is absolutely summable at radius `R`. -/
+theorem continuousOn_cauchyTypeExterior (hR : 0 < R)
+    (hc : Summable (fun k : ℤ ↦ ‖c k‖ * R ^ k)) :
+    ContinuousOn (cauchyTypeExterior c) {z : ℂ | R ≤ ‖z‖} := by
+  refine (continuousOn_tsum (fun k ↦ ?_) (summable_norm_negSucc_of_summable_norm_int hc)
+    fun k z hz ↦ ?_).neg
+  · exact continuousOn_const.mul ((continuousOn_zpow₀ _).mono fun z hz ↦
+      norm_pos_iff.mp (hR.trans_le hz))
+  · rw [mem_ofPred_eq] at hz
+    rw [norm_mul, norm_zpow, zpow_negSucc, zpow_negSucc]
+    gcongr
+
+/-- **Interior boundary limit.** As `z → t` from inside the circle `‖t‖ = R`, the Cauchy-type
+integral of the boundary density tends to the interior series at `t`. -/
+theorem tendsto_cauchyTypeIntegral_interior (hR : 0 < R)
+    (hc : Summable (fun k : ℤ ↦ ‖c k‖ * R ^ k)) {t : ℂ} (ht : ‖t‖ = R) :
+    Tendsto (cauchyTypeIntegral c R) (𝓝[ball 0 R] t) (𝓝 (cauchyTypeInterior c t)) := by
+  have hcont := continuousOn_cauchyTypeInterior hc t (mem_closedBall_zero_iff.mpr ht.le)
+  refine (hcont.tendsto.mono_left (nhdsWithin_mono _ ball_subset_closedBall)).congr' ?_
+  filter_upwards [self_mem_nhdsWithin] with z hz
+  exact cauchyTypeInterior_eq_circleIntegral hR hc (mem_ball_zero_iff.mp hz)
+
+/-- **Exterior boundary limit.** As `z → t` from outside the circle `‖t‖ = R`, the Cauchy-type
+integral of the boundary density tends to the exterior series at `t`. -/
+theorem tendsto_cauchyTypeIntegral_exterior (hR : 0 < R)
+    (hc : Summable (fun k : ℤ ↦ ‖c k‖ * R ^ k)) {t : ℂ} (ht : ‖t‖ = R) :
+    Tendsto (cauchyTypeIntegral c R) (𝓝[{z | R < ‖z‖}] t) (𝓝 (cauchyTypeExterior c t)) := by
+  have hcont := continuousOn_cauchyTypeExterior hR hc t (show R ≤ ‖t‖ from ht.ge)
+  refine (hcont.tendsto.mono_left (nhdsWithin_mono _ fun z (hz : R < ‖z‖) ↦ hz.le)).congr' ?_
+  filter_upwards [self_mem_nhdsWithin] with z hz
+  exact cauchyTypeExterior_eq_circleIntegral hR hc hz
+
+/-- **The Sokhotski–Plemelj jump relation.** For a boundary density `φ = laurentBoundaryValue c`
+with `c` absolutely summable at radius `R`, the Cauchy-type integral `Φ` has boundary limits
+`Φ₊(t)` from inside and `Φ₋(t)` from outside at every point `t` of the circle, and
+`Φ₊(t) - Φ₋(t) = φ(t)`: `Φ(z₁) - Φ(z₂) → φ(t)` as `z₁ → t` from inside and `z₂ → t` from
+outside. -/
+theorem tendsto_cauchyTypeIntegral_sub (hR : 0 < R)
+    (hc : Summable (fun k : ℤ ↦ ‖c k‖ * R ^ k)) {t : ℂ} (ht : ‖t‖ = R) :
+    Tendsto (fun p : ℂ × ℂ ↦ cauchyTypeIntegral c R p.1 - cauchyTypeIntegral c R p.2)
+      (𝓝[ball 0 R] t ×ˢ 𝓝[{z | R < ‖z‖}] t) (𝓝 (laurentBoundaryValue c t)) := by
+  rw [← cauchyTypeInterior_sub_cauchyTypeExterior]
+  exact ((tendsto_cauchyTypeIntegral_interior hR hc ht).comp tendsto_fst).sub
+    ((tendsto_cauchyTypeIntegral_exterior hR hc ht).comp tendsto_snd)
+
+end BoundaryLimits
 
 end Complex
 

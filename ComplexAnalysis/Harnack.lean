@@ -20,7 +20,10 @@ mean value property, they give **Harnack's inequality** for nonnegative harmonic
 ## Main results
 
 * `Complex.circleAverage_poissonKernel`: the kernel has total mass one.
-* `Complex.harnack`: Harnack's inequality on a disc.
+* `Complex.harnack`: Harnack's inequality on a disc, for functions continuous on the closed
+  disc and nonnegative on its boundary circle.
+* `Complex.harnack_of_harmonicOnNhd`: Harnack's inequality for nonnegative harmonic functions on
+  the open disc, without boundary hypotheses.
 
 ## References
 
@@ -109,6 +112,38 @@ theorem harnack (hR : 0 < R) {u : ℂ → ℝ} (hu : HarmonicContOnCl u (ball c 
     refine circleAverage_mono hkint (by fun_prop) fun z hz ↦ ?_
     rw [hR'] at hz
     exact mul_le_mul_of_nonneg_right (poissonKernel_le hz hw) (hpos z hz)
+
+/-- **Harnack's inequality on an open disc.** A nonnegative harmonic function on the open disc
+`ball c R` satisfies `(R - r) / (R + r) * u c ≤ u w ≤ (R + r) / (R - r) * u c` at distance
+`r < R` from the center. No continuity up to the boundary circle is assumed: the inequality
+follows from `harnack` on the smaller closed discs `closedBall c R'`, `r < R' < R`, by letting
+`R'` tend to `R`. -/
+theorem harnack_of_harmonicOnNhd {u : ℂ → ℝ} (hu : InnerProductSpace.HarmonicOnNhd u (ball c R))
+    (hpos : ∀ z ∈ ball c R, 0 ≤ u z) (hw : w ∈ ball c R) :
+    (R - ‖w - c‖) / (R + ‖w - c‖) * u c ≤ u w ∧ u w ≤ (R + ‖w - c‖) / (R - ‖w - c‖) * u c := by
+  set r := ‖w - c‖
+  have hrR : r < R := mem_ball_iff_norm.mp hw
+  have hr0 : 0 ≤ r := norm_nonneg _
+  -- Harnack's inequality on each smaller disc `ball c R'` with `r < R' < R`
+  have hsmall : ∀ R' ∈ Ioo r R,
+      (R' - r) / (R' + r) * u c ≤ u w ∧ u w ≤ (R' + r) / (R' - r) * u c := by
+    rintro R' ⟨hrR', hR'R⟩
+    have hR'0 : 0 < R' := hr0.trans_lt hrR'
+    have hcl : closure (ball c R') ⊆ ball c R := by
+      rw [closure_ball c hR'0.ne']
+      exact closedBall_subset_ball hR'R
+    exact harnack hR'0 (hu.mono hcl).harmonicContOnCl
+      (fun z hz ↦ hpos z (hcl (sphere_subset_closedBall.trans (closure_ball c hR'0.ne').ge hz)))
+      (mem_ball_iff_norm.mpr hrR')
+  have hev : ∀ᶠ R' in 𝓝[<] R, R' ∈ Ioo r R := Ioo_mem_nhdsLT hrR
+  have hid : Tendsto (fun R' : ℝ ↦ R') (𝓝[<] R) (𝓝 R) := nhdsWithin_le_nhds
+  have hRr : R + r ≠ 0 := by linarith
+  have hRr' : R - r ≠ 0 := by linarith
+  constructor
+  · exact le_of_tendsto (((hid.sub_const r).div (hid.add_const r) hRr).mul_const (u c))
+      (hev.mono fun R' hR' ↦ (hsmall R' hR').1)
+  · exact ge_of_tendsto (((hid.add_const r).div (hid.sub_const r) hRr').mul_const (u c))
+      (hev.mono fun R' hR' ↦ (hsmall R' hR').2)
 
 end Complex
 

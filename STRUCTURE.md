@@ -87,9 +87,10 @@ infinity. `ParametricIntegral` and `HolomorphicIntegral` handle complex paramete
 The theorem statements, rather than filenames or older module summaries, determine coverage.
 The following distinctions matter when reusing results or preparing an upstream contribution:
 
-- `HasOrderLE f ρ` means an explicit bound `‖f z‖ ≤ A * exp (B * ‖z‖ ^ ρ)`.
-  It is not defined as the classical infimum of growth exponents. Hadamard factorization
-  assumes this bound with `0 ≤ ρ < k + 1` and gives a polynomial exponent of degree at most `k`.
+- `HasExpRpowBound f ρ` means an explicit bound `‖f z‖ ≤ A * exp (B * ‖z‖ ^ ρ)`, and
+  `HasOrderLE f ρ` means this bound for every exponent `ρ' > ρ`; for continuous `f` the latter
+  is the classical order condition. Hadamard factorization assumes `HasOrderLE f ρ` with
+  `ρ < k + 1` and gives a polynomial exponent of degree at most `k`.
   `exists_hadamard_factorization` constructs a countable zero family, allowing finite and empty
   families; the earlier `hadamard_factorization` takes that family as input.
 - `exists_rieszFactorization` includes zeros at the origin and constructs the remaining zeros
@@ -108,17 +109,18 @@ The following distinctions matter when reusing results or preparing an upstream 
   real axis and circles; the circle theorem uses an inversion-invariant open set avoiding
   `0` and the Cayley pole `−r`.
 - `SokhotskiPlemelj` identifies the interior and exterior Cauchy integrals for absolutely
-  summable Laurent boundary data and proves the series jump identity. It does not state the
-  one-sided boundary limits or a principal-value formula. `PaleyWiener` proves entire
+  summable Laurent boundary data, proves that the series are the one-sided boundary limits,
+  and derives the jump relation for these limits. It does not give a principal-value formula. `PaleyWiener` proves entire
   extension and exponential growth for the transform of integrable compactly supported data,
   without the full `L²` characterization.
 - `ChordalMetric` proves distance formulas and metric axioms for `chordalDist` on `OnePoint ℂ`;
   this is not a meromorphic normal-family API. `SphericalDerivative` supplies inversion
   invariance, not Marty's criterion.
 - `MobiusGeometry` proves cross-ratio invariance and explicit transformations of generalized
-  circle equations. Its assembled `isGenCircle_mobiusMap` has pointwise existential output
-  coefficients and no nondegeneracy conclusion; it should not be advertised as a setwise
-  circle-preservation theorem.
+  circle equations. `isGenCircle_mobiusMap_iff` gives the image parameters through the
+  Hermitian-matrix action, and `exists_isGenCircle_mobiusMap` states that one nondegenerate
+  image circle serves for all points away from the pole. The pole and the point at infinity
+  are not included; there is no `OnePoint ℂ` formulation.
 - `EllipticLiouville` proves constancy of entire doubly periodic functions. `EllipticResidue`
   proves cancellation for periodic functions continuous on the boundary; the meromorphic residue-sum
   and equal-zero/pole-count theorems are not assembled.

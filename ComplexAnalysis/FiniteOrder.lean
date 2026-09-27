@@ -12,24 +12,32 @@ public import Mathlib.Analysis.SpecialFunctions.Log.Base
 /-!
 # Entire functions of finite order
 
-An entire function `f` has order at most `ρ` if `‖f z‖ ≤ A exp (B ‖z‖ ^ ρ)` for some constants
-`A, B ≥ 0`. Jensen's inequality (Mathlib) bounds the number of zeros of `f` in the disc of radius
-`r` by a constant times `r ^ ρ`, and a dyadic shell argument turns this counting bound into the
-summability of `‖a i‖ ^ (-s)` over the zeros `a i` for every `s > ρ`. These are the ingredients
-of Hadamard's factorization theorem.
+A function `f` satisfies the growth bound `HasExpRpowBound f ρ` if
+`‖f z‖ ≤ A exp (B ‖z‖ ^ ρ)` for some constants `A, B ≥ 0`, and it has order at most `ρ`,
+`HasOrderLE f ρ`, if it satisfies this bound for every exponent `ρ' > ρ`. For continuous `f`
+the latter is the classical condition `limsup_{r → ∞} log log M(r) / log r ≤ ρ`, where `M(r)` is
+the maximum of `‖f‖` on the circle of radius `r`. The two notions differ at the endpoint: `z ↦ z`
+has order at most `0`, but does not satisfy the growth bound with exponent `0`.
+
+Jensen's inequality (Mathlib) bounds the number of zeros of `f` in the disc of radius `r` by a
+constant times `r ^ ρ` under the growth bound, and a dyadic shell argument turns this counting
+bound into the summability of `‖a i‖ ^ (-s)` over the zeros `a i` for every `s > ρ`. These are
+the ingredients of Hadamard's factorization theorem.
 
 ## Main definitions
 
-* `Complex.HasOrderLE f ρ`.
+* `Complex.HasExpRpowBound f ρ`: the growth bound `‖f z‖ ≤ A exp (B ‖z‖ ^ ρ)`.
+* `Complex.HasOrderLE f ρ`: `f` has order at most `ρ`.
 
 ## Main results
 
-* `Complex.sum_divisor_le_of_hasOrderLE`: Jensen's zero-counting bound.
+* `Complex.sum_divisor_le_of_forall_norm_le`: Jensen's zero-counting bound.
 * `Complex.ncard_setOf_norm_le_eq_sum_divisor`: the counting function of a family enumerating
   the zeros with multiplicity is the divisor degree.
 * `Complex.summable_norm_rpow_neg_of_ncard_le`: summability of `‖a i‖ ^ (-s)` for `s > ρ`.
-* `Complex.summable_norm_rpow_neg_of_hasOrderLE`: the same for the zeros of a function of order
-  at most `ρ`.
+* `Complex.summable_norm_rpow_neg_of_hasExpRpowBound`,
+  `Complex.summable_norm_rpow_neg_of_hasOrderLE`: the same for the zeros of an entire function
+  satisfying the growth bound, or of order at most `ρ`.
 
 ## References
 
@@ -44,16 +52,22 @@ open scoped Topology
 
 namespace Complex
 
-/-- `f` has order at most `ρ`: `‖f z‖ ≤ A * exp (B * ‖z‖ ^ ρ)` for all `z`, for some constants
-`A, B ≥ 0`. -/
-def HasOrderLE (f : ℂ → ℂ) (ρ : ℝ) : Prop :=
+/-- The growth bound with exponent `ρ`: `‖f z‖ ≤ A * exp (B * ‖z‖ ^ ρ)` for all `z`, for some
+constants `A, B ≥ 0`. This is stronger than `HasOrderLE f ρ`. -/
+def HasExpRpowBound (f : ℂ → ℂ) (ρ : ℝ) : Prop :=
   ∃ A B : ℝ, 0 ≤ A ∧ 0 ≤ B ∧ ∀ z, ‖f z‖ ≤ A * Real.exp (B * ‖z‖ ^ ρ)
+
+/-- `f` has order at most `ρ`: it satisfies the growth bound `HasExpRpowBound f ρ'` for every
+exponent `ρ' > ρ`. For continuous `f` this is the classical condition
+`limsup_{r → ∞} log log M(r) / log r ≤ ρ` on the maximum modulus `M(r)`. -/
+def HasOrderLE (f : ℂ → ℂ) (ρ : ℝ) : Prop :=
+  ∀ ρ', ρ < ρ' → HasExpRpowBound f ρ'
 
 variable {f : ℂ → ℂ} {ρ : ℝ}
 
-/-- The order bound is monotone in the exponent. -/
-theorem HasOrderLE.mono (h : HasOrderLE f ρ) {ρ' : ℝ} (hρ : 0 ≤ ρ) (hρρ' : ρ ≤ ρ') :
-    HasOrderLE f ρ' := by
+/-- The growth bound is monotone in the exponent. -/
+theorem HasExpRpowBound.mono (h : HasExpRpowBound f ρ) {ρ' : ℝ} (hρ : 0 ≤ ρ) (hρρ' : ρ ≤ ρ') :
+    HasExpRpowBound f ρ' := by
   obtain ⟨A, B, hA, hB, h⟩ := h
   refine ⟨A * Real.exp B, B, by positivity, hB, fun z ↦ ?_⟩
   have h1 : ‖z‖ ^ ρ ≤ 1 + ‖z‖ ^ ρ' := by
@@ -67,13 +81,29 @@ theorem HasOrderLE.mono (h : HasOrderLE f ρ) {ρ' : ℝ} (hρ : 0 ≤ ρ) (hρ�
     _ = A * Real.exp B * Real.exp (B * ‖z‖ ^ ρ') := by
         rw [mul_add, mul_one, Real.exp_add, mul_assoc]
 
+/-- A growth bound with a nonnegative exponent `ρ` implies order at most `ρ`. -/
+theorem HasExpRpowBound.hasOrderLE (h : HasExpRpowBound f ρ) (hρ : 0 ≤ ρ) : HasOrderLE f ρ :=
+  fun _ hρρ' ↦ h.mono hρ hρρ'.le
+
+/-- The order bound is monotone in the exponent. -/
+theorem HasOrderLE.mono (h : HasOrderLE f ρ) {ρ' : ℝ} (hρρ' : ρ ≤ ρ') : HasOrderLE f ρ' :=
+  fun ρ'' hρ'' ↦ h ρ'' (hρρ'.trans_lt hρ'')
+
+/-- A function of order at most `ρ` satisfies a growth bound with some nonnegative exponent
+strictly between `ρ` and any given `s > max ρ 0`. -/
+theorem HasOrderLE.exists_hasExpRpowBound (h : HasOrderLE f ρ) {s : ℝ} (hs : ρ < s)
+    (hs0 : 0 < s) : ∃ ρ', 0 ≤ ρ' ∧ ρ < ρ' ∧ ρ' < s ∧ HasExpRpowBound f ρ' := by
+  have hρ' : ρ < (max ρ 0 + s) / 2 := by linarith [le_max_left ρ 0, max_lt hs hs0]
+  exact ⟨(max ρ 0 + s) / 2, by linarith [le_max_right ρ 0], hρ',
+    by linarith [max_lt hs hs0], h _ hρ'⟩
+
 /-- **Jensen's zero-counting bound.** For an entire function with `f 0 ≠ 0` and
 `‖f z‖ ≤ A exp (B ‖z‖ ^ ρ)`, the divisor degree on the disc of radius `r` is at most
 `(log (max 1 (A exp (B (2r) ^ ρ))) - log ‖f 0‖) / log 2`.
 
 A counterpart under a related growth hypothesis appears in Matteo Cipollina's Hadamard
 development. See `CREDITS.md`. -/
-theorem sum_divisor_le_of_hasOrderLE (hf : Differentiable ℂ f) (h0 : f 0 ≠ 0) {A B : ℝ}
+theorem sum_divisor_le_of_forall_norm_le (hf : Differentiable ℂ f) (h0 : f 0 ≠ 0) {A B : ℝ}
     (hbound : ∀ z, ‖f z‖ ≤ A * Real.exp (B * ‖z‖ ^ ρ)) {r : ℝ} (hr : 0 < r) :
     ((∑ᶠ u, MeromorphicOn.divisor f (closedBall 0 r) u : ℤ) : ℝ) ≤
       (Real.log (max 1 (A * Real.exp (B * (2 * r) ^ ρ))) - Real.log ‖f 0‖) / Real.log 2 := by
@@ -238,14 +268,14 @@ theorem summable_norm_rpow_neg_of_ncard_le
       _ = C * 2 ^ ρ / (1 - q) := by
           rw [tsum_mul_left, tsum_geometric_of_lt_one hq0.le hq1, div_eq_mul_inv]
 
-/-- **Summability of the inverse powers of the zeros.** If `f` is entire with `f 0 ≠ 0` and of
-order at most `ρ`, and `a` enumerates its zeros with multiplicity, then `∑ ‖a i‖ ^ (-s)`
+/-- **Summability of the inverse powers of the zeros.** If `f` is entire with `f 0 ≠ 0` and
+satisfies the growth bound `‖f z‖ ≤ A exp (B ‖z‖ ^ ρ)`, and `a` enumerates its zeros with multiplicity, then `∑ ‖a i‖ ^ (-s)`
 converges for every `s > ρ`.
 
 A counterpart under a related growth hypothesis appears in Matteo Cipollina's Hadamard
 development. See `CREDITS.md`. -/
-theorem summable_norm_rpow_neg_of_hasOrderLE (hf : Differentiable ℂ f) (h0 : f 0 ≠ 0)
-    (hρ : 0 ≤ ρ) (hord : HasOrderLE f ρ)
+theorem summable_norm_rpow_neg_of_hasExpRpowBound (hf : Differentiable ℂ f) (h0 : f 0 ≠ 0)
+    (hρ : 0 ≤ ρ) (hord : HasExpRpowBound f ρ)
     (hlim : Tendsto (fun i ↦ ‖a i‖) cofinite atTop)
     (hzero : ∀ w, analyticOrderAt f w =
       ((finite_setOf_eq_of_tendsto_cofinite hlim w).toFinset.card : ℕ∞))
@@ -259,7 +289,7 @@ theorem summable_norm_rpow_neg_of_hasOrderLE (hf : Differentiable ℂ f) (h0 : f
     positivity
   refine summable_norm_rpow_neg_of_ncard_le hlim hρ hC (fun r hr ↦ ?_) hs
   have hr0 : 0 < r := by linarith
-  have h1 := sum_divisor_le_of_hasOrderLE hf h0 hbound hr0
+  have h1 := sum_divisor_le_of_forall_norm_le hf h0 hbound hr0
   rw [← ncard_setOf_norm_le_eq_sum_divisor hf hlim hzero r] at h1
   push_cast at h1
   -- estimate the numerator
@@ -300,6 +330,18 @@ theorem summable_norm_rpow_neg_of_hasOrderLE (hf : Differentiable ℂ f) (h0 : f
     _ ≤ (Real.log (max 1 A) + |Real.log ‖f 0‖| + B * 2 ^ ρ) * r ^ ρ / Real.log 2 :=
         div_le_div_of_nonneg_right hnum hlog2.le
     _ = C * r ^ ρ := by rw [hC_def]; ring
+
+/-- **Summability of the inverse powers of the zeros, order form.** If `f` is entire with
+`f 0 ≠ 0` and of order at most `ρ`, and `a` enumerates its zeros with multiplicity, then
+`∑ ‖a i‖ ^ (-s)` converges for every `s > ρ`. -/
+theorem summable_norm_rpow_neg_of_hasOrderLE (hf : Differentiable ℂ f) (h0 : f 0 ≠ 0)
+    (hρ : 0 ≤ ρ) (hord : HasOrderLE f ρ)
+    (hlim : Tendsto (fun i ↦ ‖a i‖) cofinite atTop)
+    (hzero : ∀ w, analyticOrderAt f w =
+      ((finite_setOf_eq_of_tendsto_cofinite hlim w).toFinset.card : ℕ∞))
+    {s : ℝ} (hs : ρ < s) : Summable fun i ↦ ‖a i‖ ^ (-s) := by
+  obtain ⟨ρ', hρ'0, -, hρ's, hbound⟩ := hord.exists_hasExpRpowBound hs (hρ.trans_lt hs)
+  exact summable_norm_rpow_neg_of_hasExpRpowBound hf h0 hρ'0 hbound hlim hzero hρ's
 
 end Complex
 

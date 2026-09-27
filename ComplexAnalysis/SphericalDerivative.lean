@@ -12,12 +12,15 @@ public import ComplexAnalysis.ChordalMetric
 # The spherical derivative
 
 The spherical derivative `f#(z) = |f'(z)| / (1 + |f(z)|²)` of a holomorphic function measures
-the local distortion of the chordal metric (`ChordalMetric.lean`) under `f`: it is the
-infinitesimal ratio of chordal length in the target to Euclidean length in the source,
-`f#(z) = lim_{w → z} chordalDist (f w) (f z) / ‖w - z‖` (this limit characterization is not
-proved here). Unlike the ordinary derivative, the spherical derivative is unchanged under
-post-composition with the inversion `w ↦ 1/w`, reflecting that inversion is a chordal isometry
-of the sphere — this is the one structural property proved in this file.
+the local distortion of the chordal metric (`ChordalMetric.lean`) under `f`. Since the chordal
+distance there is normalized as `2 ‖z - w‖ / (√(1 + ‖z‖²) √(1 + ‖w‖²))` (the sphere has unit
+radius), the infinitesimal ratio of chordal length in the target to Euclidean length in the
+source is `2 f#(z) = lim_{w → z} chordalDist (f w) (f z) / ‖w - z‖` (this limit
+characterization is not proved here). Some authors include the factor `2` in the definition of
+the spherical derivative, so that it equals this limit; it is omitted here. Unlike the ordinary
+derivative, the spherical derivative is unchanged under post-composition with the inversion
+`w ↦ 1/w`, reflecting that inversion is a chordal isometry of the sphere — this is the one
+structural property proved in this file.
 
 ## Main definitions
 
@@ -39,8 +42,8 @@ public noncomputable section
 
 namespace Complex
 
-/-- **The spherical derivative.** The local distortion factor of the chordal metric under a
-holomorphic function `f` at `z`. -/
+/-- **The spherical derivative.** Half the local distortion factor of the chordal metric
+`chordalDist` under a holomorphic function `f` at `z`. -/
 def sphericalDeriv (f : ℂ → ℂ) (z : ℂ) : ℝ := ‖deriv f z‖ / (1 + ‖f z‖ ^ 2)
 
 /-- The spherical derivative is nonnegative. -/

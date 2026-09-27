@@ -381,8 +381,8 @@ theorem weierstrass_factorization :
   rw [← Set.ncard_eq_toFinset_card _ (Complex.finite_setOf_eq_of_tendsto hlim w)]
   exact hzero w
 
-/-- 26. Hadamard factorization under an explicit growth bound, with polynomial degree at most the
-genus.
+/-- 26. Hadamard factorization for entire functions of order at most `ρ`, with polynomial degree
+at most the genus.
 Related factorization theorem: Matteo Cipollina (PrimeNumberTheoremAnd fork). See CREDITS.md.
 Library: `Complex.exists_hadamard_factorization`. -/
 theorem hadamard :
@@ -390,7 +390,6 @@ theorem hadamard :
     Differentiable ℂ f →
     (∃ (z : ℂ), f z ≠ 0) →
     ∀ {ρ : ℝ},
-    0 ≤ ρ →
     Complex.HasOrderLE f ρ →
     ∀ {k : ℕ},
     ρ < ↑k + 1 →

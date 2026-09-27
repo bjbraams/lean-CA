@@ -35,7 +35,7 @@ is then recovered as a theorem about this definition.
   `Complex.chordalDist_eq_zero_iff`: the chordal distance is a genuine metric.
 * `Complex.chordalDist_coe_coe`, `Complex.chordalDist_coe_infty`: the classical closed-form
   formula.
-* `Complex.chordalDist_lt_two`: the chordal distance is bounded by the diameter of the sphere.
+* `Complex.chordalDist_le_two`: the chordal distance is bounded by the diameter of the sphere.
 
 ## References
 

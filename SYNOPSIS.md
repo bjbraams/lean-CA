@@ -58,8 +58,9 @@ $f(a)$ in a sufficiently small disc.
 ## Convergence, approximation, and prescribed singularities
 
 The library constructs complete spaces of holomorphic functions with the topology of uniform
-convergence on compact subsets and proves convergence of all iterated derivatives under
-locally uniform convergence. Montel's theorem gives compactness and convergent subsequences
+convergence on compact subsets and proves locally uniform convergence of all iterated
+derivatives, for Banach-valued functions and along arbitrary filters, under locally uniform
+convergence. Montel's theorem gives compactness and convergent subsequences
 for families bounded on each compact subset. Vitali's theorem gives convergence throughout a
 connected domain from such bounds and pointwise convergence on a set with an interior
 accumulation point.
@@ -83,13 +84,15 @@ products. Weierstrass products realize prescribed nonzero zeros tending to infin
 entire function with those zeros and multiplicities and nonzero value at the origin factors
 as the product times the exponential of an entire function.
 
-The finite-order development uses an explicit growth hypothesis
+The finite-order development uses the explicit growth bound
 
 $$
-|f(z)|\le A\exp(B|z|^\rho),\qquad A,B\ge0.
+|f(z)|\le A\exp(B|z|^{\rho'}),\qquad A,B\ge0,
 $$
 
-For a nonzero entire $f$ satisfying this bound with $0\le\rho<k+1$, Hadamard factorization
+and says that $f$ has order at most $\rho$ when this bound holds for every $\rho'>\rho$; for
+continuous $f$ this is the classical condition $\limsup_{r\to\infty}\log\log M(r)/\log r\le\rho$.
+For a nonzero entire $f$ of order at most $\rho<k+1$, Hadamard factorization
 constructs its nonzero zeros $a_j$, counted with multiplicity, an integer $m\ge0$, and a
 polynomial $P$ of degree at most $k$, such that
 
@@ -137,8 +140,8 @@ theorem nor boundary extension of Riemann maps to arbitrary Jordan boundaries is
 ## Harmonic functions and boundary behavior
 
 The Poisson integral solves the Dirichlet problem on a disc for continuous boundary data,
-with uniqueness. Harnack's inequality, harmonicity of locally uniform limits, and Harnack's
-monotone convergence principle are proved. Subharmonic functions here are finite real-valued
+with uniqueness. Harnack's inequality (for nonnegative harmonic functions on an open disc),
+harmonicity of locally uniform limits, and Harnack's monotone convergence principle are proved. Subharmonic functions here are finite real-valued
 upper semicontinuous functions satisfying a local submean inequality. The theory includes
 maximum principles, the submean inequality on all contained closed discs for continuous
 subharmonic functions, holomorphic examples, and the $C^2$ criterion $\Delta u\ge0$.
@@ -160,13 +163,15 @@ nonnegative-coefficient power series forces convergence at a larger positive rea
 
 ## Selected further results and limits of scope
 
-There are cross-ratio identities for Möbius maps, chordal-distance formulas on the extended
-plane, and inversion invariance of the spherical derivative. These do not yet supply a
-normal-family theory for meromorphic maps or Marty's criterion.
+There are cross-ratio identities and preservation of generalized circles for Möbius maps,
+chordal-distance formulas on the extended plane, and inversion invariance of the spherical
+derivative. These do not yet supply a normal-family theory for meromorphic maps or Marty's
+criterion.
 
 The circle Sokhotski–Plemelj result identifies the interior and exterior Cauchy integrals with
-their series for absolutely summable Laurent boundary data and proves the jump identity for
-those series values. Explicit one-sided limit and principal-value statements remain absent.
+their series for absolutely summable Laurent boundary data, shows that these series are the
+one-sided boundary limits of the Cauchy integral, and proves the jump relation
+$\Phi_+(t)-\Phi_-(t)=\varphi(t)$ for these limits. Principal-value statements remain absent.
 The Paley–Wiener development gives entire extension and an exponential-type bound for the
 Fourier-type transform of integrable data supported in a bounded interval; it does not prove
 the full $L^2$ characterization.
@@ -207,5 +212,6 @@ content of the statements, not identity of proof or complete chapter coverage.
 For Lang XII in particular, Jensen, Borel–Carathéodory, and Phragmén–Lindelöf are Mathlib
 inputs; the project adds the three-circles theorem above. Picard–Borel, the Hermite
 interpolation formula, and the arithmetic applications are not supplied by this project.
-For XIII §3, the explicit growth-bound formulation of Hadamard factorization should be
-compared with Lang's distinction between order and strict order.
+For XIII §3, Hadamard factorization is stated for order at most $\rho$ in the classical sense;
+the explicit growth bound at the exponent itself (`HasExpRpowBound`, with a constant $B$ in the
+exponent) is close to Lang's strict order.

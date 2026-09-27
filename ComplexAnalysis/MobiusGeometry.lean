@@ -17,24 +17,33 @@ Möbius transformation, by direct algebra on the individual differences `M zᵢ 
 
 A **generalized circle** (an ordinary circle, or, in the limit of infinite radius, a line) is
 the zero set of `A |z|² + 2 Re(conj B z) + C` for real `A`, `C` and complex `B` (the case `A = 0`
-gives a line; `A ≠ 0` with `‖B‖² > A C` gives a genuine circle). Every Möbius transformation
-sends generalized circles to generalized circles: this is proved by decomposing an arbitrary
-Möbius map into translations, scalings/rotations, and the inversion `z ↦ 1 / z`, each of which
-is checked directly to preserve the defining quadratic equation.
+gives a line when `B ≠ 0`; `A ≠ 0` with `‖B‖² > A C` gives a genuine circle). The parameters are
+nondegenerate when `A C < ‖B‖²`. Every Möbius transformation sends generalized circles to
+generalized circles: writing the equation as the Hermitian form of `H = [[A, B], [conj B, C]]`
+on `(z, 1)`, the image circle has matrix `Nᴴ H N`, where `N = [[d, -b], [-c, a]]` is the adjugate
+of the matrix of the transformation. This gives explicit image parameters, independent of the
+point, and the discriminant is multiplied by `‖a d - b c‖²`, so nondegeneracy is preserved.
+Translations, scalings/rotations, and the inversion `z ↦ 1 / z` are also treated separately.
 
-Symmetric points with respect to a generalized circle are not treated here.
+Two points are symmetric with respect to the generalized circle through three given points when
+their cross ratios with those points are complex conjugates; Möbius transformations preserve
+this relation.
 
 ## Main definitions
 
 * `Complex.mobiusMap a b c d z`: the Möbius transformation `(a z + b) / (c z + d)`.
 * `Complex.crossRatio z₁ z₂ z₃ z₄`: the cross ratio of four points.
 * `Complex.IsGenCircle A B C z`: `z` lies on the generalized circle with parameters `A, B, C`.
+* `Complex.IsSymmetricWrt z star z₁ z₂ z₃`: `z` and `star` are symmetric with respect to the
+  generalized circle through `z₁, z₂, z₃`.
 
 ## Main results
 
 * `Complex.crossRatio_mobiusMap`: **invariance of the cross ratio** under Möbius transformations.
-* `Complex.isGenCircle_mobiusMap`: **Möbius transformations send generalized circles to
-  generalized circles**.
+* `Complex.isGenCircle_mobiusMap_iff`: explicit parameters of the image of a generalized circle.
+* `Complex.exists_isGenCircle_mobiusMap`: **Möbius transformations send nondegenerate generalized
+  circles to nondegenerate generalized circles**.
+* `Complex.isSymmetricWrt_mobiusMap`: Möbius transformations preserve symmetric points.
 
 ## References
 
@@ -84,8 +93,10 @@ theorem crossRatio_mobiusMap {a b c d : ℂ} (had : a * d - b * c ≠ 0) {z₁ z
 /-! ### Generalized circles -/
 
 /-- `z` lies on the generalized circle (circle or line) with parameters `A, B, C`:
-`A ‖z‖ ^ 2 + 2 Re (conj B * z) + C = 0`. `A = 0` gives a line; `A ≠ 0` with `‖B‖ ^ 2 > A * C`
-gives a genuine circle. -/
+`A ‖z‖ ^ 2 + 2 Re (conj B * z) + C = 0`. The parameters are nondegenerate when
+`A * C < normSq B`; then `A = 0` (forcing `B ≠ 0`) gives a line and `A ≠ 0` gives a circle of
+positive radius. No nondegeneracy is imposed by this predicate; for instance `A = B = C = 0`
+gives all of `ℂ`. -/
 def IsGenCircle (A : ℝ) (B : ℂ) (C : ℝ) (z : ℂ) : Prop :=
   A * normSq z + 2 * (conj B * z).re + C = 0
 
@@ -141,42 +152,65 @@ theorem mobiusMap_eq_of_ne_zero {a b c d z : ℂ} (hc : c ≠ 0) (hz : c * z + d
   ring
 
 
-/-- **Möbius transformations send generalized circles to generalized circles.** -/
-theorem isGenCircle_mobiusMap {a b c d : ℂ} (had : a * d - b * c ≠ 0) {A : ℝ} {B : ℂ} {C : ℝ}
-    {z : ℂ} (hz : c * z + d ≠ 0) (h : IsGenCircle A B C z) :
-    ∃ (A' : ℝ) (B' : ℂ) (C' : ℝ), IsGenCircle A' B' C' (mobiusMap a b c d z) := by
-  rcases eq_or_ne c 0 with hc | hc
-  · -- the affine case: `mobiusMap a b 0 d z = (a / d) * z + (b / d)`
-    have hd : d ≠ 0 := by rintro rfl; simp [hc] at had
-    have heq : mobiusMap a b c d z = (a / d) * z + (b / d) := by
-      unfold mobiusMap
-      rw [hc, zero_mul, zero_add]
-      field_simp
-    rw [heq]
-    have had0 : a / d ≠ 0 := by
-      have ha0 : a ≠ 0 := by rintro rfl; simp [hc] at had
-      exact div_ne_zero ha0 hd
-    exact ⟨_, _, _, isGenCircle_add_const _ (B / conj (a / d)) C (b / d)
-      (isGenCircle_const_mul A B C had0 h)⟩
-  · -- the genuine Möbius case: translate, invert, scale, translate
-    rw [mobiusMap_eq_of_ne_zero hc hz]
-    have h1 : z + d / c ≠ 0 := by
-      intro h0
-      apply hz
-      have h2 : c * (z + d / c) = 0 := by rw [h0]; ring
-      rwa [mul_add, mul_div_cancel₀ d hc] at h2
-    have step1 := isGenCircle_add_const A B C (d / c) h
-    have step2 := isGenCircle_inv h1 step1
-    have hne0 : -(a * d - b * c) / c ^ 2 ≠ 0 := by
-      simp only [ne_eq, div_eq_zero_iff, neg_eq_zero]
-      push Not
-      exact ⟨had, pow_ne_zero 2 hc⟩
-    have step3 := isGenCircle_const_mul _ _ _ hne0 step2
-    have step4 := isGenCircle_add_const _ _ _ (a / c) step3
-    have hpt : -(a * d - b * c) / c ^ 2 * (z + d / c)⁻¹ + a / c =
-        a / c - (a * d - b * c) / c ^ 2 * (z + d / c)⁻¹ := by ring
-    rw [hpt] at step4
-    exact ⟨_, _, _, step4⟩
+/-- **Explicit image of a generalized circle under a Möbius transformation.** Away from the
+pole, `z` lies on the generalized circle with parameters `A, B, C` if and only if
+`mobiusMap a b c d z` lies on the generalized circle whose parameters are the entries of the
+Hermitian matrix `Nᴴ H N`, where `H = [[A, B], [conj B, C]]` and `N = [[d, -b], [-c, a]]` is the
+adjugate of the matrix of the transformation. The underlying identity multiplies the defining
+expression of the image circle at `mobiusMap a b c d z` by `normSq (c * z + d)` to obtain
+`normSq (a * d - b * c)` times the defining expression of the original circle at `z`. -/
+theorem isGenCircle_mobiusMap_iff {a b c d : ℂ} (had : a * d - b * c ≠ 0) {A : ℝ} {B : ℂ}
+    {C : ℝ} {z : ℂ} (hz : c * z + d ≠ 0) :
+    IsGenCircle (A * normSq d - 2 * (B * conj d * c).re + C * normSq c)
+        (B * a * conj d - A * b * conj d + conj B * b * conj c - C * a * conj c)
+        (A * normSq b - 2 * (B * a * conj b).re + C * normSq a) (mobiusMap a b c d z) ↔
+      IsGenCircle A B C z := by
+  have key : ((A * normSq d - 2 * (B * conj d * c).re + C * normSq c) *
+        normSq (mobiusMap a b c d z) +
+      2 * (conj (B * a * conj d - A * b * conj d + conj B * b * conj c - C * a * conj c) *
+        mobiusMap a b c d z).re +
+      (A * normSq b - 2 * (B * a * conj b).re + C * normSq a)) * normSq (c * z + d) =
+      normSq (a * d - b * c) * (A * normSq z + 2 * (conj B * z).re + C) := by
+    apply ofReal_injective
+    have hz' : conj c * conj z + conj d ≠ 0 := by
+      rw [← map_mul, ← map_add]; exact (map_ne_zero _).mpr hz
+    push_cast
+    simp only [re_eq_add_conj, ← mul_conj]
+    simp only [mobiusMap, map_mul, map_sub, map_add, map_div₀, conj_conj, conj_ofReal]
+    field_simp
+    ring
+  have hq : normSq (c * z + d) ≠ 0 := normSq_eq_zero.not.mpr hz
+  have hΔ : normSq (a * d - b * c) ≠ 0 := normSq_eq_zero.not.mpr had
+  unfold IsGenCircle
+  constructor
+  · intro h
+    rw [h, zero_mul] at key
+    exact (mul_eq_zero.mp key.symm).resolve_left hΔ
+  · intro h
+    rw [h, mul_zero] at key
+    exact (mul_eq_zero.mp key).resolve_right hq
+
+/-- **Möbius transformations send generalized circles to generalized circles.** For a
+nondegenerate generalized circle (`A * C < normSq B`) and a Möbius transformation, there is a
+single nondegenerate generalized circle such that every point `z` away from the pole lies on the
+original circle if and only if `mobiusMap a b c d z` lies on the new one. -/
+theorem exists_isGenCircle_mobiusMap {a b c d : ℂ} (had : a * d - b * c ≠ 0) {A : ℝ} {B : ℂ}
+    {C : ℝ} (hABC : A * C < normSq B) :
+    ∃ (A' : ℝ) (B' : ℂ) (C' : ℝ), A' * C' < normSq B' ∧
+      ∀ z, c * z + d ≠ 0 → (IsGenCircle A' B' C' (mobiusMap a b c d z) ↔ IsGenCircle A B C z) := by
+  refine ⟨_, _, _, ?_, fun z hz ↦ isGenCircle_mobiusMap_iff had hz⟩
+  have hdisc : (A * normSq d - 2 * (B * conj d * c).re + C * normSq c) *
+      (A * normSq b - 2 * (B * a * conj b).re + C * normSq a) -
+      normSq (B * a * conj d - A * b * conj d + conj B * b * conj c - C * a * conj c) =
+      normSq (a * d - b * c) * (A * C - normSq B) := by
+    apply ofReal_injective
+    push_cast
+    simp only [re_eq_add_conj, ← mul_conj, map_mul, map_sub, map_add, conj_conj, conj_ofReal]
+    ring
+  have hΔ : 0 < normSq (a * d - b * c) := normSq_pos.mpr had
+  have : normSq (a * d - b * c) * (A * C - normSq B) < 0 :=
+    mul_neg_of_pos_of_neg hΔ (sub_neg.mpr hABC)
+  linarith
 
 
 /-! ### Symmetric points -/

@@ -59,9 +59,10 @@ theorem exists_differentiable_eq_pow_mul {f : ℂ → ℂ} (hf : Differentiable 
   exact ⟨g, fun z ↦ (hg z (mem_univ z)).differentiableAt, hg0,
     fun z ↦ by simpa using hfg z (mem_univ z)⟩
 
-/-- Dividing by `z ^ m` does not increase the order. -/
-theorem HasOrderLE.of_pow_mul {f g : ℂ → ℂ} {m : ℕ} (hg : Differentiable ℂ g)
-    (hfg : ∀ z, f z = z ^ m * g z) {ρ : ℝ} (h : HasOrderLE f ρ) : HasOrderLE g ρ := by
+/-- Dividing by `z ^ m` preserves the growth bound. -/
+theorem HasExpRpowBound.of_pow_mul {f g : ℂ → ℂ} {m : ℕ} (hg : Differentiable ℂ g)
+    (hfg : ∀ z, f z = z ^ m * g z) {ρ : ℝ} (h : HasExpRpowBound f ρ) :
+    HasExpRpowBound g ρ := by
   obtain ⟨A, B, hA, hB, hbound⟩ := h
   obtain ⟨M₀, hM₀⟩ := (isCompact_closedBall (0 : ℂ) 1).exists_bound_of_continuousOn
     hg.continuous.continuousOn
@@ -82,6 +83,11 @@ theorem HasOrderLE.of_pow_mul {f g : ℂ → ℂ} {m : ℕ} (hg : Differentiable
       _ ≤ A * Real.exp (B * ‖z‖ ^ ρ) := hbound z
       _ ≤ max A M₀ * Real.exp (B * ‖z‖ ^ ρ) :=
           mul_le_mul_of_nonneg_right (le_max_left _ _) (Real.exp_pos _).le
+
+/-- Dividing by `z ^ m` does not increase the order. -/
+theorem HasOrderLE.of_pow_mul {f g : ℂ → ℂ} {m : ℕ} (hg : Differentiable ℂ g)
+    (hfg : ∀ z, f z = z ^ m * g z) {ρ : ℝ} (h : HasOrderLE f ρ) : HasOrderLE g ρ :=
+  fun ρ' hρ' ↦ (h ρ' hρ').of_pow_mul hg hfg
 
 /-- An entire function whose real part has subdegree polynomial bounds on arbitrarily
 large balls is a polynomial of bounded degree. -/
@@ -211,7 +217,7 @@ with a zero of order `m` at the origin, and let `a i` list its nonzero zeros wit
 
 Related factorization theorems are formalized in Matteo Cipollina's Hadamard development. See
 `CREDITS.md`. -/
-theorem hadamard_factorization {f : ℂ → ℂ} (hf : Differentiable ℂ f) {ρ : ℝ} (hρ0 : 0 ≤ ρ)
+theorem hadamard_factorization {f : ℂ → ℂ} (hf : Differentiable ℂ f) {ρ : ℝ}
     (hord : HasOrderLE f ρ) {k : ℕ} (hk : ρ < k + 1) {ι : Type*} {a : ι → ℂ}
     (ha : ∀ i, a i ≠ 0) (hlim : Tendsto (fun i ↦ ‖a i‖) cofinite atTop) {m : ℕ}
     (hm : analyticOrderAt f 0 = m)
@@ -220,9 +226,11 @@ theorem hadamard_factorization {f : ℂ → ℂ} (hf : Differentiable ℂ f) {ρ
     (Summable fun i ↦ ‖a i‖⁻¹ ^ (k + 1)) ∧ ∃ P : Polynomial ℂ, P.natDegree ≤ k ∧
       ∀ z, f z = exp (P.eval z) * z ^ m * canonicalProduct k a z := by
   classical
+  -- replace `ρ` by a nonnegative exponent below `k + 1` at which `f` satisfies a growth bound
+  obtain ⟨ρ, hρ0, -, hk, hord⟩ := hord.exists_hasExpRpowBound hk (by positivity)
   -- remove the zero at the origin
   obtain ⟨g, hg, hg0, hfg⟩ := exists_differentiable_eq_pow_mul hf hm
-  have hordg : HasOrderLE g ρ := HasOrderLE.of_pow_mul hg hfg hord
+  have hordg : HasExpRpowBound g ρ := hord.of_pow_mul hg hfg
   have hzerog : ∀ w, analyticOrderAt g w =
       ((finite_setOf_eq_of_tendsto_cofinite hlim w).toFinset.card : ℕ∞) := by
     intro w
@@ -249,7 +257,7 @@ theorem hadamard_factorization {f : ℂ → ℂ} (hf : Differentiable ℂ f) {ρ
   have hρρ' : ρ < ρ' := by linarith [le_max_left ρ 0]
   have hρ's : ρ' < s := by linarith [max_lt hρs hs0]
   have hsum' : Summable fun i ↦ ‖a i‖ ^ (-ρ') :=
-    summable_norm_rpow_neg_of_hasOrderLE hg hg0 hρ0 hordg hlim hzerog hρρ'
+    summable_norm_rpow_neg_of_hasExpRpowBound hg hg0 hρ0 hordg hlim hzerog hρρ'
   have hs1 : Summable fun i ↦ ‖a i‖⁻¹ ^ (k + 1) :=
     summable_inv_pow_of_summable_rpow hlim (by linarith) hsum'
   refine ⟨hs1, ?_⟩
@@ -282,7 +290,7 @@ most `k`, where `a` lists the nonzero zeros with multiplicity over a countable i
 Related factorization theorems are formalized in Matteo Cipollina's Hadamard development. See
 `CREDITS.md`. -/
 theorem exists_hadamard_factorization (hf : Differentiable ℂ f) (hne : ∃ z, f z ≠ 0) {ρ : ℝ}
-    (hρ0 : 0 ≤ ρ) (hord : HasOrderLE f ρ) {k : ℕ} (hk : ρ < k + 1) :
+    (hord : HasOrderLE f ρ) {k : ℕ} (hk : ρ < k + 1) :
     ∃ (ι : Type) (_ : Countable ι) (a : ι → ℂ) (m : ℕ) (P : Polynomial ℂ),
       (∀ i, a i ≠ 0) ∧ Tendsto (fun i ↦ ‖a i‖) cofinite atTop ∧ (∀ i, f (a i) = 0) ∧
       (Summable fun i ↦ ‖a i‖⁻¹ ^ (k + 1)) ∧ P.natDegree ≤ k ∧
@@ -329,7 +337,7 @@ theorem exists_hadamard_factorization (hf : Differentiable ℂ f) (hne : ∃ z, 
     · rw [(hf.analyticAt w).analyticOrderAt_eq_zero.mpr fun h ↦ hwZ ⟨hw, h⟩]
       rfl
   obtain ⟨hsum, P, hP, hfact⟩ :=
-    hadamard_factorization hf hρ0 hord hk ha hlim (hn 0).symm hzero
+    hadamard_factorization hf hord hk ha hlim (hn 0).symm hzero
   exact ⟨ι, hcount, a, n 0, P, ha, hlim, hfa, hsum, hP, hfact⟩
 
 end Enumerate

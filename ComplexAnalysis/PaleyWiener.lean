@@ -192,8 +192,8 @@ theorem norm_paleyWienerTransform_le (hτ : 0 ≤ τ)
   · exact intervalIntegral.integral_mul_const _ _
 
 /-- `HasExponentialTypeLE f τ`: `f` has exponential type at most `τ`, i.e. `‖f z‖ ≤ A * exp (τ *
-‖z‖)` for some constant `A ≥ 0`. Sharper than `Complex.HasOrderLE f 1` (`FiniteOrder.lean`) in
-that it names the exact constant `τ` rather than merely asserting order at most `1`. -/
+‖z‖)` for some constant `A ≥ 0`. Sharper than `Complex.HasExpRpowBound f 1` (`FiniteOrder.lean`)
+in that it names the exact constant `τ` rather than merely asserting some exponential type. -/
 def HasExponentialTypeLE (f : ℂ → ℂ) (τ : ℝ) : Prop :=
   ∃ A : ℝ, 0 ≤ A ∧ ∀ z, ‖f z‖ ≤ A * Real.exp (τ * ‖z‖)
 

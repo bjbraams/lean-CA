@@ -119,8 +119,12 @@ def canonicalProduct {ι : Type*} (k : ℕ) (a : ι → ℂ) (z : ℂ) : ℂ :=
   ∏' i, elementaryFactor k (z / a i)
 
 /-- An explicit exponential growth bound of exponent `ρ`. -/
-def HasOrderLE (f : ℂ → ℂ) (ρ : ℝ) : Prop :=
+def HasExpRpowBound (f : ℂ → ℂ) (ρ : ℝ) : Prop :=
   ∃ A B : ℝ, 0 ≤ A ∧ 0 ≤ B ∧ ∀ z, ‖f z‖ ≤ A * Real.exp (B * ‖z‖ ^ ρ)
+
+/-- Order at most `ρ`: the growth bound holds for every exponent `ρ' > ρ`. -/
+def HasOrderLE (f : ℂ → ℂ) (ρ : ℝ) : Prop :=
+  ∀ ρ', ρ < ρ' → HasExpRpowBound f ρ'
 
 /-- The normalized Blaschke factor. -/
 def blaschkeFactor (a z : ℂ) : ℂ := (‖a‖ / a) * (a - z) / (1 - conj a * z)
@@ -480,8 +484,8 @@ theorem weierstrass_factorization :
     ∃ g : ℂ → ℂ, Differentiable ℂ g ∧
     ∀ z : ℂ, f z = Complex.exp (g z) * Complex.weierstrassProduct a z := by sorry
 
-/-- 26. Hadamard factorization under an explicit growth bound, with polynomial degree at most the
-genus.
+/-- 26. Hadamard factorization for entire functions of order at most `ρ`, with polynomial degree
+at most the genus.
 Related factorization theorem: Matteo Cipollina (PrimeNumberTheoremAnd fork). See CREDITS.md.
 Library: `Complex.exists_hadamard_factorization`. -/
 theorem hadamard :
@@ -489,7 +493,6 @@ theorem hadamard :
     Differentiable ℂ f →
     (∃ (z : ℂ), f z ≠ 0) →
     ∀ {ρ : ℝ},
-    0 ≤ ρ →
     Complex.HasOrderLE f ρ →
     ∀ {k : ℕ},
     ρ < ↑k + 1 →

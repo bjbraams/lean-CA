@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import ComplexAnalysis.CanonicalProduct
+public import ToMathlib.Analysis.SpecialFunctions.Pow.Real
 
 /-!
 # Lower bounds for canonical products
@@ -36,19 +37,6 @@ namespace Complex
 
 variable {ι : Type*} {a : ι → ℂ} {k : ℕ}
 
-/-- `log x ≤ x ^ ε / ε` for `x > 0` and `ε > 0`. -/
-theorem log_le_rpow_div_of_pos {x ε : ℝ} (hx : 0 < x) (hε : 0 < ε) :
-    Real.log x ≤ x ^ ε / ε := by
-  have h := Real.log_le_sub_one_of_pos (Real.rpow_pos_of_pos hx ε)
-  rw [Real.log_rpow hx] at h
-  rw [le_div_iff₀ hε]
-  linarith
-
-/-- For a nonnegative real base, a natural power of its inverse is the real power with the
-corresponding negative exponent. -/
-theorem inv_pow_eq_rpow_neg {x : ℝ} (hx : 0 ≤ x) (n : ℕ) : x⁻¹ ^ n = x ^ (-(n : ℝ)) := by
-  rw [Real.rpow_neg hx, Real.rpow_natCast, inv_pow]
-
 /-- Summability of `‖a i‖ ^ (-ρ)` with `ρ > 0` forces the family to tend to infinity. -/
 theorem tendsto_norm_cofinite_of_summable_rpow (ha : ∀ i, a i ≠ 0) {ρ : ℝ} (hρ : 0 < ρ)
     (hsum : Summable fun i ↦ ‖a i‖ ^ (-ρ)) : Tendsto (fun i ↦ ‖a i‖) cofinite atTop := by
@@ -78,7 +66,7 @@ theorem summable_inv_pow_of_summable_rpow (hlim : Tendsto (fun i ↦ ‖a i‖) 
     {ρ : ℝ} (hρ : ρ ≤ k + 1) (hsum : Summable fun i ↦ ‖a i‖ ^ (-ρ)) :
     Summable fun i ↦ ‖a i‖⁻¹ ^ (k + 1) := by
   refine (summable_norm_rpow_neg_mono hlim hρ hsum).congr fun i ↦ ?_
-  rw [inv_pow_eq_rpow_neg (norm_nonneg _)]
+  rw [Real.inv_pow_eq_rpow_neg (norm_nonneg _)]
   push_cast
   rfl
 
@@ -181,7 +169,7 @@ theorem exp_neg_le_norm_tprod_far (ha : ∀ i, a i ≠ 0) {ρ : ℝ} (hρ0 : 0 <
       have hai : 0 < ‖a i‖ := norm_pos_iff.mpr (ha i)
       have h2r : 0 < 2 * r := by positivity
       have e1 : ‖a i‖⁻¹ ^ (k + 1) = ‖a i‖ ^ (-ρ) * ‖a i‖ ^ (ρ - (k + 1)) := by
-        rw [inv_pow_eq_rpow_neg (norm_nonneg _), ← Real.rpow_add hai]
+        rw [Real.inv_pow_eq_rpow_neg (norm_nonneg _), ← Real.rpow_add hai]
         push_cast
         ring_nf
       have e2 : ‖a i‖ ^ (ρ - (k + 1)) ≤ (2 * r) ^ (ρ - (k + 1)) :=
@@ -259,7 +247,7 @@ theorem sum_norm_div_pow_le (hlim : Tendsto (fun i ↦ ‖a i‖) cofinite atTop
         have h1 : 1 < ‖a i‖ := not_le.mp hi.2
         have h2 : ‖a i‖ ≤ 2 * r := (hFmem i).mp hi.1
         have hai : 0 < ‖a i‖ := by linarith
-        rw [inv_pow_eq_rpow_neg (norm_nonneg _), show -(k : ℝ) = -ρ + (ρ - k) by ring,
+        rw [Real.inv_pow_eq_rpow_neg (norm_nonneg _), show -(k : ℝ) = -ρ + (ρ - k) by ring,
           Real.rpow_add hai, mul_comm]
         gcongr
         calc ‖a i‖ ^ (ρ - k) ≤ ‖a i‖ ^ m :=
@@ -327,7 +315,7 @@ theorem exp_neg_le_prod_norm_one_sub_div (ha : ∀ i, a i ≠ 0)
       rwa [Set.ncard_eq_toFinset_card _ hfin] at this
     have hlog2r : 0 ≤ Real.log (2 * r) := Real.log_nonneg h2r
     have hle : Real.log (2 * r) ≤ (2 * r) ^ (s - ρ) / (s - ρ) :=
-      log_le_rpow_div_of_pos (by linarith) (by linarith)
+      Real.log_le_rpow_div (by linarith) (by linarith)
     calc ∑ i ∈ F, Real.log ‖a i‖ ≤ ∑ _i ∈ F, Real.log (2 * r) := by
           refine Finset.sum_le_sum fun i hi ↦ ?_
           exact Real.log_le_log (norm_pos_iff.mpr (ha i)) ((hFmem i).mp hi)

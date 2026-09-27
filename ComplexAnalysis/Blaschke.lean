@@ -21,8 +21,8 @@ zeros are exactly the `a i`, with the right multiplicities.
 
 Conversely, the **Blaschke condition** (F. Riesz): the nonzero zeros `w` of a bounded holomorphic
 function on the disc, not identically zero, satisfy `∑ (1 - ‖w‖) < ∞`. This follows from
-Jensen's formula (Mathlib). As a corollary, a bounded holomorphic function vanishing on a
-family `a i` with `∑ (1 - ‖a i‖) = ∞` vanishes identically.
+Jensen's formula (Mathlib). As a corollary, a bounded holomorphic function vanishing on an
+injective family `a i` of nonzero points with `∑ (1 - ‖a i‖) = ∞` vanishes identically.
 
 ## Main definitions
 

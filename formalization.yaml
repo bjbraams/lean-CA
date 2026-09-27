@@ -277,15 +277,18 @@ fidelity:
     the domain; the cycle residue theorem allows isolated singularities of any type, with finitely
     many specified exceptional points. The Laurent theorem uses a closed annulus on which the
     function is holomorphic on a neighborhood. Montel and Vitali allow finite-dimensional complex
-    Banach targets; the iterated-derivative convergence statement is pointwise. Mittag–Leffler
-    takes principal parts holomorphic on the whole punctured plane at each specified singularity;
+    Banach targets; the iterated-derivative convergence statement is pointwise, a corollary of
+    the locally uniform TendstoLocallyUniformlyOn.iteratedDeriv for Banach targets and filters.
+    Mittag–Leffler takes principal parts holomorphic on the whole punctured plane at each
+    specified singularity;
     the singularity set S ⊆ U is described by the explicit condition that every z ∈ U has a
     positive distance from S \ {z}, which Complex.compl_mem_codiscreteWithin_iff proves equivalent
     to Mathlib's Sᶜ ∈ codiscreteWithin U used by the library theorem Complex.mittagLeffler.
     The sequential Weierstrass factorization uses nonzero zeros tending to infinity, with
     multiplicities; Hadamard uses an intrinsic countable index type, including finite and empty
-    cases. HasOrderLE is the explicit bound A exp(B |z|^ρ); the genus k satisfies ρ < k + 1 and
-    the polynomial degree is at most k, rather than defining the order by a limsup.
+    cases. HasOrderLE f ρ requires the explicit bound A exp(B |z|^ρ') for every ρ' > ρ, which for
+    continuous f is the classical limsup condition on the order; the genus k satisfies ρ < k + 1
+    and the polynomial degree is at most k.
     The Blaschke condition counts multiplicities at nonzero zeros. Riesz factorization gives
     a zero-free bounded factor and is not a complete Hardy-space inner–outer factorization.
     Koebe growth is the upper bound; distortion has both bounds. Subharmonic functions are
@@ -501,8 +504,8 @@ alignment:
       lean: LeanCA.hadamard
       module: Challenge
       status: proved
-      note: Hadamard factorization under an explicit growth bound, with polynomial degree at most
-        the genus.
+      note: Hadamard factorization for entire functions of order at most ρ, with polynomial degree
+        at most the genus.
       library_declaration: Complex.exists_hadamard_factorization
       library_file: ComplexAnalysis/Hadamard.lean
     - source: Simon, 9.9; Conway II, 20.2 (Blaschke condition)

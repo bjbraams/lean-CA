@@ -247,9 +247,9 @@ and `Topology` libraries.
 * `KoebeGrowth`: the Koebe distortion theorem (both bounds on `‖f' z‖`) and the growth theorem's
   upper bound on `‖f z‖`, by integrating the pre-Schwarzian bound along a ray through a
   holomorphic logarithm of `f'`; the growth theorem's lower bound is not derived.
-* `MobiusGeometry`: invariance of the cross ratio under Möbius transformations, and generalized
-  circles (circles and lines) mapping to generalized circles, by decomposing a Möbius map into
-  translations, scalings, and inversion.
+* `MobiusGeometry`: invariance of the cross ratio under Möbius transformations, nondegenerate
+  generalized circles (circles and lines) mapping to nondegenerate generalized circles with
+  explicit image parameters, and invariance of symmetric points.
 * `EllipticLiouville`: Liouville's first theorem for elliptic functions, that an entire
   function doubly periodic with respect to a lattice (`PeriodPair`) is constant, by showing
   it is bounded on the compact fundamental parallelogram and applying the classical Liouville
@@ -261,7 +261,7 @@ and `Topology` libraries.
 * `SokhotskiPlemelj`: the Sokhotski–Plemelj jump relation for the Cauchy-type contour integral
   of a density on a circle given by an absolutely summable two-sided Laurent series, identifying
   the interior and exterior Cauchy-type integrals with explicit one-sided power series in the
-  Laurent coefficients whose difference at the boundary recovers the density.
+  Laurent coefficients, which give the one-sided boundary limits and differ by the density.
 * `PaleyWiener`: the holomorphic-extension half of the Paley–Wiener theorem, that the
   Fourier-type transform of a function integrable on `[-τ, τ]` extends to an entire function of
   exponential type at most `τ`, by differentiating under the integral sign in the complex
