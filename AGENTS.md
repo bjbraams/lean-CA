@@ -80,9 +80,11 @@ The following are concerns to be kept in mind and addressed throughout the devel
   a brief docstring.
 - This project is the master copy of the `ComplexAnalysis` files. The companion project
   `../lean-SCV` holds exact copies of the subset it imports, and its `ToMathlib` files that
-  share a name with ones here have identical content and path. Changes to a file used there
-  are propagated by copying; renaming or removing declarations in such a file requires a
-  matching update in lean-SCV.
+  share a name with ones here have identical content and path. The umbrella modules
+  `ToMathlib.lean`, `ToMathlib/Analysis.lean` and `ToMathlib/Topology.lean` are exempt: each
+  project's umbrella imports its own inventory. Changes to a file used there are propagated
+  by copying; renaming or removing declarations in such a file requires a matching update in
+  lean-SCV.
 
 ## Validation
 

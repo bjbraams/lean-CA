@@ -11,8 +11,8 @@ public import ComplexAnalysis.LaurentSeries.Annulus
 # Circle coefficients for analytic Laurent series
 
 Laurent coefficients on a circle satisfy Cauchy bounds. Cauchy's formula on an annulus proves
-the Laurent expansion, independence of radius, and vanishing of negative coefficients on a disc. These results are independent of the
-multivariable Laurent expansion.
+the Laurent expansion, independence of radius, and vanishing of negative coefficients on a disc.
+These results are independent of the multivariable Laurent expansion.
 
 ## Main results
 
