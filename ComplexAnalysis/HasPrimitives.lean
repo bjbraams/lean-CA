@@ -62,9 +62,12 @@ theorem IsExactOn.of_isSimplyConnected (hU : IsOpen U) (hUc : IsSimplyConnected 
   let V : U → Set U := fun z ↦ (Subtype.val : U → ℂ) ⁻¹' ball z (r z)
   have hV : ∀ z, IsOpen (V z) := fun z ↦ isOpen_ball.preimage continuous_subtype_val
   have hcover : ∀ z : U, ∃ i, z ∈ V i := fun z ↦ ⟨z, mem_ball_self (hr z)⟩
-  have hdiff : ∀ i j x : U, x ∈ V i ∩ V j →
-      ∀ᶠ y : U in 𝓝 x, P i y - P j y = P i x - P j x := by
-    intro i j x hx
+  have hdiff : ∀ i j, IsLocallyConstant
+      (fun x : ↥(V i ∩ V j) ↦ P i (x : U) - P j (x : U)) := by
+    intro i j
+    apply (((hV i).inter (hV j)).isLocallyConstant_domRestrict_iff
+      (f := fun x : U ↦ P i x - P j x)).mpr
+    intro x hx
     have hderiv : ∀ y ∈ ball (i : ℂ) (r i) ∩ ball (j : ℂ) (r j),
         HasDerivAt (fun w ↦ P i w - P j w) 0 y := by
       intro y hy
@@ -76,17 +79,18 @@ theorem IsExactOn.of_isSimplyConnected (hU : IsOpen U) (hUc : IsSimplyConnected 
       (fun w hw ↦ (hderiv w hw).differentiableAt.differentiableWithinAt)
       (fun w hw ↦ (hderiv w hw).deriv) hy hx
   obtain ⟨z₀, hz₀⟩ := hUc.nonempty
-  obtain ⟨Q, _, hQ⟩ := exists_locally_eq_add_of_locally_constant_sub
+  obtain ⟨Q, ⟨_, hQ⟩, _⟩ := existsUnique_isLocallyConstant_sub
     V hV hcover (fun i z ↦ P i z) hdiff ⟨z₀, hz₀⟩ (0 : F)
   let R : ℂ → F := fun z ↦ if hz : z ∈ U then Q ⟨z, hz⟩ else 0
   refine ⟨R, fun z hz ↦ ?_⟩
   let x : U := ⟨z, hz⟩
-  have hlocal := hQ x x (mem_ball_self (hr x))
-  apply (((hP x z (mem_ball_self (hr x))).sub_const (P x z)).const_add (Q x)).congr_of_eventuallyEq
+  have hlocal := ((hV x).isLocallyConstant_domRestrict_iff
+    (f := fun y : U ↦ Q y - P x y)).mp (hQ x) x (mem_ball_self (hr x))
+  apply ((hP x z (mem_ball_self (hr x))).const_add (Q x - P x z)).congr_of_eventuallyEq
   rw [← hU.isOpenEmbedding_subtypeVal.map_nhds_eq x]
-  change ∀ᶠ y : U in 𝓝 x, R y = Q x + (P x y - P x z)
+  change ∀ᶠ y : U in 𝓝 x, R y = (Q x - P x z) + P x y
   filter_upwards [hlocal] with y hy
-  simpa only [R, dite_eq_left y.property] using hy
+  simpa only [R, dite_eq_left y.property] using eq_add_of_sub_eq hy
 
 /-- Primitives are unique up to an additive constant on a connected open domain. -/
 theorem IsExactOn.eq_add_const {P Q : ℂ → F} (hU : IsOpen U) (hUc : IsPreconnected U)

@@ -67,10 +67,9 @@ theorem integral_compactifiedRay_eq_sub
     have hc' : Tendsto (fun u : ℝ ↦ compactifiedRay q t (u : ℂ)) (𝓝 1) (𝓝 t) := by
       simpa only [ofReal_one, compactifiedRay_one] using hc.tendsto
     exact ((hP t ht).continuousAt.tendsto.comp hc').mono_left inf_le_left
-  have heq := integral_eq_sub_of_hasFDerivAt_of_tendsto zero_lt_one
-    (fun z hz ↦ (hP z hz).hasFDerivAt)
-    (fun u hu ↦ hasDerivAt_compactifiedRay_ofReal t (hq u ⟨hu.1, hu.2.le⟩) hu.1.ne')
-    (fun u hu ↦ hU u ⟨hu.1, hu.2.le⟩)
+  have heq := intervalIntegral.integral_eq_sub_of_hasDerivAt_of_tendsto zero_lt_one
+    (fun u hu ↦ ((hP _ (hU u ⟨hu.1, hu.2.le⟩)).hasFDerivAt.restrictScalars ℝ).comp_hasDerivAt u
+      (hasDerivAt_compactifiedRay_ofReal t (hq u ⟨hu.1, hu.2.le⟩) hu.1.ne'))
     (show IntervalIntegrable (fun u : ℝ ↦
       ContinuousLinearMap.toSpanSingleton ℂ (f (compactifiedRay q t (u : ℂ)))
         (-compactifiedRayJacobian q (u : ℂ) / (u : ℂ) ^ 2)) volume 0 1 by
@@ -78,8 +77,8 @@ theorem integral_compactifiedRay_eq_sub
       ext u
       simp only [ContinuousLinearMap.toSpanSingleton_apply, neg_div, neg_smul, Pi.neg_apply])
     hlim hend
-  simp only [ContinuousLinearMap.toSpanSingleton_apply, neg_div, neg_smul,
-    intervalIntegral.integral_neg] at heq
+  simp only [ContinuousLinearMap.coe_restrictScalars', ContinuousLinearMap.toSpanSingleton_apply,
+    neg_div, neg_smul, intervalIntegral.integral_neg] at heq
   exact neg_eq_iff_eq_neg.mp heq |>.trans (neg_sub _ _)
 
 end Complex

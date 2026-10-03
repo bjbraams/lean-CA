@@ -62,9 +62,12 @@ theorem DifferentiableOn.exists_continuous_primitive_pullback
   let V : X → Set X := fun x ↦ g ⁻¹' ball (g x) (r x)
   have hV : ∀ x, IsOpen (V x) := fun x ↦ isOpen_ball.preimage hg
   have hcover : ∀ x : X, ∃ i, x ∈ V i := fun x ↦ ⟨x, mem_ball_self (hr x)⟩
-  have hdiff : ∀ i j x : X, x ∈ V i ∩ V j →
-      ∀ᶠ y in 𝓝 x, P i (g y) - P j (g y) = P i (g x) - P j (g x) := by
-    intro i j x hx
+  have hdiff : ∀ i j, IsLocallyConstant
+      (fun x : ↥(V i ∩ V j) ↦ P i (g x) - P j (g x)) := by
+    intro i j
+    apply (((hV i).inter (hV j)).isLocallyConstant_domRestrict_iff
+      (f := fun x ↦ P i (g x) - P j (g x))).mpr
+    intro x hx
     have hd : ∀ z ∈ ball (g i) (r i) ∩ ball (g j) (r j),
         HasDerivAt (fun w ↦ P i w - P j w) 0 z := by
       intro z hz
@@ -75,8 +78,15 @@ theorem DifferentiableOn.exists_continuous_primitive_pullback
       ((convex_ball (g i) (r i)).inter (convex_ball (g j) (r j))).isPreconnected
       (fun z hz ↦ (hd z hz).differentiableAt.differentiableWithinAt)
       (fun z hz ↦ (hd z hz).deriv) hy hx
-  obtain ⟨Q, hQ₀, hQ⟩ := exists_locally_eq_add_of_locally_constant_sub
+  obtain ⟨Q, ⟨hQ₀, hQl⟩, _⟩ := existsUnique_isLocallyConstant_sub
     V hV hcover (fun i x ↦ P i (g x)) hdiff x₀ v₀
+  have hQ (i : X) (x : X) (hx : x ∈ V i) :
+      ∀ᶠ y in 𝓝 x, Q y = Q x + (P i (g y) - P i (g x)) := by
+    filter_upwards [((hV i).isLocallyConstant_domRestrict_iff
+      (f := fun y ↦ Q y - P i (g y))).mp (hQl i) x hx] with y hy
+    calc
+      Q y = (Q x - P i (g x)) + P i (g y) := eq_add_of_sub_eq hy
+      _ = Q x + (P i (g y) - P i (g x)) := by abel
   refine ⟨Q, ?_, hQ₀, fun x ↦ ⟨P x, hP x (g x) (mem_ball_self (hr x)),
     hQ x x (mem_ball_self (hr x))⟩⟩
   apply continuous_iff_continuousAt.mpr

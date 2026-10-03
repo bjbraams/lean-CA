@@ -9,24 +9,15 @@ public import ToMathlib.Analysis.Integral.CurveIntegral.Map
 public import Mathlib.MeasureTheory.Integral.IntegralEqImproper
 
 /-!
-# Endpoint formulas for improper integrals of exact one-forms
+# Limits of curve integrals
 
-An exact one-form pulled back along a parametrized curve integrates to the
-difference of the limiting potential values. The curve need not have a finite
-endpoint: only the potential along it must converge. We treat both a half-line
-and an open finite parameter interval. Absolute integrability of the pullback
-is explicit; no conditionally convergent integral is identified with a Bochner integral.
-We also give limits of finite curve integrals, which only require convergence of
-the endpoint potential values, and identify integrable half-line pullbacks with
-limits of their finite path integrals.
+Limits of finite integrals of exact one-forms depend only on convergence of their
+endpoint potential values. The endpoints themselves need not converge in the ambient space.
+Integrable half-line pullbacks are also identified with limits of finite path integrals.
+Ordinary improper endpoint formulas use Mathlib's fundamental theorem directly.
 
 ## Main results
 
-* `integral_Ioi_eq_sub_of_hasFDerivAt`: The integral of an exact form along a half-line
-  parametrization is determined by the finite endpoint and the limiting potential at infinity.
-* `integral_eq_sub_of_hasFDerivAt_of_tendsto`: An exact form on an open parameter interval
-  integrates to the difference of the limiting potential values, even if the curve itself has no
-  finite endpoints.
 * `tendsto_curveIntegral_of_hasFDerivAt`: Limits of finite integrals of an exact form depend
   only on the limiting endpoint potential values. The endpoints themselves need not converge in
   the ambient space.
@@ -49,34 +40,6 @@ variable {𝕜 E F : Type*} [RCLike 𝕜]
   [CompleteSpace F]
   {U : Set E} {P : E → F} {ω : E → E →L[𝕜] F}
   {γ γ' : ℝ → E} {a b : ℝ} {l l₀ l₁ : F}
-
-/-- The integral of an exact form along a half-line parametrization is determined by the
-finite endpoint and the limiting potential at infinity. -/
-theorem integral_Ioi_eq_sub_of_hasFDerivAt
-    (hP : ∀ z ∈ U, HasFDerivAt P (ω z) z)
-    (hγ : ∀ t ∈ Ioi a, HasDerivAt γ (γ' t) t)
-    (hcont : ContinuousWithinAt γ (Ici a) a) (hγU : MapsTo γ (Ici a) U)
-    (hint : IntegrableOn (fun t ↦ ω (γ t) (γ' t)) (Ioi a))
-    (hlim : Tendsto (P ∘ γ) atTop (𝓝 l)) :
-    ∫ t in Ioi a, ω (γ t) (γ' t) = l - P (γ a) := by
-  apply integral_Ioi_of_hasDerivAt_of_tendsto
-    ((hP _ (hγU self_mem_Ici)).continuousAt.comp_continuousWithinAt hcont)
-    _ hint hlim
-  intro t ht
-  exact ((hP _ (hγU (le_of_lt ht))).restrictScalars ℝ).comp_hasDerivAt t (hγ t ht)
-
-/-- An exact form on an open parameter interval integrates to the difference of the
-limiting potential values, even if the curve itself has no finite endpoints. -/
-theorem integral_eq_sub_of_hasFDerivAt_of_tendsto (hab : a < b)
-    (hP : ∀ z ∈ U, HasFDerivAt P (ω z) z)
-    (hγ : ∀ t ∈ Ioo a b, HasDerivAt γ (γ' t) t) (hγU : MapsTo γ (Ioo a b) U)
-    (hint : IntervalIntegrable (fun t ↦ ω (γ t) (γ' t)) volume a b)
-    (ha : Tendsto (P ∘ γ) (𝓝[>] a) (𝓝 l₀))
-    (hb : Tendsto (P ∘ γ) (𝓝[<] b) (𝓝 l₁)) :
-    ∫ t in a..b, ω (γ t) (γ' t) = l₁ - l₀ := by
-  exact intervalIntegral.integral_eq_sub_of_hasDerivAt_of_tendsto hab
-    (fun t ht ↦ ((hP _ (hγU ht)).restrictScalars ℝ).comp_hasDerivAt t (hγ t ht))
-    hint ha hb
 
 omit [NormedSpace ℝ F] [IsScalarTower ℝ 𝕜 F] in
 /-- Limits of finite integrals of an exact form depend only on the limiting endpoint
