@@ -8,7 +8,7 @@ module
 public import ComplexAnalysis.DiscMobius
 public import ComplexAnalysis.HolomorphicInverse
 public import ComplexAnalysis.RiemannMapping
-public import Mathlib.Analysis.Complex.Schwarz
+public import TauCeti.Analysis.Complex.Conformal.UnitDisc.Automorphism.Rotation
 
 /-!
 # Automorphisms of the unit disc
@@ -17,7 +17,9 @@ Every holomorphic bijection of the unit disc onto itself has the form `z ↦ c *
 `‖c‖ = 1` and `‖a‖ < 1`, where `φ_a` is the disc Möbius transformation
 (`Complex.discMobius`). The proof is the Schwarz lemma applied to the map and its inverse
 after normalizing the fixed point to `0`. As a consequence the normalized Riemann map is
-unique.
+unique. The normalized rotation theorem uses the imported proof of the Tau Ceti contributors
+in `TauCeti.Analysis.Complex.Conformal.UnitDisc.Automorphism.Rotation`; the remaining
+statements adapt it to the local Möbius and Riemann-map interfaces.
 
 ## Main results
 
@@ -41,44 +43,15 @@ open scoped Topology ComplexConjugate
 namespace Complex
 
 /-- A holomorphic self-map of the disc fixing `0`, with a holomorphic left inverse mapping the
-disc into itself, is a rotation. -/
+disc into itself, is a rotation.
+
+Uses `TauCeti.exists_eqOn_const_mul_of_leftInvOn_ball_of_map_zero`. -/
 theorem exists_eqOn_mul_of_leftInverse_of_map_zero {f g : ℂ → ℂ}
     (hf : DifferentiableOn ℂ f (ball 0 1)) (hfm : MapsTo f (ball 0 1) (ball 0 1)) (hf0 : f 0 = 0)
     (hg : DifferentiableOn ℂ g (ball 0 1)) (hgm : MapsTo g (ball 0 1) (ball 0 1))
     (hgf : ∀ z ∈ ball 0 1, g (f z) = z) :
-    ∃ c : ℂ, ‖c‖ = 1 ∧ EqOn f (fun z ↦ c * z) (ball 0 1) := by
-  have h0 : (0 : ℂ) ∈ ball (0 : ℂ) 1 := mem_ball_self one_pos
-  have hg0 : g 0 = 0 := by
-    have := hgf 0 h0
-    rwa [hf0] at this
-  have hfmaps : MapsTo f (ball 0 1) (closedBall (f 0) 1) := by
-    rw [hf0]
-    exact hfm.mono_right ball_subset_closedBall
-  have hgmaps : MapsTo g (ball 0 1) (closedBall (g 0) 1) := by
-    rw [hg0]
-    exact hgm.mono_right ball_subset_closedBall
-  have hf1 : ‖deriv f 0‖ ≤ 1 := norm_deriv_le_one_of_mapsTo_ball hf hfmaps one_pos
-  have hg1 : ‖deriv g 0‖ ≤ 1 := norm_deriv_le_one_of_mapsTo_ball hg hgmaps one_pos
-  have hchain : deriv g 0 * deriv f 0 = 1 := by
-    have hfd : HasDerivAt f (deriv f 0) 0 :=
-      (hf.differentiableAt (isOpen_ball.mem_nhds h0)).hasDerivAt
-    have hgd : HasDerivAt g (deriv g 0) (f 0) := by
-      rw [hf0]
-      exact (hg.differentiableAt (isOpen_ball.mem_nhds h0)).hasDerivAt
-    have hev : (g ∘ f) =ᶠ[𝓝 0] id := by
-      filter_upwards [isOpen_ball.mem_nhds h0] with z hz
-      exact hgf z hz
-    have := ((hgd.comp 0 hfd).congr_of_eventuallyEq hev.symm).deriv
-    rw [deriv_id] at this
-    exact this.symm
-  have hnorm : ‖deriv f 0‖ = 1 := by
-    have h1 : ‖deriv g 0‖ * ‖deriv f 0‖ = 1 := by rw [← norm_mul, hchain, norm_one]
-    nlinarith [norm_nonneg (deriv f 0), norm_nonneg (deriv g 0)]
-  obtain ⟨C, hC, hfeq⟩ := affine_of_mapsTo_ball_of_exists_norm_dslope_eq_div' hf hfmaps
-    ⟨0, h0, by rw [dslope_same, hnorm, div_one]⟩
-  refine ⟨C, by simpa using hC, fun z hz ↦ ?_⟩
-  rw [hfeq hz, hf0]
-  simp only [zero_add, sub_zero, smul_eq_mul, mul_comm]
+    ∃ c : ℂ, ‖c‖ = 1 ∧ EqOn f (fun z ↦ c * z) (ball 0 1) :=
+  TauCeti.exists_eqOn_const_mul_of_leftInvOn_ball_of_map_zero hf hg hfm hgm hgf hf0
 
 /-- **Automorphisms of the disc.** A holomorphic bijection of the disc with holomorphic inverse
 is `z ↦ c * φ_a z` with `‖c‖ = 1` and `‖a‖ < 1`. -/

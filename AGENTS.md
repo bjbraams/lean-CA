@@ -62,11 +62,38 @@ The following are concerns to be kept in mind and addressed throughout the devel
 - Do not introduce axioms.
 - Do not replace `sorry` with `by exact Classical.choice ...` or other logically equivalent
   escape mechanisms.
-- Search Mathlib for existing results before recreating substantial theory.
+- Search Mathlib first, then the pinned TauCeti modules, before developing substantial
+  local theory. Follow the upstream reuse policy below.
 - Additional lemmas are welcome when they clarify the mathematical structure.
 - Preserve theorem statements unless they are false or require missing assumptions.
 - If a statement appears false then mark the issue clearly before changing it.
 - Pay particular attention to empty, singleton, and nontrivial index types.
+
+## Upstream reuse policy
+
+The order of preference for existing results is **Mathlib, then the pinned TauCeti, then
+local project code**. Apply this policy throughout `ToMathlib` and `ComplexAnalysis`:
+
+- Use a suitable Mathlib result in preference to a TauCeti or local version.
+- When Mathlib does not supply a suitable result, import the specific TauCeti module
+  providing it before developing a local proof. Prefer imports to copied proofs.
+- Remove redundant local declarations and update their callers when adopting an upstream
+  result. Small adapters may remain when they connect an upstream result to a useful local
+  interface without duplicating its mathematical proof.
+- Compare hypotheses and conclusions before replacing a declaration, and check for name
+  conflicts. Preserve existing generality: do not strengthen assumptions merely to fit
+  an upstream theorem. Retain local results whose additional scope is still needed.
+- Credit imported results at their point of use. When preparing a Mathlib contribution,
+  resolve its TauCeti prerequisites as part of that work.
+
+Mathlib and TauCeti are allowed external dependencies in both project layers. `ToMathlib`
+must not import `ComplexAnalysis`; `ComplexAnalysis` may import `ToMathlib`. Import specific
+TauCeti modules; `import TauCeti` does not re-export the library. Keep TauCeti pinned to the
+compatible revision in `lakefile.toml`, and preserve the common Mathlib pin when updating it.
+The shared package checkout does not make TauCeti a dependency of companion projects.
+When propagating a shared source change to `lean-SCV` under the rule below, also check that
+its dependency configuration supports any new imports. Adding TauCeti here alone does not
+authorize changes to companion dependency configurations.
 
 ## Editing
 

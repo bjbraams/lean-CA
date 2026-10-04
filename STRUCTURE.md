@@ -52,9 +52,25 @@ Cauchy and residue theorems are stated with integrals over the pieces.
 Meromorphic orders and divisors use Mathlib's APIs.
 
 `Complex.HolomorphicMap` in `ToMathlib.Analysis.Holomorphic.FunctionSpace` carries the compact-open
-structure. `ToMathlib.Analysis.Holomorphic.NormalFamily` takes closedness and uniqueness hypotheses as
-inputs; `ComplexAnalysis.FunctionSpace`, `Montel`, and `Vitali` supply the one-variable
-specializations. Compactness and the stated Vitali theorems require finite-dimensional targets.
+structure, with direct evaluation and restriction. The shared `Holomorphic.LocallyUniformLimit`
+module proves closedness and completeness on planar domains with Banach targets;
+`ComplexAnalysis.FunctionSpace` re-exports it. `Holomorphic.NormalFamily` supplies planar
+Montel and Vitali results, retaining conditional general-source versions for SCV.
+`ComplexAnalysis.Montel` adapts TauCeti's subsequence selection theorem for ambient functions;
+`Vitali` retains the shared finite-dimensional-target proof. The Montel
+variant with extension-by-zero bounds is named
+`Complex.isCompact_closure_of_holomorphic_bounded_on_compacts_of_openExtension`.
+Compactness and the stated Vitali theorems require finite-dimensional targets.
+
+`ComplexAnalysis.RiemannMapping` adapts TauCeti's normalized Riemann mapping theorem.
+`ComplexAnalysis.Hurwitz` adapts its zero-free and injective-limit theorems for arbitrary
+nontrivial filters, while retaining the local disk zero-persistence and divisor helpers.
+`HolomorphicInverse`, `SchwarzPick` and the normalized rotation theorem in `DiscAutomorphism`
+also adapt TauCeti. `Harnack` uses its open-disc inequality, `Reflection` its continuity and
+reflection principle, and `HalfPlane` its quotient criterion for the slit plane. The
+boundary-value Harnack theorem and the additional half-plane geometry remain local.
+These modules import the pinned TauCeti proofs; see `CREDITS.md` for their sources.
+
 `Complex.SubharmonicOn` is real-valued: it does not admit the value `−∞`.
 
 ## Where to work

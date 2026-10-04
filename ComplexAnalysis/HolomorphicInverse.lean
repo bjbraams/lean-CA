@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import ComplexAnalysis.Injective
+public import TauCeti.Analysis.Complex.Conformal.Inverse.Function
 
 /-!
 # Inverses of injective holomorphic functions
@@ -13,7 +14,8 @@ public import ComplexAnalysis.Injective
 An injective holomorphic function on an open set `U` is an open map, and its inverse on the
 image `f '' U` is holomorphic with derivative `(deriv f a)⁻¹` at `f a`. The ingredients are the
 open mapping theorem and the nonvanishing of the derivative of an injective holomorphic
-function (`Complex.deriv_ne_zero_of_injOn`).
+function (`Complex.deriv_ne_zero_of_injOn`). The inverse and its derivative use the imported
+proofs of the Tau Ceti contributors in `TauCeti.Analysis.Complex.Conformal.Inverse.Function`.
 
 ## Main results
 
@@ -49,38 +51,27 @@ theorem isOpen_image_of_injOn (hU : IsOpen U) (hf : DifferentiableOn ℂ f U) (h
   rintro _ ⟨a, ha, rfl⟩
   exact nhds_le_map_nhds_of_injOn hU hf hi ha (image_mem_map (hU.mem_nhds ha))
 
-/-- The inverse of an injective holomorphic function is continuous on the image. -/
-theorem continuousOn_invFunOn_of_injOn (hU : IsOpen U) (hf : DifferentiableOn ℂ f U)
-    (hi : InjOn f U) : ContinuousOn (invFunOn f U) (f '' U) := by
-  rintro _ ⟨a, ha, rfl⟩
-  apply ContinuousAt.continuousWithinAt
-  have hleft : (invFunOn f U ∘ f) =ᶠ[𝓝 a] id :=
-    Filter.mem_of_superset (hU.mem_nhds ha) fun _ hz ↦ hi.leftInvOn_invFunOn hz
-  rw [ContinuousAt, hi.leftInvOn_invFunOn ha]
-  have ht : Tendsto (invFunOn f U ∘ f) (𝓝 a) (𝓝 a) := tendsto_id.congr' hleft.symm
-  change map (invFunOn f U ∘ f) (𝓝 a) ≤ 𝓝 a at ht
-  exact (Filter.map_mono (nhds_le_map_nhds_of_injOn hU hf hi ha)).trans (by rwa [map_map])
+/-- The inverse of an injective holomorphic function is continuous on the image.
 
-/-- The inverse of an injective holomorphic function has derivative `(deriv f a)⁻¹` at `f a`. -/
+Uses TauCeti's `DifferentiableOn.invFunOn`. -/
+theorem continuousOn_invFunOn_of_injOn (hU : IsOpen U) (hf : DifferentiableOn ℂ f U)
+    (hi : InjOn f U) : ContinuousOn (invFunOn f U) (f '' U) :=
+  (hf.invFunOn hU hi).continuousOn
+
+/-- The inverse of an injective holomorphic function has derivative `(deriv f a)⁻¹` at `f a`.
+
+Uses `TauCeti.hasDerivAt_invFunOn`. -/
 theorem hasDerivAt_invFunOn_of_injOn (hU : IsOpen U) (hf : DifferentiableOn ℂ f U)
     (hi : InjOn f U) {a : ℂ} (ha : a ∈ U) :
-    HasDerivAt (invFunOn f U) (deriv f a)⁻¹ (f a) := by
-  have himg : f '' U ∈ 𝓝 (f a) :=
-    (isOpen_image_of_injOn hU hf hi).mem_nhds (mem_image_of_mem f ha)
-  have hcont : ContinuousAt (invFunOn f U) (f a) :=
-    (continuousOn_invFunOn_of_injOn hU hf hi).continuousAt himg
-  have hd : HasDerivAt f (deriv f a) (invFunOn f U (f a)) := by
-    rw [hi.leftInvOn_invFunOn ha]
-    exact (hf.differentiableAt (hU.mem_nhds ha)).hasDerivAt
-  refine HasDerivAt.of_local_left_inverse hcont hd (deriv_ne_zero_of_injOn hU hf hi ha) ?_
-  filter_upwards [himg] with w hw
-  exact invFunOn_eq hw
+    HasDerivAt (invFunOn f U) (deriv f a)⁻¹ (f a) :=
+  TauCeti.hasDerivAt_invFunOn hf hU hi ha
 
-/-- The inverse of an injective holomorphic function is holomorphic on the image. -/
+/-- The inverse of an injective holomorphic function is holomorphic on the image.
+
+Uses TauCeti's `DifferentiableOn.invFunOn`. -/
 theorem differentiableOn_invFunOn_of_injOn (hU : IsOpen U) (hf : DifferentiableOn ℂ f U)
-    (hi : InjOn f U) : DifferentiableOn ℂ (invFunOn f U) (f '' U) := by
-  rintro _ ⟨a, ha, rfl⟩
-  exact (hasDerivAt_invFunOn_of_injOn hU hf hi ha).differentiableAt.differentiableWithinAt
+    (hi : InjOn f U) : DifferentiableOn ℂ (invFunOn f U) (f '' U) :=
+  hf.invFunOn hU hi
 
 /-- A left inverse of a holomorphic function on an open set is holomorphic on the image. -/
 theorem differentiableOn_of_leftInverse (hU : IsOpen U) (hf : DifferentiableOn ℂ f U)

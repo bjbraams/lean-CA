@@ -11,6 +11,13 @@ public import Mathlib.MeasureTheory.Integral.IntegralEqImproper
 /-!
 # Limits of curve integrals
 
+Related work on the curve-integral API includes
+[Mathlib PR #39524](https://github.com/leanprover-community/mathlib4/pull/39524),
+line-segment integrability and the fundamental theorem of calculus by FordUniver, and
+[Mathlib PR #39254](https://github.com/leanprover-community/mathlib4/pull/39254),
+complex contour integrals by Yury Kudryashov. Our code here will be reviewed upon the
+anticipated adoption of those PRs, comparing the results and their assumptions separately.
+
 Limits of finite integrals of exact one-forms depend only on convergence of their
 endpoint potential values. The endpoints themselves need not converge in the ambient space.
 Integrable half-line pullbacks are also identified with limits of finite path integrals.

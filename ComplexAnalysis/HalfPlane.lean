@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import Mathlib.Analysis.Complex.Polynomial.Basic
+public import TauCeti.Analysis.Complex.SlitPlane
 
 /-!
 # Geometry of the right half-plane
@@ -13,6 +14,8 @@ public import Mathlib.Analysis.Complex.Polynomial.Basic
 Products and quotients of right-half-plane points avoid the principal branch cut.
 Square roots lie in a smaller sector, and finite families fit inside a disk tangent
 to the imaginary axis. These results do not depend on special-function domains.
+The quotient criterion uses the imported proof of the Tau Ceti contributors in
+`TauCeti.Analysis.Complex.SlitPlane`.
 
 ## Main results
 
@@ -56,16 +59,12 @@ theorem mul_mem_slitPlane_of_re_pos {x y : ℂ} (hx : 0 < x.re) (hy : 0 < y.re) 
 theorem sq_mem_slitPlane_of_re_pos {x : ℂ} (hx : 0 < x.re) : x ^ 2 ∈ slitPlane := by
   simpa only [pow_two] using mul_mem_slitPlane_of_re_pos hx hx
 
-/-- A ratio of two right-half-plane numbers cannot lie on the nonpositive real axis. -/
+/-- A ratio of two right-half-plane numbers cannot lie on the nonpositive real axis.
+
+Uses `TauCeti.div_mem_slitPlane_of_re_pos`, whose denominator hypothesis comes first. -/
 theorem div_mem_slitPlane_of_re_pos {x y : ℂ} (hx : 0 < x.re) (hy : 0 < y.re) :
-    x / y ∈ slitPlane := by
-  apply mem_slitPlane_iff.mpr
-  by_cases hi : (x / y).im = 0
-  · left
-    have h := congrArg Complex.re (div_mul_cancel₀ x (ne_zero_of_re_pos hy))
-    rw [mul_re, hi, zero_mul, sub_zero] at h
-    nlinarith
-  · exact Or.inr hi
+    x / y ∈ slitPlane :=
+  TauCeti.div_mem_slitPlane_of_re_pos hy hx
 
 /-- A number with positive real part has a square root in the sector `|im x| < re x`. -/
 theorem exists_sq_eq_of_re_pos {z : ℂ} (hz : 0 < z.re) :

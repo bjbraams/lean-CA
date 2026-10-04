@@ -8,6 +8,7 @@ module
 public import ComplexAnalysis.Rouche
 public import ComplexAnalysis.ZeroPersistence
 public import Mathlib.Analysis.Complex.LocallyUniformLimit
+public import TauCeti.Analysis.Complex.Conformal.Hurwitz
 
 /-!
 # Hurwitz's theorem
@@ -15,6 +16,11 @@ public import Mathlib.Analysis.Complex.LocallyUniformLimit
 Uniform approximation on a closed disk with a zero-free boundary eventually preserves
 the total number of zeros counted with multiplicity. On a connected open set, a locally
 uniform limit of zero-free holomorphic functions is zero-free or identically zero.
+
+The zero-free and injective-limit conclusions use the Tau Ceti contributors'
+`TauCeti.hurwitz` and `TauCeti.hurwitz_injOn`, imported from
+`TauCeti.Analysis.Complex.Conformal.Hurwitz`. The local adapters retain arbitrary nontrivial
+filters. The disk zero-persistence and divisor-counting helpers remain local.
 
 ## Main results
 
@@ -104,6 +110,9 @@ theorem eventually_exists_zero_of_tendstoUniformlyOn {ι : Type*} {l : Filter ι
 /-- **Hurwitz's theorem.** A locally uniform limit of zero-free holomorphic functions on
 a connected open set is identically zero or has no zeros.
 
+This adapts the Tau Ceti contributors' `TauCeti.hurwitz` from
+`TauCeti.Analysis.Complex.Conformal.Hurwitz`; the mathematical proof is imported.
+
 Related formalizations: Vincent Beffara's RMT4 and Yury Kudryashov's Mathlib PR #33505. See
 `CREDITS.md`. -/
 theorem eqOn_zero_or_forall_ne_zero_of_tendstoLocallyUniformlyOn
@@ -113,34 +122,13 @@ theorem eqOn_zero_or_forall_ne_zero_of_tendstoLocallyUniformlyOn
     (hne : ∀ᶠ n in l, ∀ z ∈ U, F n z ≠ 0)
     (hlim : TendstoLocallyUniformlyOn F f l U) :
     EqOn f 0 U ∨ ∀ z ∈ U, f z ≠ 0 := by
-  have hf := (hlim.differentiableOn hF hU).analyticOnNhd hU
-  by_cases hall : EqOn f 0 U
-  · exact Or.inl hall
-  right
-  intro c hc hzero
-  have hp : ∀ᶠ z in 𝓝[≠] c, f z ≠ 0 :=
-    (hf c hc).eventually_eq_zero_or_eventually_ne_zero.resolve_left (fun he ↦
-      hall (hf.eqOn_zero_of_preconnected_of_eventuallyEq_zero hconn hc he))
-  obtain ⟨R, hR, hball⟩ := Metric.mem_nhdsWithin_iff.mp hp
-  obtain ⟨S, hS, hSsub⟩ := Metric.nhds_basis_closedBall.mem_iff.mp (hU.mem_nhds hc)
-  let r := min (R / 2) S
-  have hr : 0 < r := lt_min (by positivity) hS
-  have hrR : r < R := (min_le_left _ _).trans_lt (half_lt_self hR)
-  have hKU : closedBall c r ⊆ U := (closedBall_subset_closedBall (min_le_right _ _)).trans hSsub
-  have hb : ∀ z ∈ sphere c r, f z ≠ 0 := by
-    intro z hz
-    exact hball ⟨(mem_sphere.mp hz).trans_lt hrR, ne_of_mem_sphere hz hr.ne'⟩
-  have hFn : ∀ᶠ n in l, AnalyticOnNhd ℂ (F n) (closedBall c r) :=
-    hF.mono (fun _ hn ↦ (hn.analyticOnNhd hU).mono hKU)
-  have he := eventually_exists_zero_of_tendstoUniformlyOn hr hFn
-    (hf.continuousOn.mono hKU) hzero hb
-    ((tendstoLocallyUniformlyOn_iff_tendstoUniformlyOn_of_compact
-      (isCompact_closedBall c r)).mp (hlim.mono hKU))
-  obtain ⟨n, ⟨z, hz, hnz⟩, hn⟩ := (he.and hne).exists
-  exact hn z (hKU (ball_subset_closedBall hz)) hnz
+  simpa only [Set.EqOn, Pi.zero_apply] using (TauCeti.hurwitz hU hconn hF hlim hne).symm
 
 /-- A locally uniform limit of injective holomorphic functions on a connected open set
 is constant or injective.
+
+This adapts the Tau Ceti contributors' `TauCeti.hurwitz_injOn` from
+`TauCeti.Analysis.Complex.Conformal.Hurwitz`; the mathematical proof is imported.
 
 Related formalizations: Vincent Beffara's RMT4 and Yury Kudryashov's Mathlib PR #33505. See
 `CREDITS.md`. -/
@@ -151,32 +139,6 @@ theorem eqOn_const_or_injOn_of_tendstoLocallyUniformlyOn
     (hinj : ∀ᶠ n in l, InjOn (F n) U)
     (hlim : TendstoLocallyUniformlyOn F f l U) :
     (∃ v : ℂ, EqOn f (fun _ ↦ v) U) ∨ InjOn f U := by
-  by_cases hconst : ∃ v : ℂ, EqOn f (fun _ ↦ v) U
-  · exact Or.inl hconst
-  right
-  intro a ha b hb hab
-  by_contra hne
-  have hV : IsOpen (U \ {a}) := hU.sdiff isClosed_singleton
-  obtain ⟨r, hr, hsub⟩ := Metric.isOpen_iff.mp hV b ⟨hb, Ne.symm hne⟩
-  have hballU : ball b r ⊆ U := fun z hz ↦ (hsub hz).1
-  have hFd : ∀ᶠ n in l, DifferentiableOn ℂ (fun z ↦ F n z - F n a) (ball b r) :=
-    hF.mono (fun n hn ↦ (hn.mono hballU).sub_const (F n a))
-  have hFn : ∀ᶠ n in l, ∀ z ∈ ball b r, F n z - F n a ≠ 0 := by
-    filter_upwards [hinj] with n hn z hz
-    exact sub_ne_zero.mpr (fun he ↦ (hsub hz).2 (hn (hballU hz) ha he))
-  have hlim' : TendstoLocallyUniformlyOn (fun n z ↦ F n z - F n a)
-      (fun z ↦ f z - f a) l (ball b r) :=
-    (hlim.sub ((hlim.tendsto_at ha).tendstoUniformlyOn_const U).tendstoLocallyUniformlyOn).mono
-      hballU
-  have he : EqOn (fun z ↦ f z - f a) 0 (ball b r) :=
-    (eqOn_zero_or_forall_ne_zero_of_tendstoLocallyUniformlyOn isOpen_ball
-      (convex_ball b r).isPreconnected hFd hFn hlim').resolve_right (fun h ↦
-        h b (mem_ball_self hr) (sub_eq_zero.mpr hab.symm))
-  have he' : f =ᶠ[𝓝 b] (fun _ ↦ f a) := by
-    filter_upwards [ball_mem_nhds b hr] with z hz
-    exact sub_eq_zero.mp (he hz)
-  have hf := (hlim.differentiableOn hF hU).analyticOnNhd hU
-  exact hconst ⟨f a, hf.eqOn_of_preconnected_of_eventuallyEq
-    analyticOnNhd_const hconn hb he'⟩
+  simpa only [Set.EqOn] using (TauCeti.hurwitz_injOn hU hconn hF hlim hinj).symm
 
 end Complex

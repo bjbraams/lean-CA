@@ -12,6 +12,13 @@ public import Mathlib.Analysis.Calculus.ContDiff.Operations
 /-!
 # Integrating exact one-forms along curves
 
+Related work on the curve-integral API includes
+[Mathlib PR #39524](https://github.com/leanprover-community/mathlib4/pull/39524),
+line-segment integrability and the fundamental theorem of calculus by FordUniver, and
+[Mathlib PR #39254](https://github.com/leanprover-community/mathlib4/pull/39254),
+complex contour integrals by Yury Kudryashov. Our code here will be reviewed upon the
+anticipated adoption of those PRs, comparing the results and their assumptions separately.
+
 The fundamental theorem for Mathlib's `curveIntegral`: integration of the derivative of a
 potential gives its endpoint difference. The potential may take values in a Banach space and
 the source may be any real or complex normed space. The basic result assumes differentiability

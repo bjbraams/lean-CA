@@ -7,18 +7,23 @@ module
 
 public import ToMathlib.Analysis.Holomorphic.NormalFamily
 public import ComplexAnalysis.FunctionSpace
+public import TauCeti.Analysis.Complex.Conformal.Montel.Basic
 
 /-!
 # Montel's theorem in one variable
 
 A compact-locally bounded family of holomorphic maps with finite-dimensional target has
 compact closure. Every such sequence has a locally uniformly convergent subsequence with
-holomorphic limit. All compactness arguments are shared with SCV through `Analysis`.
+holomorphic limit. The bundled compactness results are shared with SCV through `Analysis`.
+The ambient-function subsequence theorem adapts the Tau Ceti contributors' `TauCeti.montel`
+from `TauCeti.Analysis.Complex.Conformal.Montel.Basic`, retaining finite-dimensional targets.
 
 ## Main results
 
-* `Complex.isCompact_closure_of_holomorphic_bounded_on_compacts`: **Montel's theorem** in the
-  compact-open holomorphic function space.
+* `Complex.isCompact_closure_of_holomorphic_bounded_on_compacts`: the shared Montel
+  theorem, with bounds directly on compact subsets of the domain.
+* `Complex.isCompact_closure_of_holomorphic_bounded_on_compacts_of_openExtension`: the
+  variant using bounds for the ambient extension by zero.
 * `Complex.exists_subseq_tendstoLocallyUniformlyOn_of_bounded_on_compacts`: A compact-locally
   bounded sequence of holomorphic functions has a locally uniformly convergent subsequence with
   holomorphic limit.
@@ -39,18 +44,23 @@ namespace Complex
 variable {F : Type*} [NormedAddCommGroup F] [NormedSpace ℂ F]
   [CompleteSpace F] [FiniteDimensional ℂ F]
 
-/-- **Montel's theorem** in the compact-open holomorphic function space.
+/-- **Montel's theorem** with compact-local bounds on the ambient extension by zero.
 
 A scalar version is formalized in Vincent Beffara's RMT4. See `CREDITS.md`. -/
-theorem isCompact_closure_of_holomorphic_bounded_on_compacts
+theorem isCompact_closure_of_holomorphic_bounded_on_compacts_of_openExtension
     {U : TopologicalSpace.Opens ℂ} {S : Set (HolomorphicMap U F)}
     (hb : ∀ K ⊆ (U : Set ℂ), IsCompact K → ∃ M : ℝ,
       ∀ f ∈ S, ∀ z ∈ K, ‖openExtension U f.val z‖ ≤ M) : IsCompact (closure S) :=
   isCompact_closure_of_holomorphic_bounded_on_compacts_of_isClosed
     (isClosed_holomorphicSubmodule U) hb
 
+-- Retain the existing completeness parameter in the public interface.
+set_option linter.unusedSectionVars false in
 /-- A compact-locally bounded sequence of holomorphic functions has a locally uniformly
 convergent subsequence with holomorphic limit.
+
+This adapts the Tau Ceti contributors' `TauCeti.montel` from
+`TauCeti.Analysis.Complex.Conformal.Montel.Basic`; the compactness proof is imported.
 
 Scalar counterparts appear in Vincent Beffara's RMT4 and the `phasetr/ising-model` project. See
 `CREDITS.md`. -/
@@ -60,18 +70,8 @@ theorem exists_subseq_tendstoLocallyUniformlyOn_of_bounded_on_compacts
     (hb : ∀ K ⊆ U, IsCompact K → ∃ M : ℝ, ∀ n, ∀ z ∈ K, ‖f n z‖ ≤ M) :
     ∃ (g : ℂ → F) (φ : ℕ → ℕ), StrictMono φ ∧ DifferentiableOn ℂ g U ∧
       TendstoLocallyUniformlyOn (fun n ↦ f (φ n)) g atTop U := by
-  let V : TopologicalSpace.Opens ℂ := ⟨U, hU⟩
-  let s (n : ℕ) := holomorphicMapOfAnalyticOnNhd V (f n) ((hf n).analyticOnNhd hU)
-  obtain ⟨g, φ, hφ, hlim⟩ :=
-    exists_subseq_tendsto_of_holomorphic_bounded_on_compacts_of_isClosed
-      (isClosed_holomorphicSubmodule V) s (by
-        intro K hKU hK
-        obtain ⟨M, hM⟩ := hb K hKU hK
-        refine ⟨M, fun n z hz ↦ ?_⟩
-        rw [openExtension_apply V _ (hKU hz)]
-        exact hM n z hz)
-  refine ⟨openExtension V g.val, φ, hφ, g.property.differentiableOn, ?_⟩
-  exact (holomorphicMap_tendsto_iff.mp hlim).congr (fun n z hz ↦ by
-    rw [openExtension_apply V _ hz]; rfl)
+  obtain ⟨φ, g, hφ, hg, hlim⟩ :=
+    TauCeti.montel hU hf (TauCeti.isLocallyBoundedOn_def.mpr hb)
+  exact ⟨g, φ, hφ, hg, hlim⟩
 
 end Complex

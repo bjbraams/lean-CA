@@ -10,6 +10,13 @@ public import ToMathlib.Analysis.Integral.CurveIntegral
 /-!
 # Pullback of one-forms along mapped paths
 
+Related work on the curve-integral API includes
+[Mathlib PR #39524](https://github.com/leanprover-community/mathlib4/pull/39524),
+line-segment integrability and the fundamental theorem of calculus by FordUniver, and
+[Mathlib PR #39254](https://github.com/leanprover-community/mathlib4/pull/39254),
+complex contour integrals by Yury Kudryashov. Our code here will be reviewed upon the
+anticipated adoption of those PRs, comparing the results and their assumptions separately.
+
 Mapping a differentiable path through a differentiable function pulls back a
 one-form by composition with the derivative. The change-of-variables identity
 holds for the totalized curve integral, without continuity of the form or an

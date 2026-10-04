@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import ToMathlib.Analysis.Holomorphic.FunctionSpace
+public import ToMathlib.Analysis.Holomorphic.LocallyUniformLimit
 public import ToMathlib.Analysis.Holomorphic.NormalFamily
 public import ToMathlib.Analysis.Integral.CompactSupport
 public import ToMathlib.Analysis.Integral.CurveIntegral
@@ -30,7 +31,10 @@ Mathlib.
 This module re-exports the following developments:
 
 * `ToMathlib.Analysis.Holomorphic.FunctionSpace`: Shared spaces of holomorphic maps.
-* `ToMathlib.Analysis.Holomorphic.NormalFamily`: Shared Montel and Vitali arguments.
+* `ToMathlib.Analysis.Holomorphic.LocallyUniformLimit`: Closedness and completeness on
+  open subsets of the complex plane, with Banach targets.
+* `ToMathlib.Analysis.Holomorphic.NormalFamily`: Montel and Vitali theorems on planar
+  domains, and conditional versions for general finite-dimensional sources.
 * `ToMathlib.Analysis.Integral.CompactSupport`: Integration helpers for compactly supported
   and weighted functions.
 * `ToMathlib.Analysis.Integral.CurveIntegral`: Integrating exact one-forms along curves.

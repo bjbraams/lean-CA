@@ -1,7 +1,8 @@
 # Complex analysis of one variable
 
 A Lean 4 formalization of fundamental complex analysis of one variable. The project builds on
-Mathlib and is written as a potential Mathlib contribution.
+Mathlib, with pinned TauCeti modules available as an additional source of results, and is written
+as a potential Mathlib contribution.
 
 ## Organization
 
@@ -32,13 +33,26 @@ pass to improper limits when the endpoint-track integrals vanish.
 Exterior-path support proves escape to infinity and endpoint formulas for exact integrals;
 general pullback and improper-integration results live in `ToMathlib.Analysis`.
 
-`ToMathlib` depends only on Mathlib. `ComplexAnalysis` builds on it.
+`ToMathlib` may depend on Mathlib and TauCeti. `ComplexAnalysis` builds on it and may also
+import either external library directly.
 
 Each directory has a matching umbrella module (`ToMathlib.lean`, with `ToMathlib/Analysis.lean`
 and `ToMathlib/Topology.lean`, and `ComplexAnalysis.lean`). `LeanCA.lean` imports both.
 
 The file [STRUCTURE.md](STRUCTURE.md) provides a more detailed description of the project
 organization. It is written for potential future developers.
+
+## Dependencies and building
+
+Run `lake build` from the project root. The project uses Lean `v4.35.0-rc3`, Mathlib revision
+`5e0c4e5239cb0a2d86d68a884bf52cfd963fce22`, and TauCeti revision
+`a780c7ad6beb23f60a17351a492d177878020ad5`, matching the pins used in `lean-LCS`.
+
+Prefer existing results in Mathlib, then the pinned TauCeti, before developing local proofs.
+Import specific modules, for example
+`public import TauCeti.Analysis.Complex.Conformal.Montel.Basic`;
+`import TauCeti` does not re-export the library. TauCeti prerequisites must be resolved when
+preparing a contribution to Mathlib itself.
 
 ## Development process, AI disclosure
 

@@ -13,6 +13,76 @@ statement docstrings; the comparisons and sources are collected here. Similar st
 names, or classical proof strategies do not establish copying. Source authorship headers
 have therefore not been changed.
 
+## TauCeti results adopted on 4 October 2026
+
+The modules below now import results by **the Tau Ceti contributors** at the pinned revision
+`a780c7ad6beb23f60a17351a492d177878020ad5`. These are uses of imported proofs, with small
+adapters preserving the existing local theorem statements. They replace the previous local
+proofs; the historical overlap acknowledgments below remain relevant.
+
+- [RiemannMapping.lean](ComplexAnalysis/RiemannMapping.lean):
+  `Complex.exists_riemannMap` uses `TauCeti.exists_isNormalizedRiemannMapOn` from
+  [RiemannMapping.Normalization][tau-rmt-normalization]. The unused local extremal-family
+  construction and its helper theorems have been removed.
+- [Hurwitz.lean](ComplexAnalysis/Hurwitz.lean): the zero-free and injective-limit conclusions
+  use `TauCeti.hurwitz` and `TauCeti.hurwitz_injOn` from [Conformal.Hurwitz][tau-hurwitz],
+  retaining arbitrary nontrivial filters. The other disk-level helpers remain local.
+- [Montel.lean](ComplexAnalysis/Montel.lean):
+  `Complex.exists_subseq_tendstoLocallyUniformlyOn_of_bounded_on_compacts` uses `TauCeti.montel`
+  from [Montel.Basic][tau-montel], retaining finite-dimensional complex vector targets.
+  The shared bundled-map, general-source and Vitali development remains local.
+
+- [Injective.lean](ComplexAnalysis/Injective.lean): `Complex.deriv_ne_zero_of_injOn`
+  uses `TauCeti.deriv_ne_zero_of_injOn` from [Conformal.LocalDegree][tau-local-degree].
+  The unused derivative-vanishing helper was removed; the nonconstancy helper remains because
+  `HolomorphicInverse` and `UnivalentDisk.Geometry` use it.
+- [Subharmonic/SmoothCriterion.lean](ComplexAnalysis/Subharmonic/SmoothCriterion.lean):
+  `Complex.laplacian_normSq_sub` specializes the squared-norm and translation lemmas from
+  [Laplacian.Basic][tau-laplacian-basic]. The submean and smooth-criterion development remains local.
+
+The shared `Injective` and `Subharmonic/SmoothCriterion` files are synchronized byte for
+byte with the copies used in `../lean-SCV`.
+
+The remaining replacements from review points 4–6 are also implemented:
+
+- [HolomorphicInverse.lean](ComplexAnalysis/HolomorphicInverse.lean): inverse continuity,
+  holomorphy and derivative use `DifferentiableOn.invFunOn` and
+  `TauCeti.hasDerivAt_invFunOn` from [Inverse.Function][tau-inverse].
+- [SchwarzPick.lean](ComplexAnalysis/SchwarzPick.lean): both inequalities use
+  `TauCeti.pseudoHyperbolicExpr_map_le` and `TauCeti.norm_deriv_div_one_sub_norm_sq_le`
+  from [SchwarzPick.Derivative][tau-schwarz-pick]. The unused local conjugation construction
+  and its helpers have been removed.
+- [DiscAutomorphism.lean](ComplexAnalysis/DiscAutomorphism.lean): the normalized rotation
+  result uses `TauCeti.exists_eqOn_const_mul_of_leftInvOn_ball_of_map_zero` from
+  [UnitDisc.Automorphism.Rotation][tau-rotation]. The local Möbius classification and
+  normalized Riemann-map uniqueness build on this adapter.
+- [Harnack.lean](ComplexAnalysis/Harnack.lean): the open-disc inequality uses
+  `TauCeti.harnack_inequality_center` from [Harnack.Planar][tau-harnack]. The local
+  boundary-value inequality and Poisson-kernel results remain.
+- [Reflection.lean](ComplexAnalysis/Reflection.lean): continuity and analyticity use
+  `TauCeti.continuousOn_schwarzReflection_of_symmetric` and
+  `TauCeti.differentiableOn_schwarzReflection_of_symmetric` from
+  [Reflection.Principle][tau-reflection], with the existing local extension definition.
+- [HalfPlane.lean](ComplexAnalysis/HalfPlane.lean): the quotient criterion uses
+  `TauCeti.div_mem_slitPlane_of_re_pos` from [Complex.SlitPlane][tau-slit-plane].
+  The product, square-root sector and finite-family geometry remain local.
+
+All retained theorem statements and hypotheses are unchanged. These six modules are not
+part of the subset used by `../lean-SCV`, so no additional copies are introduced there.
+
+[tau-inverse]: https://github.com/TauCetiProject/TauCeti/blob/a780c7ad6beb23f60a17351a492d177878020ad5/TauCeti/Analysis/Complex/Conformal/Inverse/Function.lean
+[tau-schwarz-pick]: https://github.com/TauCetiProject/TauCeti/blob/a780c7ad6beb23f60a17351a492d177878020ad5/TauCeti/Analysis/Complex/Conformal/SchwarzPick/Derivative.lean
+[tau-rotation]: https://github.com/TauCetiProject/TauCeti/blob/a780c7ad6beb23f60a17351a492d177878020ad5/TauCeti/Analysis/Complex/Conformal/UnitDisc/Automorphism/Rotation.lean
+[tau-harnack]: https://github.com/TauCetiProject/TauCeti/blob/a780c7ad6beb23f60a17351a492d177878020ad5/TauCeti/Analysis/PDE/Harnack/Planar.lean
+[tau-reflection]: https://github.com/TauCetiProject/TauCeti/blob/a780c7ad6beb23f60a17351a492d177878020ad5/TauCeti/Analysis/Complex/Conformal/Reflection/Principle.lean
+[tau-slit-plane]: https://github.com/TauCetiProject/TauCeti/blob/a780c7ad6beb23f60a17351a492d177878020ad5/TauCeti/Analysis/Complex/SlitPlane.lean
+
+[tau-local-degree]: https://github.com/TauCetiProject/TauCeti/blob/a780c7ad6beb23f60a17351a492d177878020ad5/TauCeti/Analysis/Complex/Conformal/LocalDegree.lean
+[tau-laplacian-basic]: https://github.com/TauCetiProject/TauCeti/blob/a780c7ad6beb23f60a17351a492d177878020ad5/TauCeti/Analysis/InnerProductSpace/Laplacian/Basic.lean
+[tau-rmt-normalization]: https://github.com/TauCetiProject/TauCeti/blob/a780c7ad6beb23f60a17351a492d177878020ad5/TauCeti/Analysis/Complex/Conformal/RiemannMapping/Normalization.lean
+[tau-hurwitz]: https://github.com/TauCetiProject/TauCeti/blob/a780c7ad6beb23f60a17351a492d177878020ad5/TauCeti/Analysis/Complex/Conformal/Hurwitz.lean
+[tau-montel]: https://github.com/TauCetiProject/TauCeti/blob/a780c7ad6beb23f60a17351a492d177878020ad5/TauCeti/Analysis/Complex/Conformal/Montel/Basic.lean
+
 ## Closest theorem matches
 
 ### Riemann mapping, Hurwitz, and normal families
