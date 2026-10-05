@@ -129,8 +129,7 @@ assumes `-r ∉ U`; `Complex.eventually_sum_divisor_eq_of_tendstoUniformlyOn` as
 convergence only on the circle; the curve-index results of `CurveIndex.Continuity`,
 `Complex.curveIndex_eq_of_continuous_homotopy` and the curve-integral results of
 `LogDerivIntegral` assume piecewise `C¹` loops; Montel and Vitali in `ComplexAnalysis` drop the
-redundant `CompleteSpace` assumption (implied by finite dimensionality), with the matching
-Challenge statements. New local results: `Complex.exists_eqOn_real_mobius_of_leftInverse`,
+redundant `CompleteSpace` assumption (implied by finite dimensionality). New local results: `Complex.exists_eqOn_real_mobius_of_leftInverse`,
 `Complex.exists_harmonicOnNhd_tendsto_of_isBarrier` and
 `Complex.exists_greenFunction_of_isBarrier`. None of these modules is part of the subset used by
 `../lean-SCV`.

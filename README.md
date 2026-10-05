@@ -94,8 +94,10 @@ See [SYNOPSIS.md](SYNOPSIS.md).
 
 ## Headline results
 
-`Challenge.lean` states 45 headline results over Mathlib alone, with copies of the few
-supporting definitions they need, and `Solution.lean` proves them from the library. The Lean
+`Challenge.lean` states 24 headline results over Mathlib alone, with copies of the few
+supporting definitions they need, and `Solution.lean` proves them from the library. The selection
+omits results that are available in Mathlib or in the pinned TauCeti, so that it shows what this
+project contributes. The Lean
 comparator, configured by `comparator.json`, checks that the two files state the same theorems
 and that the proofs use only the standard axioms. `formalization.yaml` records the source of
 each result in the references and the corresponding library declaration.

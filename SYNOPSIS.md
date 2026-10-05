@@ -15,6 +15,13 @@ Mathlib supplies complex arithmetic, differentiation and power series, the ident
 principles, local Cauchy theory, removable singularities, Liouville's theorem, Schwarz's lemma,
 and basic meromorphic-function theory. It also supplies Jensen's formula, Borel–Carathéodory,
 Poisson representation, and Phragmén–Lindelöf estimates. The project extends these foundations.
+Some results below are proved in the pinned TauCeti library and stated here in the project's
+interfaces: the Riemann mapping theorem and its uniqueness, the classification of disc
+automorphisms, Schwarz–Pick, Hurwitz's zero-free and injective-limit theorems, Rouché's
+theorem, the local mapping theorem, Montel's subsequence theorem, inverses of injective
+holomorphic maps, homotopy invariance of the winding number, the open-disc Harnack inequality
+and real-axis Schwarz reflection. [STRUCTURE.md](STRUCTURE.md) lists these adaptations; the
+account below does not distinguish them by provenance.
 
 Domains are open subsets of the complex plane; connectedness or simple connectedness is
 assumed when needed. Functions are complex-valued unless another target is specified.
@@ -135,7 +142,7 @@ $$
 \qquad |f(z)|\le\frac{r}{(1-r)^2}.
 $$
 
-The lower growth estimate is not yet included. Neither the general Bieberbach coefficient
+The lower growth estimate is not included. Neither the general Bieberbach coefficient
 theorem nor boundary extension of Riemann maps to arbitrary Jordan boundaries is asserted.
 
 ## Harmonic functions and boundary behavior
@@ -157,7 +164,8 @@ logarithmic singularity at its pole. Symmetry and strict positivity are not esta
 Removability under continuity covers countable sets, analytic zero sets, and gluing across
 the real axis. Schwarz reflection covers the real axis and circles, the latter on
 inversion-invariant domains avoiding the centre. Analytic continuation is unique
-along a fixed path; general monodromy remains outside the development. The series
+along a fixed path. Along a continuous path, such a continuation is one in the sense of TauCeti,
+whose library proves the monodromy theorem; no monodromy statement is made here. The series
 $\sum_{n\ge0}z^{2^n}$ is shown to have the unit circle as a natural boundary. Pringsheim–Vivanti
 is proved in the form that a holomorphic extension across the positive boundary point of a
 nonnegative-coefficient power series forces convergence at a larger positive real argument.
@@ -166,7 +174,7 @@ nonnegative-coefficient power series forces convergence at a larger positive rea
 
 There are cross-ratio identities and preservation of generalized circles for Möbius maps,
 chordal-distance formulas on the extended plane, and inversion invariance of the spherical
-derivative. These do not yet supply a normal-family theory for meromorphic maps or Marty's
+derivative. These do not supply a normal-family theory for meromorphic maps or Marty's
 criterion.
 
 The circle Sokhotski–Plemelj result identifies the interior and exterior Cauchy integrals with
@@ -180,7 +188,7 @@ the full $L^2$ characterization.
 Entire doubly periodic functions are constant. The period-parallelogram index and cancellation
 of opposite-edge integrals are also proved, for Banach-valued periodic functions continuous
 on the boundary of the parallelogram. The meromorphic residue-sum and equal-zero/pole-count theorems for elliptic
-functions remain unassembled.
+functions are not assembled.
 
 Other substantial topics in the references that this library does not develop include Picard,
 Bloch and Schottky theorems, general reflection across analytic arcs, Schwarz–Christoffel
@@ -205,7 +213,7 @@ content of the statements, not identity of proof or complete chapter coverage.
 | [Conway, *Functions of One Complex Variable II* (1995)](ComplexAnalysis/References/Conway1995FunctionsOfOneComplexVariable2-SpringerGTM159.pdf), Chapters 13–15, 20–21 | Selected overlap: reflection, the area and univalent estimates of 14 §§6–7, and bounded-function Blaschke factorization related to 20. The prime-end, multiply connected, Hardy-space, and capacity theories are not supplied. Perron and Green-function results also overlap parts of Chapter 19. |
 | [Gamelin, *Complex Analysis* (2001)](ComplexAnalysis/References/Gamelin2001ComplexAnalysis-Springer.UTM.pdf), Chapters II–VII | The basic function, integration, Laurent, and residue theory is shared with Mathlib and extended here. Later overlap includes zero counting, Schwarz–Pick, Riemann mapping, approximation, and parts of the Dirichlet theory; meromorphic compactness and the full boundary theory remain outside scope. |
 | [Heins, *Complex Function Theory* (1968)](ComplexAnalysis/References/Heins1968ComplexFunctionTheory-AcademicPress), Chapters IV–VIII | Cauchy theory, Laurent expansions, residues, and prescribed principal parts are represented. The general open-domain divisor-realization theory goes beyond the entire and disc product constructions here. |
-| [Lang, *Complex Analysis*, 4th ed. (1999)](ComplexAnalysis/References/Lang1999ComplexAnalysis4thEd-SpringerGTM103.pdf), Chapters I–XIII | I–II are predominantly Mathlib foundations. III–VIII closely match the integration, homology, singularity, conformal, and harmonic core. IX–XI are partial: line/circle reflection, Riemann mapping, and fixed-path continuation uniqueness are present; general arc reflection, boundary extension, and monodromy are absent. XII is selective; XIII has substantial product, finite-order, and Mittag-Leffler coverage. |
+| [Lang, *Complex Analysis*, 4th ed. (1999)](ComplexAnalysis/References/Lang1999ComplexAnalysis4thEd-SpringerGTM103.pdf), Chapters I–XIII | I–II are predominantly Mathlib foundations. III–VIII closely match the integration, homology, singularity, conformal, and harmonic core. IX–XI are partial: line/circle reflection, Riemann mapping, and fixed-path continuation uniqueness are present; general arc reflection and boundary extension are absent, and monodromy is available only through TauCeti's continuation predicate. XII is selective; XIII has substantial product, finite-order, and Mittag-Leffler coverage. |
 | [Simon, *A Comprehensive Course in Analysis*, Part 2A (2015), companion booklet](ComplexAnalysis/References/Simon2015ComprehensiveCourseAnalysisCompanion-AMS.pdf), Chapters 2–4 | The chapter topics align with local Cauchy theory, singularities, indices, homological Cauchy theory, and Runge. The available PDF contains contents and indices, not the text of Part 2A, so this is a topic-level comparison only. |
 | [Stein–Shakarchi, *Complex Analysis* (2003)](ComplexAnalysis/References/SteinShakarchi2003PrincetonLecturesAnalysis2ComplexAnalysis-PrincetonUniversityPress.pdf), Chapters 2–3 | Cauchy theory, branches, residues, and the argument principle are represented, using Mathlib for much of the local foundation. Further overlap includes finite-order factorization in Chapter 5 and Riemann mapping in Chapter 8; the Chapter 4 Paley–Wiener result is partial. |
 | [Remmert, *Theory of Complex Functions* (1991)](ComplexAnalysis/References/Remmert1991TheoryOfComplexFunctions-SpringerGTM122.pdf), Chapters 6–8 | Integration, primitives, Cauchy estimates, convergence, and local mapping theory are covered jointly with Mathlib. The project emphasizes general interfaces rather than the book's historical material and worked examples. |

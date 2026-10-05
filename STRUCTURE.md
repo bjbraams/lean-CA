@@ -7,8 +7,9 @@ kept separate from the complex-specific results.
 
 ## Package and imports
 
-Lean and Mathlib are pinned to `v4.35.0-rc2` in [lean-toolchain](lean-toolchain) and
-[lakefile.toml](lakefile.toml). The Lake package and default library target are named `LeanCA`.
+Lean is pinned to `v4.35.0-rc3` in [lean-toolchain](lean-toolchain); Mathlib and TauCeti are
+pinned in [lakefile.toml](lakefile.toml). The Lake package and default library target are named
+`LeanCA`.
 The two source roots have matching umbrella modules; `ToMathlib` has two parts:
 
 | Root | Role | Project dependencies |
@@ -17,7 +18,8 @@ The two source roots have matching umbrella modules; `ToMathlib` has two parts:
 | [ToMathlib.Analysis](ToMathlib/Analysis.lean) | Integration, curve integrals and smooth concatenation of paths, Taylor bounds, and holomorphic function spaces | None outside `ToMathlib.Analysis` |
 | [ComplexAnalysis](ComplexAnalysis.lean) | Function theory of one complex variable | `ToMathlib` |
 
-All use Mathlib. `ToMathlib` collects general support intended for Mathlib; its module names
+All use Mathlib, and any of them may import modules of the pinned TauCeti. TauCeti modules are
+imported individually; `import TauCeti` does not re-export the library. `ToMathlib` collects general support intended for Mathlib; its module names
 start with `ToMathlib` to avoid clashes with other packages, while its declarations use Mathlib's
 namespaces, so they would move to Mathlib without renaming. [ToMathlib.lean](ToMathlib.lean)
 imports its two parts, and [LeanCA.lean](LeanCA.lean) imports `ToMathlib` and
@@ -46,31 +48,40 @@ Zero counting, conformal mapping, and factorization use scalar-valued functions.
 `Complex.Cycle` represents a finite family of closed paths. The homological Cauchy and residue
 theorems impose `IsC1`, containment of the cycle range, and vanishing of its index outside the
 domain. They do not require a chosen Jordan interior or a homology-group construction.
-Piecewise-`C¹` closed curves enter through `Loop.piecewise` and `Loop.polygon` (`Cycle.Piecewise`),
-built on `Path.smoothConcat` (`ToMathlib.Analysis.Integral.CurveIntegral.SmoothConcat`); the corresponding
-Cauchy and residue theorems are stated with integrals over the pieces.
+Piecewise-`C¹` closed curves enter through `Loop.piecewise` and `Loop.polygon`
+(`Cycle.Piecewise`), built on `Path.smoothConcat`
+(`ToMathlib.Analysis.Integral.CurveIntegral.SmoothConcat`); the corresponding Cauchy and residue
+theorems are stated with integrals over the pieces.
 Meromorphic orders and divisors use Mathlib's APIs.
 
 `Complex.HolomorphicMap` in `ToMathlib.Analysis.Holomorphic.FunctionSpace` carries the compact-open
 structure, with direct evaluation and restriction. The shared `Holomorphic.LocallyUniformLimit`
 module proves closedness and completeness on planar domains with Banach targets;
 `ComplexAnalysis.FunctionSpace` re-exports it. `Holomorphic.NormalFamily` supplies planar
-Montel and Vitali results, retaining conditional general-source versions for SCV.
+Montel and Vitali results, together with variants for general finite-dimensional sources that
+take closedness as a hypothesis, for several-variable use.
 `ComplexAnalysis.Montel` adapts TauCeti's subsequence selection theorem for ambient functions;
-`Vitali` retains the shared finite-dimensional-target proof. The Montel
+`Vitali` builds on the shared finite-dimensional-target proof. The Montel
 variant with extension-by-zero bounds is named
 `Complex.isCompact_closure_of_holomorphic_bounded_on_compacts_of_openExtension`.
 Compactness and the stated Vitali theorems require finite-dimensional targets.
 
-`ComplexAnalysis.RiemannMapping` adapts TauCeti's normalized Riemann mapping theorem.
-`ComplexAnalysis.Hurwitz` adapts its zero-free and injective-limit theorems for arbitrary
-nontrivial filters, while retaining the local disk zero-persistence and divisor helpers.
-`HolomorphicInverse`, `SchwarzPick` and `DiscAutomorphism` (rotation, classification and
-normalized uniqueness) also adapt TauCeti. `Harnack` uses its open-disc inequality, `Reflection`
-its continuity and reflection principle, and `HalfPlane` its quotient criterion for the slit
-plane. The boundary-value Harnack theorem and the additional half-plane geometry remain local.
+`Complex.SubharmonicOn` is real-valued: it does not admit the value `−∞`.
 
-Further TauCeti bridges connect the local interfaces to TauCeti's contour library:
+### Use of TauCeti
+
+Several modules state results in the project's interfaces and take their proofs from the
+pinned TauCeti. `ComplexAnalysis.RiemannMapping` adapts TauCeti's normalized Riemann mapping
+theorem. `ComplexAnalysis.Hurwitz` adapts its zero-free and injective-limit theorems to
+arbitrary nontrivial filters; the disk zero-persistence and divisor helpers are local.
+`HolomorphicInverse`, `SchwarzPick` and `DiscAutomorphism` (rotation, classification and
+normalized uniqueness) also adapt TauCeti, as does `Injective` for the nonvanishing derivative
+of an injective holomorphic function. `Harnack` uses its open-disc inequality, `Reflection`
+its continuity and reflection principle, `HalfPlane` its quotient criterion for the slit
+plane, and `Subharmonic.SmoothCriterion` its Laplacian lemmas for the squared norm. The
+boundary-value Harnack theorem and the remaining half-plane geometry are proved locally.
+
+TauCeti bridges connect the local interfaces to TauCeti's contour library:
 `Complex.finsum_divisor_eq_finsum_analyticOrderNatAt` (`Rouche`) identifies a divisor degree on
 a closed disk with TauCeti's zero count, so Rouché's theorem and `LocalMapping` are adapters;
 `Complex.curveIntegral_sub_inv_eq_two_pi_I_mul_windingNumber` (`LogDerivIntegral`) and
@@ -78,13 +89,13 @@ a closed disk with TauCeti's zero count, so Rouché's theorem and `LocalMapping`
 `C¹` loop with TauCeti's winding number, giving integrality, local constancy, vanishing on the
 unbounded component and continuous homotopy invariance; and
 `Complex.residue_eq_contour_residue` (`Residue.Meromorphic`) identifies the local residue with
-TauCeti's on meromorphic germs. The local residue remains the more general definition
-(Banach-valued, essential singularities allowed), as do the local homology Cauchy and residue
-theorems for cycles. `Cayley` uses Mathlib's `UpperHalfPlane.upperHalfPlaneSet` and TauCeti's
-Cayley-transform lemmas. These modules import the pinned TauCeti proofs; see `CREDITS.md` for
-their sources.
-
-`Complex.SubharmonicOn` is real-valued: it does not admit the value `−∞`.
+TauCeti's on meromorphic germs, so that `Residue.LogDeriv` imports the residue of a
+logarithmic derivative. The local residue is the more general definition (Banach-valued,
+essential singularities allowed), and the homology Cauchy and residue theorems for cycles are
+proved locally. `AnalyticContinuation` passes from its continuation predicate to TauCeti's
+along continuous paths. `Cayley` uses Mathlib's `UpperHalfPlane.upperHalfPlaneSet` and TauCeti's
+Cayley-transform lemmas. Module docstrings name the TauCeti results used; see
+[CREDITS.md](CREDITS.md) for their sources.
 
 ## Where to work
 
@@ -94,7 +105,7 @@ family of modules; consult its source files for the individual declarations.
 | Development | Main modules | Interface and dependencies |
 | --- | --- | --- |
 | Primitives and branches | `HasPrimitives`, `HasPrimitives/Pullback`, `BranchLog`, `BranchLog/` | Local-to-global primitives use `ToMathlib.Topology.LocallyConstantGluing`; logarithms use Mathlib covering-space machinery. Includes normalized logarithms, roots, parameter dependence, and homotopy lifts. |
-| Contours and Cauchy theory | `CauchyIntegral`, `CauchyFormula`, `CurveIndex`, `CurveIndex/`, `Integral/`, `Cycle`, `Cycle/`, `PolygonIntegral` | Endpoint and deformation identities, winding numbers, and Cauchy theory on simply connected sets and null-homologous cycles. |
+| Contours and Cauchy theory | `CauchyIntegral`, `CauchyFormula`, `CurveIndex`, `CurveIndex/`, `LogDerivIntegral`, `Integral/`, `Cycle`, `Cycle/`, `PolygonIntegral` | Endpoint and deformation identities, winding numbers, and Cauchy theory on simply connected sets and null-homologous cycles. |
 | Local theory and residues | `CauchyDerivatives`, `CauchyEstimates`, `CauchySeries`, `LaurentSeries`, `LaurentSeries/`, `Residue`, `Residue/`, `ResidueAtInfinity`, `EssentialSingularity` | Banach-valued expansions and estimates; isolated singularities, principal parts, and residues, including infinity. |
 | Zeros and convergence | `ArgumentPrinciple`, `Rouche`, `Hurwitz`, `Injective`, `ZeroPersistence`, `LocalMapping`, `LocallyUniform`, `FunctionSpace`, `Montel`, `Vitali` | Divisor counts, local multiplicity, persistence of zeros, derivative convergence, and normal families. |
 | Approximation | `CauchyPompeiu`, `CauchyTransform`, `Runge/`, `MittagLeffler` | Cauchy transforms and cutoffs feed Runge approximation; compact exhaustions give open-set approximation and prescribed principal parts. Main endpoints: `runge`, `runge_isOpen`, `mittagLeffler`. |
@@ -113,7 +124,7 @@ infinity. `ParametricIntegral` and `HolomorphicIntegral` handle complex paramete
 
 ## Boundaries of the current APIs
 
-The theorem statements, rather than filenames or older module summaries, determine coverage.
+The theorem statements, rather than filenames or module summaries, determine coverage.
 The following distinctions matter when reusing results or preparing an upstream contribution:
 
 - `HasExpRpowBound f ρ` means an explicit bound `‖f z‖ ≤ A * exp (B * ‖z‖ ^ ρ)`, and
@@ -121,7 +132,7 @@ The following distinctions matter when reusing results or preparing an upstream 
   is the classical order condition. Hadamard factorization assumes `HasOrderLE f ρ` with
   `ρ < k + 1` and gives a polynomial exponent of degree at most `k`.
   `exists_hadamard_factorization` constructs a countable zero family, allowing finite and empty
-  families; the earlier `hadamard_factorization` takes that family as input.
+  families; `hadamard_factorization` takes that family as input.
 - `exists_rieszFactorization` includes zeros at the origin and constructs the remaining zeros
   with multiplicity. Its cofactor retains the bound on the original function. This is the
   bounded holomorphic case, not the full Hardy-space inner–outer factorization theory.
@@ -162,6 +173,7 @@ The mathematical account is [SYNOPSIS.md](SYNOPSIS.md).
 Mathlib supplies the basic analytic and meromorphic APIs, local Cauchy theory, identity and
 maximum principles, Liouville, Schwarz, locally uniform holomorphic limits, Jensen,
 Borel–Carathéodory, Poisson representation, and Phragmén–Lindelöf. The project builds its global
-contour, approximation, factorization, and mapping results on those foundations. These are
-potential Mathlib contributions; inclusion here is not a claim that every auxiliary lemma is
-absent from Mathlib.
+contour, approximation, factorization, and mapping results on those foundations, and uses the
+TauCeti results listed above. These are potential Mathlib contributions; inclusion here is not a
+claim that every auxiliary lemma is absent from Mathlib. Modules that import TauCeti need its
+prerequisites resolved before they are proposed to Mathlib.
