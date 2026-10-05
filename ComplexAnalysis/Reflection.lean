@@ -14,8 +14,8 @@ public import TauCeti.Analysis.Complex.Conformal.Reflection.Principle
 A function holomorphic above the real axis, continuous up to the axis, and real-valued
 on it extends holomorphically to a conjugation-invariant open domain. Below the axis the
 extension is `conj (f (conj z))`. Continuity and analyticity use the imported proofs of the
-Tau Ceti contributors in `TauCeti.Analysis.Complex.Conformal.Reflection.Principle`, adapted
-to the existing local definition of the extension.
+Tau Ceti contributors in `TauCeti.Analysis.Complex.Conformal.Reflection.Principle`, applied to
+the extension `Complex.schwarzReflection` defined here.
 
 ## Main results
 

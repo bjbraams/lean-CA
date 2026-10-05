@@ -17,7 +17,7 @@ with positive real derivative there.
 This file adapts `TauCeti.exists_isNormalizedRiemannMapOn`, by the Tau Ceti contributors,
 from `TauCeti.Analysis.Complex.Conformal.RiemannMapping.Normalization`. The imported theorem
 supplies the normalized map; the adapter expresses its positive complex derivative as an
-explicit positive real number. The former local extremal-family proof is no longer needed.
+explicit positive real number.
 
 ## Main results
 

@@ -13,12 +13,11 @@ public import TauCeti.Analysis.Contour.Winding.Number.Homotopy
 # Homotopy invariance of the analytic curve index
 
 The analytic index of piecewise `C¹` loops is unchanged by a continuous based homotopy
-avoiding the pole. In particular it vanishes for a loop contractible in the
-punctured plane. The continuous statements adapt the homotopy invariance of the winding number
-by the Tau Ceti contributors (`TauCeti.Analysis.Contour.Winding.Number.Homotopy`). The older
-`C²` homotopy statements remain available. These are
-statements about the analytic curve index; no index for arbitrary continuous
-loops is introduced here.
+avoiding the pole. In particular it vanishes for a loop contractible in the punctured plane.
+The continuous statements adapt the homotopy invariance of the winding number by the Tau Ceti
+contributors (`TauCeti.Analysis.Contour.Winding.Number.Homotopy`). Versions for `C²` homotopies
+follow directly from the homotopy form of Cauchy's theorem. These are statements about the
+analytic curve index; no index for arbitrary continuous loops is introduced here.
 
 ## Main results
 
