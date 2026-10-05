@@ -111,7 +111,7 @@ theorem exists_greenFunction_of_isBarrier (hU : IsOpen U) (hUb : Bornology.IsBou
       ring
     rw [harmonicAt_congr_nhds hev]
     exact h1.sub h2
-  have hsubMinus : SubharmonicOn (fun z ↦ -G z) (U \ {w}) := hharmMinus.subharmonicOn hPO
+  have hsubMinus : SubharmonicOn (fun z ↦ -G z) (U \ {w}) := hharmMinus.subharmonicOn
   have hbdP : ∀ ζ ∈ frontier (U \ {w}), ∀ ε > 0, ∀ᶠ z in 𝓝[U \ {w}] ζ, -G z ≤ 0 + ε := by
     intro ζ hζ ε hε
     rcases mem_frontier_or_eq_of_mem_frontier_diff_singleton hU hζ with hζU | hζw

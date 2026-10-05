@@ -201,7 +201,7 @@ theorem isBarrier_log_of_exteriorDisc (hU : IsOpen U) (hUb : Bornology.IsBounded
       rw [Real.log_div hR.ne' (norm_ne_zero_iff.mpr hw)]
     rw [harmonicAt_congr_nhds hev]
     exact (harmonicAt_const _).sub h1
-  refine ⟨hharm.subharmonicOn hU, ?_, fun z hz ↦ ?_, ?_, fun δ hδ ↦ ?_⟩
+  refine ⟨hharm.subharmonicOn, ?_, fun z hz ↦ ?_, ?_, fun δ hδ ↦ ?_⟩
   · -- continuity
     refine ContinuousOn.log (continuousOn_const.div (by fun_prop) fun z hz ↦
       norm_ne_zero_iff.mpr (hne z hz)) fun z hz ↦ ?_

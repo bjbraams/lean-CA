@@ -155,7 +155,7 @@ theorem le_poissonExtension (hR : 0 < R) (hcl : closedBall c R ⊆ U) (hv : Subh
   · have hP := harmonicContOnCl_poissonExtension hR (hvc.mono (sphere_subset_closedBall.trans hcl))
     have hd : SubharmonicOn (fun w ↦ v w + (-poissonExtension c R v) w) (ball c R) :=
       (hv.mono (ball_subset_closedBall.trans hcl)).add
-        (hP.harmonicOnNhd.neg.subharmonicOn isOpen_ball)
+        hP.harmonicOnNhd.neg.subharmonicOn
     have husc : UpperSemicontinuousOn (fun w ↦ v w + (-poissonExtension c R v) w)
         (closedBall c R) :=
       ((hvc.mono hcl).add hP.continuousOn_ball.neg).upperSemicontinuousOn
@@ -176,7 +176,7 @@ theorem subharmonicOn_poissonExtension (hR : 0 < R) (hU : IsOpen U) (hcl : close
   have hge := le_poissonExtension hR hcl hv hvc
   by_cases hab : a ∈ ball c R
   · exact ((harmonicOnNhd_poissonExtension hR (hvc.mono
-      (sphere_subset_closedBall.trans hcl))).subharmonicOn isOpen_ball).hasSubmeanAt hab
+      (sphere_subset_closedBall.trans hcl))).subharmonicOn).hasSubmeanAt hab
   · obtain ⟨ρ, hρ, hsub⟩ := (hv.hasSubmeanAt ha).exists_forall_lt
     obtain ⟨ρ', hρ', hball⟩ := Metric.isOpen_iff.mp hU a ha
     refine hasSubmeanAt_of_forall_lt (lt_min hρ hρ') fun r hr hrρ ↦ ?_
@@ -399,7 +399,7 @@ theorem harmonicOnNhd_perronFunction (hU : IsOpen U) (hUb : Bornology.IsBounded 
       le_antisymm (hh'u a (mem_ball_self hr)) (hha ▸ hhh' a (mem_ball_self hr))
     -- the difference `h - h'` is subharmonic, nonpositive, and vanishes at `a`
     have hd : SubharmonicOn (fun z ↦ h z + (-h') z) (ball a r) :=
-      (hh.subharmonicOn isOpen_ball).add (hh'.neg.subharmonicOn isOpen_ball)
+      hh.subharmonicOn.add hh'.neg.subharmonicOn
     have hdmax : ∀ z ∈ ball a r, h z + (-h') z ≤ h a + (-h') a := fun z hz ↦ by
       simp only [Pi.neg_apply]
       linarith [hhh' z hz, hha, hh'a]

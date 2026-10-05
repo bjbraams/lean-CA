@@ -49,17 +49,6 @@ variable {c w z : ℂ} {R : ℝ} {g : ℂ → ℝ}
 def poissonIntegral (c : ℂ) (R : ℝ) (g : ℂ → ℝ) (w : ℂ) : ℝ :=
   circleAverage (poissonKernel c w • g) c R
 
-/-- Harmonic functions on an open set are subharmonic. -/
-theorem _root_.InnerProductSpace.HarmonicOnNhd.subharmonicOn {u : ℂ → ℝ} {U : Set ℂ}
-    (hU : IsOpen U) (hu : HarmonicOnNhd u U) : SubharmonicOn u U := by
-  have hcont : ContinuousOn u U := hu.contDiffOn.continuousOn
-  refine ⟨hcont.upperSemicontinuousOn, fun a ha ↦ ?_⟩
-  obtain ⟨ρ, hρ, hball⟩ := Metric.isOpen_iff.mp hU a ha
-  refine hasSubmeanAt_of_circleAverage_eq hρ (hcont.mono hball) fun r hr hrρ ↦ ?_
-  have : HarmonicOnNhd u (closedBall a |r|) :=
-    hu.mono ((closedBall_subset_ball (by rwa [abs_of_pos hr])).trans hball)
-  exact this.circleAverage_eq
-
 /-- The Poisson integral of continuous boundary data is harmonic on the open disc. -/
 theorem harmonicOnNhd_poissonIntegral (hR : 0 < R) (hg : ContinuousOn g (sphere c R)) :
     HarmonicOnNhd (poissonIntegral c R g) (ball c R) := by
@@ -386,7 +375,7 @@ theorem eqOn_of_harmonicContOnCl_of_eqOn_sphere (hR : 0 < R) {u v : ℂ → ℝ}
       EqOn u v (sphere c R) → ∀ z ∈ closedBall c R, u z ≤ v z := by
     intro u v hu hv h
     have hd : HarmonicContOnCl (u - v) (ball c R) := hu.sub hv
-    have hsub : SubharmonicOn (u - v) (ball c R) := hd.harmonicOnNhd.subharmonicOn isOpen_ball
+    have hsub : SubharmonicOn (u - v) (ball c R) := hd.harmonicOnNhd.subharmonicOn
     have husc : UpperSemicontinuousOn (u - v) (closedBall c R) :=
       hd.continuousOn_ball.upperSemicontinuousOn
     have := hsub.le_of_le_sphere hR husc (M := 0) fun z hz ↦ by
