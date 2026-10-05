@@ -41,8 +41,7 @@ open scoped Topology
 
 namespace Complex
 
-variable {F : Type*} [NormedAddCommGroup F] [NormedSpace ℂ F]
-  [CompleteSpace F] [FiniteDimensional ℂ F]
+variable {F : Type*} [NormedAddCommGroup F] [NormedSpace ℂ F] [FiniteDimensional ℂ F]
 
 /-- **Montel's theorem** with compact-local bounds on the ambient extension by zero.
 
@@ -51,11 +50,10 @@ theorem isCompact_closure_of_holomorphic_bounded_on_compacts_of_openExtension
     {U : TopologicalSpace.Opens ℂ} {S : Set (HolomorphicMap U F)}
     (hb : ∀ K ⊆ (U : Set ℂ), IsCompact K → ∃ M : ℝ,
       ∀ f ∈ S, ∀ z ∈ K, ‖openExtension U f.val z‖ ≤ M) : IsCompact (closure S) :=
+  have := FiniteDimensional.complete ℂ F
   isCompact_closure_of_holomorphic_bounded_on_compacts_of_isClosed
     (isClosed_holomorphicSubmodule U) hb
 
--- Retain the existing completeness parameter in the public interface.
-set_option linter.unusedSectionVars false in
 /-- A compact-locally bounded sequence of holomorphic functions has a locally uniformly
 convergent subsequence with holomorphic limit.
 

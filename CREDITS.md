@@ -83,6 +83,72 @@ part of the subset used by `../lean-SCV`, so no additional copies are introduced
 [tau-hurwitz]: https://github.com/TauCetiProject/TauCeti/blob/a780c7ad6beb23f60a17351a492d177878020ad5/TauCeti/Analysis/Complex/Conformal/Hurwitz.lean
 [tau-montel]: https://github.com/TauCetiProject/TauCeti/blob/a780c7ad6beb23f60a17351a492d177878020ad5/TauCeti/Analysis/Complex/Conformal/Montel/Basic.lean
 
+## TauCeti results adopted on 5 October 2026
+
+A second review adopted further results by **the Tau Ceti contributors** at the same pinned
+revision, mostly through bridge lemmas that connect local interfaces to TauCeti's.
+
+- [Rouche.lean](ComplexAnalysis/Rouche.lean): `Complex.finsum_divisor_eq_finsum_analyticOrderNatAt`
+  identifies the divisor degree on a closed disk with TauCeti's zero count. Rouché's theorem now
+  uses `TauCeti.rouche_symm` from [Conformal.Rouche][tau-rouche], and the new
+  `Complex.sum_divisor_eq_of_norm_sub_lt_norm_add_norm` states the symmetric inequality.
+- [LocalMapping.lean](ComplexAnalysis/LocalMapping.lean): the local mapping theorem uses
+  `TauCeti.localDegree_card` from [Conformal.LocalDegree][tau-local-degree].
+- [LogDerivIntegral.lean](ComplexAnalysis/LogDerivIntegral.lean),
+  [CurveIndex.lean](ComplexAnalysis/CurveIndex.lean),
+  [CurveIndex/Continuity.lean](ComplexAnalysis/CurveIndex/Continuity.lean),
+  [CurveIndex/Homotopy.lean](ComplexAnalysis/CurveIndex/Homotopy.lean): the Cauchy-kernel
+  integral and the curve index are identified with `TauCeti.Contour.windingNumber` through
+  `TauCeti.Contour.windingNumber_eq_two_pi_I_inv_mul_curveIntegral`
+  ([Winding.Number.Homotopy][tau-winding-homotopy]). Integrality, the endpoint ratio, constancy on
+  components, vanishing on the unbounded component and continuous homotopy invariance are imported
+  from [Winding.EndpointRatio][tau-endpoint-ratio], [Winding.LocallyConstant][tau-loc-const],
+  [Winding.UnboundedComponent][tau-unbounded] and [Winding.Number.Homotopy][tau-winding-homotopy];
+  these results now allow piecewise `C¹` loops.
+- [Residue/Meromorphic.lean](ComplexAnalysis/Residue/Meromorphic.lean) (new) and
+  [Residue/LogDeriv.lean](ComplexAnalysis/Residue/LogDeriv.lean):
+  `Complex.residue_eq_contour_residue` identifies the local residue with
+  `TauCeti.Contour.residue` on meromorphic germs, using
+  `TauCeti.Contour.classicalResidueTheorem_circle_of_meromorphicOrderAt_neg`
+  ([Residue.Theorem][tau-residue-theorem]). The residue of a logarithmic derivative, the simple-pole
+  limit and the quotient rule come from [Residue.LogDeriv][tau-residue-logderiv],
+  [Residue.SimplePole][tau-simple-pole] and [Residue.Quotient][tau-residue-quotient].
+- [DiscAutomorphism.lean](ComplexAnalysis/DiscAutomorphism.lean): the classification uses
+  `TauCeti.exists_forall_unitDisc_eq_unitDiscStandardAutomorphismEquiv`
+  ([UnitDisc.Automorphism.Classification][tau-aut-classification]) and normalized Riemann-map
+  uniqueness uses `TauCeti.exists_eqOn_const_mul_of_image_eq_ball_of_apply_eq_zero`
+  ([RiemannMapping.Uniqueness][tau-rmt-uniqueness]).
+- [Cayley.lean](ComplexAnalysis/Cayley.lean): the mapping properties of the Cayley transform use
+  [UpperHalfPlane.Cayley][tau-cayley], and the half-plane is Mathlib's
+  `UpperHalfPlane.upperHalfPlaneSet`.
+- [AnalyticContinuation.lean](ComplexAnalysis/AnalyticContinuation.lean): an adapter to
+  `TauCeti.IsAnalyticContinuationAlong` ([Continuation.Basic][tau-continuation]).
+
+Changed statements, all generalizations: `Complex.analyticOnNhd_circleReflection` no longer
+assumes `-r ∉ U`; `Complex.eventually_sum_divisor_eq_of_tendstoUniformlyOn` assumes uniform
+convergence only on the circle; the curve-index results of `CurveIndex.Continuity`,
+`Complex.curveIndex_eq_of_continuous_homotopy` and the curve-integral results of
+`LogDerivIntegral` assume piecewise `C¹` loops; Montel and Vitali in `ComplexAnalysis` drop the
+redundant `CompleteSpace` assumption (implied by finite dimensionality), with the matching
+Challenge statements. New local results: `Complex.exists_eqOn_real_mobius_of_leftInverse`,
+`Complex.exists_harmonicOnNhd_tendsto_of_isBarrier` and
+`Complex.exists_greenFunction_of_isBarrier`. None of these modules is part of the subset used by
+`../lean-SCV`.
+
+[tau-rouche]: https://github.com/TauCetiProject/TauCeti/blob/a780c7ad6beb23f60a17351a492d177878020ad5/TauCeti/Analysis/Complex/Conformal/Rouche.lean
+[tau-winding-homotopy]: https://github.com/TauCetiProject/TauCeti/blob/a780c7ad6beb23f60a17351a492d177878020ad5/TauCeti/Analysis/Contour/Winding/Number/Homotopy.lean
+[tau-endpoint-ratio]: https://github.com/TauCetiProject/TauCeti/blob/a780c7ad6beb23f60a17351a492d177878020ad5/TauCeti/Analysis/Contour/Winding/EndpointRatio.lean
+[tau-loc-const]: https://github.com/TauCetiProject/TauCeti/blob/a780c7ad6beb23f60a17351a492d177878020ad5/TauCeti/Analysis/Contour/Winding/LocallyConstant.lean
+[tau-unbounded]: https://github.com/TauCetiProject/TauCeti/blob/a780c7ad6beb23f60a17351a492d177878020ad5/TauCeti/Analysis/Contour/Winding/UnboundedComponent.lean
+[tau-residue-theorem]: https://github.com/TauCetiProject/TauCeti/blob/a780c7ad6beb23f60a17351a492d177878020ad5/TauCeti/Analysis/Contour/Residue/Theorem.lean
+[tau-residue-logderiv]: https://github.com/TauCetiProject/TauCeti/blob/a780c7ad6beb23f60a17351a492d177878020ad5/TauCeti/Analysis/Contour/Residue/LogDeriv.lean
+[tau-simple-pole]: https://github.com/TauCetiProject/TauCeti/blob/a780c7ad6beb23f60a17351a492d177878020ad5/TauCeti/Analysis/Contour/Residue/SimplePole.lean
+[tau-residue-quotient]: https://github.com/TauCetiProject/TauCeti/blob/a780c7ad6beb23f60a17351a492d177878020ad5/TauCeti/Analysis/Contour/Residue/Quotient.lean
+[tau-aut-classification]: https://github.com/TauCetiProject/TauCeti/blob/a780c7ad6beb23f60a17351a492d177878020ad5/TauCeti/Analysis/Complex/Conformal/UnitDisc/Automorphism/Classification.lean
+[tau-rmt-uniqueness]: https://github.com/TauCetiProject/TauCeti/blob/a780c7ad6beb23f60a17351a492d177878020ad5/TauCeti/Analysis/Complex/Conformal/RiemannMapping/Uniqueness.lean
+[tau-cayley]: https://github.com/TauCetiProject/TauCeti/blob/a780c7ad6beb23f60a17351a492d177878020ad5/TauCeti/Analysis/Complex/UpperHalfPlane/Cayley.lean
+[tau-continuation]: https://github.com/TauCetiProject/TauCeti/blob/a780c7ad6beb23f60a17351a492d177878020ad5/TauCeti/Analysis/Complex/Conformal/Continuation/Basic.lean
+
 ## Closest theorem matches
 
 ### Riemann mapping, Hurwitz, and normal families

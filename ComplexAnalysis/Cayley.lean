@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import ComplexAnalysis.DiscAutomorphism
+public import TauCeti.Analysis.Complex.UpperHalfPlane.Cayley
 
 /-!
 # The Cayley transform and automorphisms of the half-plane
@@ -13,7 +14,12 @@ public import ComplexAnalysis.DiscAutomorphism
 The Cayley transform `z ↦ (z - I) / (z + I)` maps the upper half-plane `{z | 0 < z.im}`
 holomorphically and bijectively onto the unit disc, with inverse `w ↦ I * (1 + w) / (1 - w)`.
 Conjugating by it, every holomorphic automorphism of the upper half-plane is of the form
-`cayleyInv ∘ (c * φ_a) ∘ cayley` with `‖c‖ = 1` and `‖a‖ < 1`.
+`cayleyInv ∘ (c * φ_a) ∘ cayley` with `‖c‖ = 1` and `‖a‖ < 1`, and hence a real Möbius map
+`z ↦ (a * z + b) / (c * z + d)` with `a * d - b * c > 0`.
+
+The upper half-plane is Mathlib's `UpperHalfPlane.upperHalfPlaneSet`. The mapping properties of
+the Cayley transform are imported from the Tau Ceti contributors'
+`TauCeti.Analysis.Complex.UpperHalfPlane.Cayley`.
 
 ## Main definitions
 
@@ -23,7 +29,10 @@ Conjugating by it, every holomorphic automorphism of the upper half-plane is of 
 
 * `Complex.norm_cayley_lt_one`, `Complex.im_cayleyInv_pos`, `Complex.cayleyInv_cayley`,
   `Complex.cayley_cayleyInv`, `Complex.cayley_image_upperHalfPlane`.
-* `Complex.exists_eqOn_cayleyInv_mul_discMobius_cayley`: automorphisms of the half-plane.
+* `Complex.exists_eqOn_cayleyInv_mul_discMobius_cayley`: automorphisms of the half-plane, in
+  Cayley-conjugated form.
+* `Complex.exists_eqOn_real_mobius_of_leftInverse`: automorphisms of the half-plane are real
+  Möbius maps.
 
 ## References
 
@@ -34,6 +43,7 @@ Conjugating by it, every holomorphic automorphism of the upper half-plane is of 
 @[expose] public noncomputable section
 
 open Set Metric Filter Function
+open UpperHalfPlane (upperHalfPlaneSet isOpen_upperHalfPlaneSet)
 open scoped Topology ComplexConjugate
 
 namespace Complex
@@ -44,35 +54,15 @@ def cayley (z : ℂ) : ℂ := (z - I) / (z + I)
 /-- The inverse Cayley transform `w ↦ I * (1 + w) / (1 - w)`. -/
 def cayleyInv (w : ℂ) : ℂ := I * (1 + w) / (1 - w)
 
-/-- The upper half-plane as a subset of `ℂ`. -/
-def upperHalfPlaneSet : Set ℂ := {z | 0 < z.im}
-
 variable {z w : ℂ}
 
-/-- The upper half-plane is open. -/
-theorem isOpen_upperHalfPlaneSet : IsOpen upperHalfPlaneSet :=
-  isOpen_lt continuous_const continuous_im
-
 /-- The denominator `z + I` of the Cayley transform does not vanish in the upper half-plane. -/
-theorem add_I_ne_zero (hz : 0 < z.im) : z + I ≠ 0 := by
-  intro h
-  have := congrArg im h
-  simp at this
-  linarith
-
-/-- The squared norms of `z + I` and `z - I` differ by four times the imaginary part of `z`. -/
-theorem normSq_add_I_sub_normSq_sub_I (z : ℂ) : normSq (z + I) - normSq (z - I) = 4 * z.im := by
-  simp only [normSq_apply, add_re, add_im, sub_re, sub_im, I_re, I_im]
-  ring
+theorem add_I_ne_zero (hz : 0 < z.im) : z + I ≠ 0 :=
+  TauCeti.add_I_ne_zero_of_im_nonneg hz.le
 
 /-- The Cayley transform maps the upper half-plane into the unit disc. -/
-theorem norm_cayley_lt_one (hz : 0 < z.im) : ‖cayley z‖ < 1 := by
-  have hd := add_I_ne_zero hz
-  rw [cayley, norm_div, div_lt_one (norm_pos_iff.mpr hd)]
-  have h := normSq_add_I_sub_normSq_sub_I z
-  rw [normSq_eq_norm_sq, normSq_eq_norm_sq] at h
-  have : ‖z - I‖ ^ 2 < ‖z + I‖ ^ 2 := by linarith
-  exact lt_of_pow_lt_pow_left₀ 2 (norm_nonneg _) this
+theorem norm_cayley_lt_one (hz : 0 < z.im) : ‖cayley z‖ < 1 :=
+  (TauCeti.norm_sub_I_div_add_I_lt_one_iff (add_I_ne_zero hz)).mpr hz
 
 /-- The Cayley transform never takes the value one on the upper half-plane. -/
 theorem cayley_ne_one (hz : 0 < z.im) : cayley z ≠ 1 := fun h ↦ by
@@ -130,8 +120,8 @@ theorem hasDerivAt_cayley (hz : z + I ≠ 0) : HasDerivAt cayley (2 * I / (z + I
   · ring
 
 /-- The Cayley transform is holomorphic on the upper half-plane. -/
-theorem differentiableOn_cayley : DifferentiableOn ℂ cayley upperHalfPlaneSet := fun _ hz ↦
-  (hasDerivAt_cayley (add_I_ne_zero hz)).differentiableAt.differentiableWithinAt
+theorem differentiableOn_cayley : DifferentiableOn ℂ cayley upperHalfPlaneSet :=
+  TauCeti.differentiableOn_sub_I_div_add_I.mono fun _ hz ↦ add_I_ne_zero hz
 
 /-- Away from its pole, the inverse Cayley transform has derivative `2 * I / (1 - w) ^ 2`. -/
 theorem hasDerivAt_cayleyInv (hw : 1 - w ≠ 0) : HasDerivAt cayleyInv (2 * I / (1 - w) ^ 2) w := by
@@ -161,16 +151,12 @@ theorem mapsTo_cayleyInv : MapsTo cayleyInv (ball 0 1) upperHalfPlaneSet := fun 
   im_cayleyInv_pos (mem_ball_zero_iff.mp hw)
 
 /-- The Cayley transform is injective on the upper half-plane. -/
-theorem cayley_injOn : InjOn cayley upperHalfPlaneSet := fun z hz w hw h ↦ by
-  rw [← cayleyInv_cayley hz, h, cayleyInv_cayley hw]
+theorem cayley_injOn : InjOn cayley upperHalfPlaneSet :=
+  TauCeti.bijOn_sub_I_div_add_I_upperHalfPlaneSet.injOn
 
 /-- The Cayley transform maps the upper half-plane onto the unit disc. -/
-theorem cayley_image_upperHalfPlane : cayley '' upperHalfPlaneSet = ball 0 1 := by
-  refine Subset.antisymm mapsTo_cayley.image_subset fun w hw ↦ ?_
-  have hw1 : w ≠ 1 := fun h ↦ by
-    rw [mem_ball_zero_iff, h, norm_one] at hw
-    exact lt_irrefl _ hw
-  exact ⟨cayleyInv w, mapsTo_cayleyInv hw, cayley_cayleyInv hw1⟩
+theorem cayley_image_upperHalfPlane : cayley '' upperHalfPlaneSet = ball 0 1 :=
+  TauCeti.bijOn_sub_I_div_add_I_upperHalfPlaneSet.image_eq
 
 /-- **Automorphisms of the upper half-plane.** A holomorphic bijection of the upper half-plane
 with holomorphic inverse is the conjugate by the Cayley transform of a disc automorphism
@@ -217,6 +203,105 @@ theorem exists_eqOn_cayleyInv_mul_discMobius_cayley {f g : ℂ → ℂ}
     change f z = cayleyInv (cayley (f (cayleyInv (cayley z))))
     rw [cayleyInv_cayley hz, cayleyInv_cayley (hfm hz)]
   rw [h1, hFeq (mapsTo_cayley hz)]
+
+/-- **Automorphisms of the upper half-plane are real Möbius maps.** A holomorphic bijection of
+the upper half-plane with holomorphic inverse is `z ↦ (a * z + b) / (c * z + d)` with real
+coefficients and `a * d - b * c > 0`.
+
+The coefficients come from the disc automorphism `u * φ_α` of
+`Complex.exists_eqOn_cayleyInv_mul_discMobius_cayley`: with `s ^ 2 = u`, `‖s‖ = 1`, `p = s` and
+`q = -s α`, they are `a = re p + re q`, `b = im p - im q`, `c = -(im p + im q)`, `d = re p - re q`,
+and `a * d - b * c = 1 - ‖α‖ ^ 2`. -/
+theorem exists_eqOn_real_mobius_of_leftInverse {f g : ℂ → ℂ}
+    (hf : DifferentiableOn ℂ f upperHalfPlaneSet)
+    (hfm : MapsTo f upperHalfPlaneSet upperHalfPlaneSet)
+    (hg : DifferentiableOn ℂ g upperHalfPlaneSet)
+    (hgm : MapsTo g upperHalfPlaneSet upperHalfPlaneSet)
+    (hgf : ∀ z ∈ upperHalfPlaneSet, g (f z) = z) (hfg : ∀ z ∈ upperHalfPlaneSet, f (g z) = z) :
+    ∃ a b c d : ℝ, 0 < a * d - b * c ∧
+      EqOn f (fun z ↦ (a * z + b) / (c * z + d)) upperHalfPlaneSet := by
+  obtain ⟨u, α, hu, hα, hfeq⟩ :=
+    exists_eqOn_cayleyInv_mul_discMobius_cayley hf hfm hg hgm hgf hfg
+  -- a square root `s` of `u` on the unit circle, with `conj s = t`
+  set s : ℂ := exp ((arg u / 2 : ℝ) * I)
+  set t : ℂ := conj s
+  have hs1 : ‖s‖ = 1 := norm_exp_ofReal_mul_I _
+  have hst : s * t = 1 := by
+    rw [mul_conj, normSq_eq_norm_sq, hs1]; simp
+  have hsu : s ^ 2 = u := by
+    rw [← exp_nat_mul, ← mul_assoc]
+    push_cast
+    rw [show (2 : ℂ) * ((arg u : ℂ) / 2) = arg u by ring]
+    simpa [hu] using norm_mul_exp_arg_mul_I u
+  set q : ℂ := -(s * α)
+  have hdet : 0 < (s.re + q.re) * (s.re - q.re) - (s.im - q.im) * -(s.im + q.im) := by
+    have hq : normSq q = normSq α := by simp [q, normSq_eq_norm_sq, hs1]
+    have hs' : normSq s = 1 := by rw [normSq_eq_norm_sq, hs1]; norm_num
+    have hdet : (s.re + q.re) * (s.re - q.re) - (s.im - q.im) * -(s.im + q.im) =
+        normSq s - normSq q := by simp only [normSq_apply]; ring
+    rw [hdet, hs', hq, normSq_eq_norm_sq]
+    nlinarith [norm_nonneg α]
+  refine ⟨s.re + q.re, s.im - q.im, -(s.im + q.im), s.re - q.re, hdet, fun z hz ↦ ?_⟩
+  · have hzI : z + I ≠ 0 := add_I_ne_zero hz
+    set w := cayley z with hw
+    have hw1 : ‖w‖ < 1 := norm_cayley_lt_one hz
+    have hE' : 1 - conj α * w ≠ 0 := one_sub_conj_mul_ne_zero hα hw1.le
+    set E := (z + I) - conj α * (z - I)
+    set W := (z - I) - α * (z + I)
+    have hE : E ≠ 0 := by
+      have : E = (z + I) * (1 - conj α * w) := by
+        simp only [E, w, cayley]; field_simp
+      rw [this]; exact mul_ne_zero hzI hE'
+    set v := u * discMobius α w
+    have hv : v = s ^ 2 * W / E := by
+      simp only [v, w, cayley, discMobius, hsu, E, W]
+      field_simp
+    have hv1 : 1 - v ≠ 0 := by
+      have : ‖v‖ < 1 := by
+        rw [norm_mul, hu, one_mul]; exact norm_discMobius_lt_one hα hw1
+      intro h
+      rw [show v = 1 by linear_combination -h, norm_one] at this
+      exact lt_irrefl _ this
+    have key : (-((s - t) + (q - conj q)) * z + I * (s + t - q - conj q)) *
+        (I * (E + s ^ 2 * W)) = (I * (s + t + q + conj q) * z + ((s - t) - (q - conj q))) *
+          (E - s ^ 2 * W) := by
+      simp only [q, map_neg, map_mul, E, W]
+      linear_combination
+        s * (α * I + α * z + I - z) * (-(conj α) * I ^ 2 + 2 * conj α * I * z + conj α - I ^ 2 -
+          2 * I * z + 1) * hst +
+        (-α ^ 2 * I * s ^ 3 - α ^ 2 * s ^ 3 * z + 2 * α * conj α * s * z - 2 * α * I * s ^ 3 +
+          conj α ^ 2 * I * t - conj α ^ 2 * t * z + 2 * conj α * I * t - I * s ^ 3 + I * t +
+          s ^ 3 * z - 2 * s * z + t * z) * I_sq
+    have hEW : E - s ^ 2 * W ≠ 0 := by
+      intro h
+      apply hv1
+      rw [hv, ← sub_eq_zero.mp h, div_self hE, sub_self]
+    have hD : (((-(s.im + q.im) : ℝ) : ℂ) * z + ((s.re - q.re : ℝ) : ℂ)) ≠ 0 := by
+      intro h
+      have him := congrArg im h
+      have hre := congrArg re h
+      simp only [add_im, mul_im, ofReal_re, ofReal_im, zero_mul, add_zero, zero_im, add_re,
+        mul_re, sub_zero, zero_re] at him hre
+      have hc : -(s.im + q.im) = 0 := by
+        rcases mul_eq_zero.mp him with h' | h'
+        · exact h'
+        · exact absurd h' (ne_of_gt hz)
+      rw [hc, zero_mul, zero_add] at hre
+      rw [hc, hre] at hdet
+      simp at hdet
+    rw [hfeq hz]
+    change cayleyInv v = _
+    have ha : ((s.re + q.re : ℝ) : ℂ) = (s + t + q + conj q) / 2 := by
+      push_cast; rw [re_eq_add_conj, re_eq_add_conj]; ring
+    have hb : ((s.im - q.im : ℝ) : ℂ) = ((s - t) - (q - conj q)) / (2 * I) := by
+      push_cast; rw [im_eq_sub_conj, im_eq_sub_conj]; ring
+    have hc : ((-(s.im + q.im) : ℝ) : ℂ) = -((s - t) + (q - conj q)) / (2 * I) := by
+      push_cast; rw [im_eq_sub_conj, im_eq_sub_conj]; ring
+    have hd : ((s.re - q.re : ℝ) : ℂ) = (s + t - q - conj q) / 2 := by
+      push_cast; rw [re_eq_add_conj, re_eq_add_conj]; ring
+    rw [eq_div_iff hD, ha, hb, hc, hd, cayleyInv, hv]
+    field_simp
+    linear_combination key
 
 end Complex
 

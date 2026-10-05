@@ -7,6 +7,8 @@ module
 
 public import ComplexAnalysis.CauchyIntegral
 public import Mathlib.Analysis.SpecialFunctions.ExpDeriv
+public import TauCeti.Analysis.Contour.Winding.EndpointRatio
+public import TauCeti.Analysis.Contour.Winding.Number.Homotopy
 
 /-!
 # Integrals of logarithmic derivatives along curves
@@ -17,14 +19,21 @@ implies that its Cauchy-kernel integral is an integer multiple of `2 * π * I`.
 The interval theorem uses an explicitly supplied derivative, and needs no choice of a
 logarithm branch along the curve.
 
+The curve-integral results allow piecewise `C¹` paths. They identify the Cauchy-kernel integral
+with `2πi` times the winding number of the Tau Ceti contributors'
+`TauCeti.Analysis.Contour.Winding`, and import its endpoint-ratio identity
+(`TauCeti.Analysis.Contour.Winding.EndpointRatio`).
+
 ## Main results
 
 * `Complex.exp_integral_div_of_hasDerivAt`: Exponentiating a logarithmic-derivative integral
   gives the ratio of endpoint values. Continuity of the derivative is required only on the
   closed interval.
+* `Complex.curveIntegral_sub_inv_eq_two_pi_I_mul_windingNumber`: the Cauchy-kernel curve
+  integral is `2πi` times the Tau Ceti winding number.
 * `Complex.exp_curveIntegral_sub_inv`: The exponential of a Cauchy-kernel integral along a
-  nonvanishing `C¹` path is the ratio of the displaced endpoint values.
-* `Complex.exists_int_curveIntegral_sub_inv`: A closed `C¹` curve avoiding a point has
+  piecewise `C¹` path avoiding the pole is the ratio of the displaced endpoint values.
+* `Complex.exists_int_curveIntegral_sub_inv`: A closed piecewise `C¹` curve avoiding a point has
   Cauchy-kernel integral equal to an integer multiple of `2πi`. No simplicity assumption is
   needed.
 
@@ -80,31 +89,49 @@ theorem exp_integral_div_of_hasDerivAt {g g' : ℝ → ℂ} {a b : ℝ} (hab : a
   change exp (J b) * g a = g b
   rw [← he', ← mul_assoc, ← exp_add, add_neg_cancel, exp_zero, one_mul]
 
-/-- The exponential of a Cauchy-kernel integral along a nonvanishing `C¹` path is the
-ratio of the displaced endpoint values. -/
+/-- The extension of a `C¹` path is piecewise `C¹` on `[0, 1]` in the sense of the Tau Ceti
+contour library. -/
+theorem isPiecewiseC1On_extend_of_contDiffOn {a b : ℂ} {γ : Path a b}
+    (hγ : ContDiffOn ℝ 1 γ.extend I) : TauCeti.Contour.IsPiecewiseC1On γ.extend 0 1 :=
+  .of_contDiffOn (by rwa [uIcc_of_le zero_le_one])
+
+/-- The Cauchy-kernel curve integral along a piecewise `C¹` path avoiding `w` is `2πi` times the
+winding number `TauCeti.Contour.windingNumber` of the Tau Ceti contributors.
+
+This is `TauCeti.Contour.windingNumber_eq_two_pi_I_inv_mul_curveIntegral`, rewritten for the
+kernel `ContinuousLinearMap.toSpanSingleton ℂ (z - w)⁻¹`. -/
+theorem curveIntegral_sub_inv_eq_two_pi_I_mul_windingNumber {a b w : ℂ} {γ : Path a b}
+    (hγ : TauCeti.Contour.IsPiecewiseC1On γ.extend 0 1) (hw : ∀ t, γ t ≠ w) :
+    curveIntegral (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ ((z - w)⁻¹)) γ =
+      (2 * (Real.pi : ℂ) * Complex.I) * TauCeti.Contour.windingNumber γ.extend 0 1 w := by
+  rw [TauCeti.Contour.windingNumber_eq_two_pi_I_inv_mul_curveIntegral hγ hw, ← mul_assoc,
+    mul_inv_cancel₀ two_pi_I_ne_zero, one_mul]
+  congr 1
+  funext z
+  ext
+  simp
+
+/-- The exponential of a Cauchy-kernel integral along a piecewise `C¹` path avoiding `w` is the
+ratio of the displaced endpoint values.
+
+This adapts `TauCeti.Contour.IsPiecewiseC1On.exp_two_pi_I_mul_windingNumber` by the Tau Ceti
+contributors. -/
 theorem exp_curveIntegral_sub_inv {a b w : ℂ} (γ : Path a b)
-    (hγ : ContDiffOn ℝ 1 γ.extend I) (hw : ∀ t, γ t ≠ w) :
+    (hγ : TauCeti.Contour.IsPiecewiseC1On γ.extend 0 1) (hw : ∀ t, γ t ≠ w) :
     exp (curveIntegral (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ ((z - w)⁻¹)) γ) =
       (b - w) / (a - w) := by
-  have h0 : ∀ t ∈ I, γ.extend t - w ≠ 0 := by
+  have havoid : ∀ t ∈ uIcc (0 : ℝ) 1, γ.extend t ≠ w := by
+    rw [uIcc_of_le zero_le_one]
     intro t ht
     rw [γ.extend_apply ht]
-    exact sub_ne_zero.mpr (hw ⟨t, ht⟩)
-  have hd : ∀ t ∈ Ioo (0 : ℝ) 1,
-      HasDerivAt (fun s ↦ γ.extend s - w) (derivWithin γ.extend I t) t := by
-    intro t ht
-    have h := (hγ.differentiableOn one_ne_zero t (Ioo_subset_Icc_self ht)).hasDerivWithinAt
-    exact (h.hasDerivAt (Icc_mem_nhds ht.1 ht.2)).sub_const w
-  have h := exp_integral_div_of_hasDerivAt (g := fun s ↦ γ.extend s - w) zero_le_one
-    (γ.continuous_extend.continuousOn.sub continuousOn_const)
-    (hγ.continuousOn_derivWithin uniqueDiffOn_Icc_zero_one le_rfl) hd h0
-  simpa only [curveIntegral_def, curveIntegralFun_def, ContinuousLinearMap.toSpanSingleton_apply,
-    smul_eq_mul, div_eq_mul_inv, mul_comm, γ.extend_one, γ.extend_zero] using h
+    exact hw ⟨t, ht⟩
+  rw [curveIntegral_sub_inv_eq_two_pi_I_mul_windingNumber hγ hw,
+    hγ.exp_two_pi_I_mul_windingNumber havoid, γ.extend_one, γ.extend_zero]
 
-/-- A closed `C¹` curve avoiding a point has Cauchy-kernel integral equal to an integer
-multiple of `2πi`. No simplicity assumption is needed. -/
+/-- A closed piecewise `C¹` curve avoiding a point has Cauchy-kernel integral equal to an
+integer multiple of `2πi`. No simplicity assumption is needed. -/
 theorem exists_int_curveIntegral_sub_inv {a w : ℂ} (γ : Path a a)
-    (hγ : ContDiffOn ℝ 1 γ.extend I) (hw : ∀ t, γ t ≠ w) :
+    (hγ : TauCeti.Contour.IsPiecewiseC1On γ.extend 0 1) (hw : ∀ t, γ t ≠ w) :
     ∃ n : ℤ, curveIntegral
       (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ ((z - w)⁻¹)) γ =
         (n : ℂ) * (2 * (Real.pi : ℂ) * Complex.I) := by

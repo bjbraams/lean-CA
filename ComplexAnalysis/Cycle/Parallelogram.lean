@@ -236,7 +236,7 @@ theorem curveIndex_parallelogramLoop_eq_zero {c w1 w2 w : ℂ}
     curveIndex (parallelogramLoop c w1 w2) w = 0 :=
   curveIndex_eq_zero_of_continuous_nullhomotopy (coningHomotopy c w1 w2)
     (fun p hp ↦ hw (hp ▸ coningToFun_mem_closedParallelogram c w1 w2 p))
-    (contDiffOn_parallelogramLoop_extend c w1 w2)
+    (isPiecewiseC1On_extend_of_contDiffOn (contDiffOn_parallelogramLoop_extend c w1 w2))
 
 /-! ### Toward the interior index
 

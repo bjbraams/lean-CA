@@ -23,8 +23,10 @@ This does not identify an interior or an orientation for an arbitrary Jordan cur
 
 ## Main results
 
-* `Complex.exists_int_curveIndex`: The index of a closed `C¹` curve avoiding its pole is an
-  integer.
+* `Complex.curveIndex_eq_windingNumber`: on piecewise `C¹` closed curves the index is the
+  winding number of the Tau Ceti contour library.
+* `Complex.exists_int_curveIndex_of_isPiecewiseC1On`, `Complex.exists_int_curveIndex`: The index
+  of a closed piecewise `C¹` (in particular `C¹`) curve avoiding its pole is an integer.
 * `Complex.curveIndex_eq_zero_of_isSimplyConnected`: A closed `C¹` curve has index zero about
   any point excluded from a simply connected open domain containing the curve.
 * `Complex.curveIndex_circle_of_mem_ball`: A counterclockwise circle has index one about each
@@ -61,14 +63,28 @@ theorem curveIntegral_sub_inv_eq_two_pi_I_mul_curveIndex {a : ℂ} (γ : Path a 
       (2 * (Real.pi : ℂ) * Complex.I) * curveIndex γ w := by
   rw [curveIndex, ← mul_assoc, mul_inv_cancel₀ two_pi_I_ne_zero, one_mul]
 
-/-- The index of a closed `C¹` curve avoiding its pole is an integer. -/
-theorem exists_int_curveIndex {a w : ℂ} (γ : Path a a)
-    (hγ : ContDiffOn ℝ 1 γ.extend I) (hw : ∀ t, γ t ≠ w) :
+/-- On a piecewise `C¹` closed curve avoiding the pole, the index is the winding number
+`TauCeti.Contour.windingNumber` of the Tau Ceti contributors. -/
+theorem curveIndex_eq_windingNumber {a w : ℂ} {γ : Path a a}
+    (hγ : TauCeti.Contour.IsPiecewiseC1On γ.extend 0 1) (hw : ∀ t, γ t ≠ w) :
+    curveIndex γ w = TauCeti.Contour.windingNumber γ.extend 0 1 w := by
+  rw [curveIndex, curveIntegral_sub_inv_eq_two_pi_I_mul_windingNumber hγ hw, ← mul_assoc,
+    inv_mul_cancel₀ two_pi_I_ne_zero, one_mul]
+
+/-- The index of a closed piecewise `C¹` curve avoiding its pole is an integer. -/
+theorem exists_int_curveIndex_of_isPiecewiseC1On {a w : ℂ} (γ : Path a a)
+    (hγ : TauCeti.Contour.IsPiecewiseC1On γ.extend 0 1) (hw : ∀ t, γ t ≠ w) :
     ∃ n : ℤ, curveIndex γ w = (n : ℂ) := by
   obtain ⟨n, hn⟩ := exists_int_curveIntegral_sub_inv γ hγ hw
   refine ⟨n, ?_⟩
   rw [curveIndex, hn, mul_comm (n : ℂ), ← mul_assoc,
     inv_mul_cancel₀ two_pi_I_ne_zero, one_mul]
+
+/-- The index of a closed `C¹` curve avoiding its pole is an integer. -/
+theorem exists_int_curveIndex {a w : ℂ} (γ : Path a a)
+    (hγ : ContDiffOn ℝ 1 γ.extend I) (hw : ∀ t, γ t ≠ w) :
+    ∃ n : ℤ, curveIndex γ w = (n : ℂ) :=
+  exists_int_curveIndex_of_isPiecewiseC1On γ (isPiecewiseC1On_extend_of_contDiffOn hγ) hw
 
 /-- A constant loop has index zero. -/
 @[simp] theorem curveIndex_refl (a w : ℂ) : curveIndex (Path.refl a) w = 0 := by

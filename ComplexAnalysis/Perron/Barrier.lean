@@ -26,7 +26,10 @@ condition, for continuous boundary data.
 
 * `Complex.tendsto_perronFunction_of_isBarrier`: regularity of boundary points with a barrier.
 * `Complex.isBarrier_log_of_exteriorDisc`: the exterior disc criterion.
-* `Complex.exists_harmonicOnNhd_tendsto_of_exteriorDisc`: the Dirichlet problem.
+* `Complex.exists_harmonicOnNhd_tendsto_of_isBarrier`: the Dirichlet problem on bounded domains
+  with a barrier at every boundary point.
+* `Complex.exists_harmonicOnNhd_tendsto_of_exteriorDisc`: the Dirichlet problem on bounded domains
+  with the exterior disc property.
 
 ## References
 
@@ -237,12 +240,11 @@ theorem isBarrier_log_of_exteriorDisc (hU : IsOpen U) (hUb : Bornology.IsBounded
       exact Real.log_le_log (div_pos hR (by linarith))
         (div_le_div_of_nonneg_left hR.le (by linarith) h1)
 
-/-- **The Dirichlet problem on domains with the exterior disc property.** On a bounded open set
-all of whose boundary points satisfy the exterior disc condition, continuous boundary data on
-the frontier are the boundary values of a harmonic function. -/
-theorem exists_harmonicOnNhd_tendsto_of_exteriorDisc (hU : IsOpen U)
-    (hUb : Bornology.IsBounded U)
-    (hext : ∀ ζ ∈ frontier U, ∃ (c : ℂ) (R : ℝ), 0 < R ∧ closedBall c R ∩ closure U = {ζ})
+/-- **The Dirichlet problem on domains with barriers.** On a bounded open set with a barrier at
+every boundary point, continuous boundary data on the frontier are the boundary values of a
+harmonic function, the Perron function. -/
+theorem exists_harmonicOnNhd_tendsto_of_isBarrier (hU : IsOpen U)
+    (hUb : Bornology.IsBounded U) (hbar : ∀ ζ ∈ frontier U, ∃ β : ℂ → ℝ, IsBarrier U ζ β)
     (hg : ContinuousOn g (frontier U)) :
     ∃ u : ℂ → ℝ, HarmonicOnNhd u U ∧ ∀ ζ ∈ frontier U, Tendsto u (𝓝[U] ζ) (𝓝 (g ζ)) := by
   have hcomp : IsCompact (closure U) := by
@@ -261,9 +263,27 @@ theorem exists_harmonicOnNhd_tendsto_of_exteriorDisc (hU : IsOpen U)
     rw [Real.norm_eq_abs, abs_le] at this
     exact this.2
   refine ⟨perronFunction U g, harmonicOnNhd_perronFunction hU hUb hm hM, fun ζ hζ ↦ ?_⟩
+  obtain ⟨β, hβ⟩ := hbar ζ hζ
+  exact tendsto_perronFunction_of_isBarrier hU hUb hm hM hζ (hg ζ hζ) hβ
+
+/-- On a bounded open set, every boundary point with the exterior disc property has a
+barrier. -/
+theorem exists_isBarrier_of_exteriorDisc (hU : IsOpen U) (hUb : Bornology.IsBounded U)
+    (hext : ∀ ζ ∈ frontier U, ∃ (c : ℂ) (R : ℝ), 0 < R ∧ closedBall c R ∩ closure U = {ζ}) :
+    ∀ ζ ∈ frontier U, ∃ β : ℂ → ℝ, IsBarrier U ζ β := fun ζ hζ ↦ by
   obtain ⟨c, R, hR, hdisc⟩ := hext ζ hζ
-  exact tendsto_perronFunction_of_isBarrier hU hUb hm hM hζ (hg ζ hζ)
-    (isBarrier_log_of_exteriorDisc hU hUb hζ hR hdisc)
+  exact ⟨_, isBarrier_log_of_exteriorDisc hU hUb hζ hR hdisc⟩
+
+/-- **The Dirichlet problem on domains with the exterior disc property.** On a bounded open set
+all of whose boundary points satisfy the exterior disc condition, continuous boundary data on
+the frontier are the boundary values of a harmonic function. -/
+theorem exists_harmonicOnNhd_tendsto_of_exteriorDisc (hU : IsOpen U)
+    (hUb : Bornology.IsBounded U)
+    (hext : ∀ ζ ∈ frontier U, ∃ (c : ℂ) (R : ℝ), 0 < R ∧ closedBall c R ∩ closure U = {ζ})
+    (hg : ContinuousOn g (frontier U)) :
+    ∃ u : ℂ → ℝ, HarmonicOnNhd u U ∧ ∀ ζ ∈ frontier U, Tendsto u (𝓝[U] ζ) (𝓝 (g ζ)) :=
+  exists_harmonicOnNhd_tendsto_of_isBarrier hU hUb (exists_isBarrier_of_exteriorDisc hU hUb hext)
+    hg
 
 end Complex
 

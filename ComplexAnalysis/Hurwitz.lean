@@ -26,8 +26,9 @@ filters. The disk zero-persistence and divisor-counting helpers remain local.
 
 * `Complex.exists_zero_of_norm_lt_sphere`: The center-versus-boundary zero criterion on a disk
   with arbitrary center.
-* `Complex.eventually_sum_divisor_eq_of_tendstoUniformlyOn`: Uniform convergence on a closed
-  disk eventually preserves its divisor degree if the holomorphic limit has no boundary zeros.
+* `Complex.eventually_sum_divisor_eq_of_tendstoUniformlyOn`: Uniform convergence on the boundary
+  circle eventually preserves the divisor degree of a closed disk if the holomorphic limit has no
+  boundary zeros.
 * `Complex.eventually_exists_zero_of_tendstoUniformlyOn`: A zero of the limit persists under
   uniform holomorphic approximation on a closed disk whose boundary contains no zeros of the
   limit.
@@ -61,14 +62,14 @@ theorem exists_zero_of_norm_lt_sphere {f : ℂ → ℂ} {c : ℂ} {R : ℝ}
     (fun w hw ↦ by simpa using hlt (c + w) (by simpa [dist_eq_norm] using hw))
   exact ⟨c + w, by simpa [dist_eq_norm] using hw, he⟩
 
-/-- Uniform convergence on a closed disk eventually preserves its divisor degree if the
-holomorphic limit has no boundary zeros. -/
+/-- Uniform convergence on the boundary circle eventually preserves the divisor degree of a
+closed disk if the holomorphic limit has no boundary zeros. -/
 theorem eventually_sum_divisor_eq_of_tendstoUniformlyOn {ι : Type*} {l : Filter ι}
     {F : ι → ℂ → ℂ} {f : ℂ → ℂ} {c : ℂ} {R : ℝ} (hR : 0 < R)
     (hF : ∀ᶠ n in l, AnalyticOnNhd ℂ (F n) (closedBall c R))
     (hf : AnalyticOnNhd ℂ f (closedBall c R))
     (hb : ∀ z ∈ sphere c R, f z ≠ 0)
-    (hlim : TendstoUniformlyOn F f l (closedBall c R)) :
+    (hlim : TendstoUniformlyOn F f l (sphere c R)) :
     ∀ᶠ n in l, (∑ᶠ z, divisor (F n) (closedBall c R) z) =
       ∑ᶠ z, divisor f (closedBall c R) z := by
   obtain ⟨b, hb', hmin⟩ := (isCompact_sphere c R).exists_isMinOn
@@ -78,7 +79,7 @@ theorem eventually_sum_divisor_eq_of_tendstoUniformlyOn {ι : Type*} {l : Filter
   filter_upwards [hF, Metric.tendstoUniformlyOn_iff.mp hlim _ hpos] with n hn hclose
   apply (sum_divisor_eq_of_norm_sub_lt hR hf hn _).symm
   intro z hz
-  have hh := hclose z (sphere_subset_closedBall hz)
+  have hh := hclose z hz
   have hh' : ‖F n z - f z‖ < ‖f b‖ := by
     simpa [dist_eq_norm, norm_sub_rev] using hh
   exact hh'.trans_le (hmin hz)

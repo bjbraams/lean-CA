@@ -65,11 +65,24 @@ Compactness and the stated Vitali theorems require finite-dimensional targets.
 `ComplexAnalysis.RiemannMapping` adapts TauCeti's normalized Riemann mapping theorem.
 `ComplexAnalysis.Hurwitz` adapts its zero-free and injective-limit theorems for arbitrary
 nontrivial filters, while retaining the local disk zero-persistence and divisor helpers.
-`HolomorphicInverse`, `SchwarzPick` and the normalized rotation theorem in `DiscAutomorphism`
-also adapt TauCeti. `Harnack` uses its open-disc inequality, `Reflection` its continuity and
-reflection principle, and `HalfPlane` its quotient criterion for the slit plane. The
-boundary-value Harnack theorem and the additional half-plane geometry remain local.
-These modules import the pinned TauCeti proofs; see `CREDITS.md` for their sources.
+`HolomorphicInverse`, `SchwarzPick` and `DiscAutomorphism` (rotation, classification and
+normalized uniqueness) also adapt TauCeti. `Harnack` uses its open-disc inequality, `Reflection`
+its continuity and reflection principle, and `HalfPlane` its quotient criterion for the slit
+plane. The boundary-value Harnack theorem and the additional half-plane geometry remain local.
+
+Further TauCeti bridges connect the local interfaces to TauCeti's contour library:
+`Complex.finsum_divisor_eq_finsum_analyticOrderNatAt` (`Rouche`) identifies a divisor degree on
+a closed disk with TauCeti's zero count, so Rouché's theorem and `LocalMapping` are adapters;
+`Complex.curveIntegral_sub_inv_eq_two_pi_I_mul_windingNumber` (`LogDerivIntegral`) and
+`Complex.curveIndex_eq_windingNumber` (`CurveIndex`) identify the curve index of a piecewise
+`C¹` loop with TauCeti's winding number, giving integrality, local constancy, vanishing on the
+unbounded component and continuous homotopy invariance; and
+`Complex.residue_eq_contour_residue` (`Residue.Meromorphic`) identifies the local residue with
+TauCeti's on meromorphic germs. The local residue remains the more general definition
+(Banach-valued, essential singularities allowed), as do the local homology Cauchy and residue
+theorems for cycles. `Cayley` uses Mathlib's `UpperHalfPlane.upperHalfPlaneSet` and TauCeti's
+Cayley-transform lemmas. These modules import the pinned TauCeti proofs; see `CREDITS.md` for
+their sources.
 
 `Complex.SubharmonicOn` is real-valued: it does not admit the value `−∞`.
 
@@ -116,14 +129,16 @@ The following distinctions matter when reusing results or preparing an upstream 
   bound is absent. `ThreeCircles` needs only holomorphy on the open annulus and continuity
   on its closure.
 - Perron's envelope is harmonic for bounded boundary data on bounded open sets. Boundary
-  attainment needs a barrier. The exterior-disc criterion requires
-  `closedBall c R ∩ closure U = {ζ}`. `exists_greenFunction` uses this criterion at every
-  boundary point and proves a harmonic compensator, zero boundary limits, and nonnegativity;
-  symmetry and strict positivity are not included.
-- `AnalyticContinuation` proves uniqueness along a fixed path. General homotopy invariance
-  of analytic continuation and the monodromy theorem are not provided. Reflection covers the
-  real axis and circles; the circle theorem uses an inversion-invariant open set avoiding
-  `0` and the Cayley pole `−r`.
+  attainment needs a barrier. The Dirichlet problem and `exists_greenFunction_of_isBarrier`
+  assume a barrier at every boundary point; the exterior-disc criterion
+  `closedBall c R ∩ closure U = {ζ}` supplies one, and `exists_greenFunction` is that special
+  case. The Green function results give a harmonic compensator, zero boundary limits, and
+  nonnegativity; symmetry and strict positivity are not included.
+- `AnalyticContinuation` proves uniqueness along a fixed path, without assuming the path
+  continuous. Along a continuous path, `IsContinuationAlong.isAnalyticContinuationAlong` passes
+  to TauCeti's continuation predicate, whose library proves the monodromy theorem; no local
+  monodromy statement is made. Reflection covers the real axis and circles; the circle theorem
+  uses an inversion-invariant open set avoiding `0`, which may contain the whole circle.
 - `SokhotskiPlemelj` identifies the interior and exterior Cauchy integrals for absolutely
   summable Laurent boundary data, proves that the series are the one-sided boundary limits,
   and derives the jump relation for these limits. It does not give a principal-value formula. `PaleyWiener` proves entire

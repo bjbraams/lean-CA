@@ -8,6 +8,8 @@ module
 public import ComplexAnalysis.DiscMobius
 public import ComplexAnalysis.HolomorphicInverse
 public import ComplexAnalysis.RiemannMapping
+public import TauCeti.Analysis.Complex.Conformal.RiemannMapping.Uniqueness
+public import TauCeti.Analysis.Complex.Conformal.UnitDisc.Automorphism.Classification
 public import TauCeti.Analysis.Complex.Conformal.UnitDisc.Automorphism.Rotation
 
 /-!
@@ -15,11 +17,12 @@ public import TauCeti.Analysis.Complex.Conformal.UnitDisc.Automorphism.Rotation
 
 Every holomorphic bijection of the unit disc onto itself has the form `z ↦ c * φ_a z` with
 `‖c‖ = 1` and `‖a‖ < 1`, where `φ_a` is the disc Möbius transformation
-(`Complex.discMobius`). The proof is the Schwarz lemma applied to the map and its inverse
-after normalizing the fixed point to `0`. As a consequence the normalized Riemann map is
-unique. The normalized rotation theorem uses the imported proof of the Tau Ceti contributors
-in `TauCeti.Analysis.Complex.Conformal.UnitDisc.Automorphism.Rotation`; the remaining
-statements adapt it to the local Möbius and Riemann-map interfaces.
+(`Complex.discMobius`). As a consequence the normalized Riemann map is unique. The proofs are
+imported from the Tau Ceti contributors: the rotation theorem from
+`TauCeti.Analysis.Complex.Conformal.UnitDisc.Automorphism.Rotation`, the classification from
+`TauCeti.Analysis.Complex.Conformal.UnitDisc.Automorphism.Classification`, and uniqueness up to
+rotation from `TauCeti.Analysis.Complex.Conformal.RiemannMapping.Uniqueness`. The statements here
+adapt them to the local Möbius and Riemann-map interfaces.
 
 ## Main results
 
@@ -54,39 +57,20 @@ theorem exists_eqOn_mul_of_leftInverse_of_map_zero {f g : ℂ → ℂ}
   TauCeti.exists_eqOn_const_mul_of_leftInvOn_ball_of_map_zero hf hg hfm hgm hgf hf0
 
 /-- **Automorphisms of the disc.** A holomorphic bijection of the disc with holomorphic inverse
-is `z ↦ c * φ_a z` with `‖c‖ = 1` and `‖a‖ < 1`. -/
+is `z ↦ c * φ_a z` with `‖c‖ = 1` and `‖a‖ < 1`.
+
+Uses `TauCeti.exists_forall_unitDisc_eq_unitDiscStandardAutomorphismEquiv`. -/
 theorem exists_eqOn_mul_discMobius_of_leftInverse {f g : ℂ → ℂ}
     (hf : DifferentiableOn ℂ f (ball 0 1)) (hfm : MapsTo f (ball 0 1) (ball 0 1))
     (hg : DifferentiableOn ℂ g (ball 0 1)) (hgm : MapsTo g (ball 0 1) (ball 0 1))
     (hgf : ∀ z ∈ ball 0 1, g (f z) = z) (hfg : ∀ z ∈ ball 0 1, f (g z) = z) :
     ∃ c a : ℂ, ‖c‖ = 1 ∧ ‖a‖ < 1 ∧ EqOn f (fun z ↦ c * discMobius a z) (ball 0 1) := by
-  have h0 : (0 : ℂ) ∈ ball (0 : ℂ) 1 := mem_ball_self one_pos
-  set a := g 0
-  have ha : ‖a‖ < 1 := mem_ball_zero_iff.mp (hgm h0)
-  have hna : ‖-a‖ < 1 := by rwa [norm_neg]
-  set F : ℂ → ℂ := fun z ↦ f (discMobius (-a) z)
-  set G : ℂ → ℂ := fun z ↦ discMobius a (g z)
-  have hFd : DifferentiableOn ℂ F (ball 0 1) :=
-    hf.comp (differentiableOn_discMobius_ball hna) (mapsTo_discMobius_ball hna)
-  have hFm : MapsTo F (ball 0 1) (ball 0 1) := fun z hz ↦ hfm (mapsTo_discMobius_ball hna hz)
-  have hF0 : F 0 = 0 := by
-    change f (discMobius (-a) 0) = 0
-    rw [discMobius_zero_right, neg_neg]
-    exact hfg 0 h0
-  have hGd : DifferentiableOn ℂ G (ball 0 1) := (differentiableOn_discMobius_ball ha).comp hg hgm
-  have hGm : MapsTo G (ball 0 1) (ball 0 1) := fun z hz ↦ mapsTo_discMobius_ball ha (hgm hz)
-  have hGF : ∀ z ∈ ball 0 1, G (F z) = z := by
-    intro z hz
-    change discMobius a (g (f (discMobius (-a) z))) = z
-    rw [hgf _ (mapsTo_discMobius_ball hna hz)]
-    have := discMobius_neg_discMobius hna (mem_ball_zero_iff.mp hz).le
-    rwa [neg_neg] at this
-  obtain ⟨c, hc, hFeq⟩ := exists_eqOn_mul_of_leftInverse_of_map_zero hFd hFm hF0 hGd hGm hGF
-  refine ⟨c, a, hc, ha, fun z hz ↦ ?_⟩
-  have h1 : f z = F (discMobius a z) := by
-    change f z = f (discMobius (-a) (discMobius a z))
-    rw [discMobius_neg_discMobius ha (mem_ball_zero_iff.mp hz).le]
-  rw [h1, hFeq (mapsTo_discMobius_ball ha hz)]
+  obtain ⟨u, a, -, hu⟩ := TauCeti.exists_forall_unitDisc_eq_unitDiscStandardAutomorphismEquiv
+    hf hg hfm hgm hgf hfg
+  refine ⟨u, a, by simp, a.norm_lt_one, fun z hz ↦ ?_⟩
+  have := hu (UnitDisc.mk z (mem_ball_zero_iff.mp hz))
+  rw [TauCeti.coe_unitDiscStandardAutomorphismEquiv_apply, UnitDisc.coe_mk] at this
+  exact this
 
 /-- **Automorphisms of the disc.** An injective holomorphic map of the disc onto itself is
 `z ↦ c * φ_a z` with `‖c‖ = 1` and `‖a‖ < 1`. -/
@@ -108,75 +92,33 @@ theorem exists_eqOn_mul_discMobius_of_injOn_of_image_eq {f : ℂ → ℂ}
 variable {U : Set ℂ} {z₀ : ℂ}
 
 /-- **Uniqueness of the Riemann map.** Two injective holomorphic maps of an open set `U` onto
-the unit disc sending `z₀` to `0` with positive real derivative there agree on `U`. -/
+the unit disc sending `z₀` to `0` with positive real derivative there agree on `U`.
+
+Uses `TauCeti.exists_eqOn_const_mul_of_image_eq_ball_of_apply_eq_zero`. -/
 theorem eqOn_of_riemannMap (hU : IsOpen U) (hz₀ : z₀ ∈ U) {f₁ f₂ : ℂ → ℂ}
     (hf₁ : DifferentiableOn ℂ f₁ U) (hi₁ : InjOn f₁ U) (himg₁ : f₁ '' U = ball 0 1)
     (h₁0 : f₁ z₀ = 0) {r₁ : ℝ} (hr₁ : 0 < r₁) (hd₁ : deriv f₁ z₀ = r₁)
     (hf₂ : DifferentiableOn ℂ f₂ U) (hi₂ : InjOn f₂ U) (himg₂ : f₂ '' U = ball 0 1)
     (h₂0 : f₂ z₀ = 0) {r₂ : ℝ} (hr₂ : 0 < r₂) (hd₂ : deriv f₂ z₀ = r₂) :
     EqOn f₁ f₂ U := by
-  have h0 : (0 : ℂ) ∈ ball (0 : ℂ) 1 := mem_ball_self one_pos
-  -- `F = f₂ ∘ f₁⁻¹` is an automorphism of the disc fixing `0`, with inverse `f₁ ∘ f₂⁻¹`
-  set g := invFunOn f₁ U
-  have hg : DifferentiableOn ℂ g (ball 0 1) :=
-    (differentiableOn_invFunOn_of_injOn hU hf₁ hi₁).mono himg₁.symm.subset
-  have hgm : MapsTo g (ball 0 1) U := fun w hw ↦ invFunOn_mem (himg₁.symm.subset hw)
-  have hfg : ∀ w ∈ ball 0 1, f₁ (g w) = w := fun w hw ↦ invFunOn_eq (himg₁.symm.subset hw)
-  have hg0 : g 0 = z₀ := by
-    have := hi₁.leftInvOn_invFunOn hz₀
-    rwa [h₁0] at this
-  set F : ℂ → ℂ := fun w ↦ f₂ (g w)
-  have hFd : DifferentiableOn ℂ F (ball 0 1) := hf₂.comp hg hgm
-  have hFm : MapsTo F (ball 0 1) (ball 0 1) := fun w hw ↦
-    himg₂.subset (mem_image_of_mem f₂ (hgm hw))
-  have hF0 : F 0 = 0 := by
-    change f₂ (g 0) = 0
-    rw [hg0, h₂0]
-  set G : ℂ → ℂ := fun w ↦ f₁ (invFunOn f₂ U w)
-  have hGd : DifferentiableOn ℂ G (ball 0 1) :=
-    hf₁.comp ((differentiableOn_invFunOn_of_injOn hU hf₂ hi₂).mono himg₂.symm.subset)
-      fun w hw ↦ invFunOn_mem (himg₂.symm.subset hw)
-  have hGm : MapsTo G (ball 0 1) (ball 0 1) := fun w hw ↦
-    himg₁.subset (mem_image_of_mem f₁ (invFunOn_mem (himg₂.symm.subset hw)))
-  have hGF : ∀ w ∈ ball 0 1, G (F w) = w := by
-    intro w hw
-    change f₁ (invFunOn f₂ U (f₂ (g w))) = w
-    rw [hi₂.leftInvOn_invFunOn (hgm hw), hfg w hw]
-  obtain ⟨c, hc, hFeq⟩ := exists_eqOn_mul_of_leftInverse_of_map_zero hFd hFm hF0 hGd hGm hGF
-  -- the derivative of `F` at `0` is `c = r₂ / r₁`
-  have hderivF : deriv F 0 = c := by
-    have hev : F =ᶠ[𝓝 0] fun z ↦ c * z :=
-      hFeq.eventuallyEq_of_mem (isOpen_ball.mem_nhds h0)
-    have hcz : HasDerivAt (fun z : ℂ ↦ c * z) c 0 := by
-      simpa using (hasDerivAt_id (0 : ℂ)).const_mul c
-    rw [hev.deriv_eq, hcz.deriv]
-  have hderivF' : deriv F 0 = deriv f₂ z₀ * (deriv f₁ z₀)⁻¹ := by
-    have hgd : HasDerivAt g (deriv f₁ z₀)⁻¹ 0 := by
-      have := hasDerivAt_invFunOn_of_injOn hU hf₁ hi₁ hz₀
-      rwa [h₁0] at this
-    have hf₂d : HasDerivAt f₂ (deriv f₂ z₀) (g 0) := by
-      rw [hg0]
-      exact (hf₂.differentiableAt (hU.mem_nhds hz₀)).hasDerivAt
-    exact (hf₂d.comp 0 hgd).deriv
-  have hc' : c = ((r₂ / r₁ : ℝ) : ℂ) := by
-    rw [← hderivF, hderivF', hd₁, hd₂]
-    push_cast
-    ring
-  have hc1 : c = 1 := by
-    have h1 : ‖c‖ = r₂ / r₁ := by
-      rw [hc', norm_real, Real.norm_of_nonneg (div_pos hr₂ hr₁).le]
-    rw [hc] at h1
-    rw [hc', ← h1]
-    exact ofReal_one
-  -- conclude
+  obtain ⟨u, hu⟩ := TauCeti.exists_eqOn_const_mul_of_image_eq_ball_of_apply_eq_zero hU hf₁ hf₂
+    hi₁ hi₂ himg₁ himg₂ hz₀ h₁0 h₂0
+  -- the rotation factor is `r₂ / r₁`, a positive real number of norm one
+  have hderiv : deriv f₂ z₀ = u * deriv f₁ z₀ := by
+    rw [(hu.eventuallyEq_of_mem (hU.mem_nhds hz₀)).deriv_eq, deriv_const_mul _
+      (hf₁.differentiableAt (hU.mem_nhds hz₀))]
+  rw [hd₁, hd₂] at hderiv
+  have hu1 : (u : ℂ) = 1 := by
+    have hreal : (u : ℂ) = ((r₂ / r₁ : ℝ) : ℂ) := by
+      push_cast
+      field_simp [ofReal_ne_zero.mpr hr₁.ne']
+      exact hderiv.symm
+    have hn : r₂ / r₁ = 1 := by
+      have := congrArg norm hreal
+      rwa [Circle.norm_coe, norm_real, Real.norm_of_nonneg (div_pos hr₂ hr₁).le, eq_comm] at this
+    rw [hreal, hn, ofReal_one]
   intro z hz
-  have hw : f₁ z ∈ ball 0 1 := himg₁.subset (mem_image_of_mem f₁ hz)
-  have h1 := hFeq hw
-  simp only [hc1, one_mul] at h1
-  have hgz : g (f₁ z) = z := hi₁.leftInvOn_invFunOn hz
-  calc f₁ z = F (f₁ z) := h1.symm
-    _ = f₂ (g (f₁ z)) := rfl
-    _ = f₂ z := by rw [hgz]
+  simp [hu hz, hu1]
 
 end Complex
 

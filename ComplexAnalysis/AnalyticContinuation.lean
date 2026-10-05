@@ -8,6 +8,7 @@ module
 public import Mathlib.Analysis.Analytic.Uniqueness
 public import Mathlib.Analysis.Complex.Basic
 public import Mathlib.Topology.UnitInterval
+public import TauCeti.Analysis.Complex.Conformal.Continuation.Basic
 
 /-!
 # Analytic continuation along paths
@@ -18,7 +19,11 @@ An analytic continuation along a continuous path `γ : I → ℂ` is a family of
 is the **uniqueness of analytic continuation**: two continuations along the same path with the
 same germ at the initial point have the same germ at the end point. The proof shows that the set
 of parameters where the germs agree is clopen in the connected unit interval, using the identity
-theorem on the discs.
+theorem on the discs. Continuity of the path is not assumed for this uniqueness statement.
+
+Along a continuous path such a continuation is an analytic continuation in the sense of the Tau
+Ceti contributors' `TauCeti.IsAnalyticContinuationAlong`, whose library also proves the monodromy
+theorem (`TauCeti.Analysis.Complex.Conformal.Monodromy`).
 
 ## Main definitions
 
@@ -30,6 +35,8 @@ theorem on the discs.
   continuation along a path.
 * `Complex.IsContinuationAlong.eventuallyEq_of_eventuallyEq`: the germs agree at every
   parameter.
+* `Complex.IsContinuationAlong.isAnalyticContinuationAlong`: the adapter to the Tau Ceti
+  predicate along a continuous path.
 
 ## References
 
@@ -125,6 +132,19 @@ theorem eventuallyEq_one_of_eventuallyEq_zero (hf : IsContinuationAlong γ f r)
     (hg : IsContinuationAlong γ g ρ) (h0 : f 0 =ᶠ[𝓝 (γ 0)] g 0) :
     f 1 =ᶠ[𝓝 (γ 1)] g 1 :=
   hf.eventuallyEq_of_eventuallyEq hg h0 1
+
+/-- Along a continuous path, a continuation by function elements on discs is an analytic
+continuation in the sense of the Tau Ceti contributors' `TauCeti.IsAnalyticContinuationAlong`
+(`TauCeti.Analysis.Complex.Conformal.Continuation.Basic`). This gives access to their
+continuation calculus and to the monodromy theorem of
+`TauCeti.Analysis.Complex.Conformal.Monodromy`. -/
+theorem isAnalyticContinuationAlong (hf : IsContinuationAlong γ f r) (hγ : Continuous γ) :
+    TauCeti.IsAnalyticContinuationAlong f γ univ where
+  continuousOn := hγ.continuousOn
+  analyticAt t _ := hf.analytic t _ (mem_ball_self (hf.pos t))
+  locallyEq t _ := by
+    rw [nhdsWithin_univ]
+    exact (hf.compat t).mono fun _ hs ↦ hs.2
 
 end IsContinuationAlong
 

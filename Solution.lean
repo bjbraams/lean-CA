@@ -249,7 +249,7 @@ Related scalar results: Beffara (RMT4) and phasetr/ising-model contributors. See
 Library: `Complex.exists_subseq_tendstoLocallyUniformlyOn_of_bounded_on_compacts`. -/
 theorem montel :
     ∀ {F : Type u_1} [NormedAddCommGroup F]
-    [NormedSpace ℂ F] [CompleteSpace F] [FiniteDimensional ℂ F] {U : Set ℂ},
+    [NormedSpace ℂ F] [FiniteDimensional ℂ F] {U : Set ℂ},
     IsOpen U →
     ∀ {f : ℕ → ℂ → F},
     (∀ (n : ℕ), DifferentiableOn ℂ (f n) U) →
@@ -265,7 +265,7 @@ Related scalar theorem: phasetr/ising-model contributors. See CREDITS.md.
 Library: `Complex.exists_tendstoLocallyUniformlyOn_of_forall_exists_tendsto`. -/
 theorem vitali :
     ∀ {F : Type u_1} [NormedAddCommGroup F]
-    [NormedSpace ℂ F] [CompleteSpace F] [FiniteDimensional ℂ F] {D V : Set ℂ},
+    [NormedSpace ℂ F] [FiniteDimensional ℂ F] {D V : Set ℂ},
     IsOpen D →
     IsPreconnected D →
     ∀ {f : ℕ → ℂ → F},

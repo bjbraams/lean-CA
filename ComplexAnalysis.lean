@@ -44,6 +44,7 @@ public import ComplexAnalysis.RealUniqueness
 public import ComplexAnalysis.RemovableSingularity
 public import ComplexAnalysis.Residue
 public import ComplexAnalysis.Residue.LogDeriv
+public import ComplexAnalysis.Residue.Meromorphic
 public import ComplexAnalysis.Residue.PrincipalPart
 public import ComplexAnalysis.ArgumentPrinciple
 public import ComplexAnalysis.Rouche
@@ -150,12 +151,13 @@ and `Topology` libraries.
 * `CauchyFormula`: Banach-valued Cauchy formulas on simply connected open sets, with an explicit
   scalar kernel integral.
 * `LogDerivIntegral`, `CurveIndex`: the exponential endpoint identity, integer-valued index
-  for closed C¹ curves avoiding the pole, index laws, and the index-weighted Cauchy formula.
+  for closed piecewise C¹ curves avoiding the pole (identified with TauCeti's winding number),
+  index laws, and the index-weighted Cauchy formula.
 * `CurveIndex.Continuity`: continuity and local constancy away from the curve, constancy on
   connected components, and vanishing on unbounded components of the complement.
 * `Integral.Homotopy`, `CurveIndex.Homotopy`: Cauchy's theorem under `C²` path homotopies
-  on arbitrary open domains; the curve index also respects continuous based homotopies of `C¹`
-  loops.
+  on arbitrary open domains; the curve index also respects continuous based homotopies of
+  piecewise `C¹` loops.
 * `Integral.ContinuousHomotopy`: Cauchy's theorem under continuous homotopies, including moving
   endpoints, and passage to limits of finite contours when endpoint-track integrals vanish.
 * `Integral.CirclePath`: smooth circles as paths and agreement of curve and circle integrals;
@@ -167,8 +169,9 @@ and `Topology` libraries.
 * `CauchyDerivatives`, `CauchyEstimates`, `CauchySeries`: circle derivative formulas, compact
   derivative bounds, geometric Taylor-coefficient majorants, and Cauchy-series estimates.
 * `LaurentSeries`: Banach-valued coefficients and expansions, annular formulas, and geometry.
-* `Residue`, `Residue.LogDeriv`: residues at isolated singularities, pole computations,
-  and logarithmic-derivative residues equal to meromorphic orders.
+* `Residue`, `Residue.LogDeriv`, `Residue.Meromorphic`: residues at isolated singularities,
+  pole computations, logarithmic-derivative residues equal to meromorphic orders, and agreement
+  with TauCeti's residue on meromorphic germs (simple poles and quotients).
 * `ArgumentPrinciple`, `Rouche`, `Hurwitz`: disk zero counting with multiplicities,
   stability under perturbation, and zero-free or injective limits of holomorphic functions.
 * `FunctionSpace`, `Montel`, `Vitali`: compact-open holomorphic spaces, compactness and
@@ -213,15 +216,16 @@ and `Topology` libraries.
   functions.
 * `DiscMobius`, `HolomorphicInverse`, `RiemannMapping`, `DiscAutomorphism`, `Cayley`: disc
   Möbius transformations, holomorphic inverses of injective holomorphic maps, the Riemann
-  mapping theorem by the extremal argument, the classification of disc and half-plane
-  automorphisms, and uniqueness of the normalized Riemann map.
+  mapping theorem, the classification of disc automorphisms and of half-plane automorphisms as
+  real Möbius maps, and uniqueness of the normalized Riemann map.
 * `Harnack`, `DirichletDisc`: Poisson kernel bounds and Harnack's inequality, the Poisson
   integral of continuous boundary data as the solution of the Dirichlet problem on a disc,
   harmonic functions as subharmonic functions, and uniqueness by the maximum principle.
 * `LocalMapping`, `ResidueAtInfinity`: the local `m`-to-one mapping theorem by Rouché, the
   residue at infinity with the inversion change of variables, and the total residue theorem.
 * `AnalyticContinuation`, `NaturalBoundary`: function elements along a path, uniqueness of
-  analytic continuation by the clopen argument, and the lacunary series `∑ z ^ (2 ^ n)` with
+  analytic continuation by the clopen argument, passage to TauCeti's continuation predicate,
+  and the lacunary series `∑ z ^ (2 ^ n)` with
   the unit circle as natural boundary.
 * `CanonicalProduct`, `CanonicalProduct.Bounds`, `CanonicalProduct.GoodRadii`, `FiniteOrder`,
   `Hadamard`: canonical products of finite genus over a countable index type with their
@@ -240,8 +244,8 @@ and `Topology` libraries.
   function on a closed annulus is a log-convex function of the radius, deduced from Mathlib's
   three-lines theorem through the exponential map.
 * `GreenFunction`: existence and nonnegativity of the Green function of a bounded open set with
-  the exterior disc property, as the harmonic compensator for the logarithmic singularity at a
-  pole.
+  a barrier at every boundary point (for instance with the exterior disc property), as the
+  harmonic compensator for the logarithmic singularity at a pole.
 * `KoebeDistortion`: the pre-Schwarzian bound for injective holomorphic maps of the disc, by
   Bieberbach's theorem applied to the Koebe transform at each point.
 * `KoebeGrowth`: the Koebe distortion theorem (both bounds on `‖f' z‖`) and the growth theorem's
@@ -269,7 +273,7 @@ and `Topology` libraries.
 * `CircleReflection`: the Schwarz reflection principle across a circle `‖z‖ = r`, the first
   genuinely curved instance of reflection across an analytic arc, by reducing to
   `Reflection`'s real-axis case via a Cayley-type Möbius map conjugating circle inversion to
-  complex conjugation.
+  complex conjugation; the domain may contain the whole circle.
 * `ChordalMetric`: the chordal (spherical) metric on `ℂ ∪ {∞}` (`OnePoint ℂ`), defined as the
   Euclidean distance between the images of two points under inverse stereographic projection
   onto the unit sphere in `ℝ³`, which gives every metric-space axiom for free from the ambient
@@ -289,7 +293,7 @@ and `Topology` libraries.
   subharmonic functions with boundary upper limits, Perron's method (the upper envelope of
   the Perron family is harmonic), barriers and the boundary behaviour of the Perron
   solution, the exterior disc criterion, and the solution of the Dirichlet problem on
-  bounded open sets with the exterior disc property.
+  bounded open sets with a barrier at every boundary point.
 * `Parseval`, `DiscCauchyTransform`, `AreaTheorem`, `Koebe`: Cauchy's coefficient formula and
   Parseval's identity for Taylor coefficients on circles with Gutzmer's inequality, the Cauchy
   transform of a disc by polar coordinates, the index-area identity and Gronwall's area theorem

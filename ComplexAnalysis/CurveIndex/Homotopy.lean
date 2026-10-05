@@ -7,14 +7,16 @@ module
 
 public import ComplexAnalysis.CurveIndex
 public import ComplexAnalysis.Integral.Homotopy
-public import ComplexAnalysis.Integral.ContinuousHomotopy
+public import TauCeti.Analysis.Contour.Winding.Number.Homotopy
 
 /-!
 # Homotopy invariance of the analytic curve index
 
-The analytic index of `C¹` loops is unchanged by a continuous based homotopy
+The analytic index of piecewise `C¹` loops is unchanged by a continuous based homotopy
 avoiding the pole. In particular it vanishes for a loop contractible in the
-punctured plane. The older `C²` homotopy statements remain available. These are
+punctured plane. The continuous statements adapt the homotopy invariance of the winding number
+by the Tau Ceti contributors (`TauCeti.Analysis.Contour.Winding.Number.Homotopy`). The older
+`C²` homotopy statements remain available. These are
 statements about the analytic curve index; no index for arbitrary continuous
 loops is introduced here.
 
@@ -24,11 +26,12 @@ loops is introduced here.
   homotopy avoiding the pole.
 * `Complex.curveIndex_eq_zero_of_nullhomotopy`: A loop admitting a smooth contraction away from
   the pole has analytic index zero.
-* `Complex.curveIndex_eq_of_continuous_homotopy`: The analytic index of `C¹` loops is invariant
-  under any continuous based homotopy avoiding the pole. Intermediate loops need not be
-  differentiable.
-* `Complex.curveIndex_eq_zero_of_continuous_nullhomotopy`: A `C¹` loop contractible in the
-  punctured plane has analytic index zero, without a smoothness assumption on the contraction.
+* `Complex.curveIndex_eq_of_continuous_homotopy`: The analytic index of piecewise `C¹` loops is
+  invariant under any continuous based homotopy avoiding the pole. Intermediate loops need not
+  be differentiable.
+* `Complex.curveIndex_eq_zero_of_continuous_nullhomotopy`: A piecewise `C¹` loop contractible
+  in the punctured plane has analytic index zero, without a smoothness assumption on the
+  contraction.
 
 ## References
 
@@ -60,24 +63,25 @@ theorem curveIndex_eq_zero_of_nullhomotopy {a w : ℂ} {γ : Path a a}
     curveIndex γ w = 0 := by
   rw [curveIndex_eq_of_homotopy H hw hH, curveIndex_refl]
 
-/-- The analytic index of `C¹` loops is invariant under any continuous based homotopy
-avoiding the pole. Intermediate loops need not be differentiable. -/
+/-- The analytic index of piecewise `C¹` loops is invariant under any continuous based homotopy
+avoiding the pole. Intermediate loops need not be differentiable.
+
+This adapts `TauCeti.Contour.windingNumber_eq_of_pathHomotopy` by the Tau Ceti contributors. -/
 theorem curveIndex_eq_of_continuous_homotopy {a w : ℂ} {γ δ : Path a a}
     (H : γ.Homotopy δ) (hw : ∀ p, H p ≠ w)
-    (hγ : ContDiffOn ℝ 1 γ.extend I) (hδ : ContDiffOn ℝ 1 δ.extend I) :
+    (hγ : TauCeti.Contour.IsPiecewiseC1On γ.extend 0 1)
+    (hδ : TauCeti.Contour.IsPiecewiseC1On δ.extend 0 1) :
     curveIndex γ w = curveIndex δ w := by
-  apply congrArg ((2 * (Real.pi : ℂ) * Complex.I)⁻¹ * ·)
-  exact curveIntegral_eq_of_continuous_homotopy_of_contDiffOn H
-    (isOpen_compl_singleton (x := w))
-    ((differentiableOn_id.sub_const w).inv (fun z hz ↦ sub_ne_zero.mpr hz))
-    (by rintro _ ⟨p, rfl⟩; exact hw p) hγ hδ
+  rw [curveIndex_eq_windingNumber hγ fun t ↦ by simpa using hw (0, t),
+    curveIndex_eq_windingNumber hδ fun t ↦ by simpa using hw (1, t)]
+  exact TauCeti.Contour.windingNumber_eq_of_pathHomotopy H hγ hδ hw
 
-/-- A `C¹` loop contractible in the punctured plane has analytic index zero,
+/-- A piecewise `C¹` loop contractible in the punctured plane has analytic index zero,
 without a smoothness assumption on the contraction. -/
 theorem curveIndex_eq_zero_of_continuous_nullhomotopy {a w : ℂ} {γ : Path a a}
     (H : γ.Homotopy (Path.refl a)) (hw : ∀ p, H p ≠ w)
-    (hγ : ContDiffOn ℝ 1 γ.extend I) : curveIndex γ w = 0 := by
+    (hγ : TauCeti.Contour.IsPiecewiseC1On γ.extend 0 1) : curveIndex γ w = 0 := by
   rw [curveIndex_eq_of_continuous_homotopy H hw hγ
-    (by simp only [Path.refl_extend, ContinuousMap.coe_const]; fun_prop), curveIndex_refl]
+    (.of_contDiffOn (by simp only [Path.refl_extend]; exact contDiffOn_const)), curveIndex_refl]
 
 end Complex

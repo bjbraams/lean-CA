@@ -1,26 +1,15 @@
-# Project instructions
+# Project instructions — lean-CA
 
-## Build topology (do not change)
+Before working, read and follow [the shared Lean instructions](../lean-codes/AGENTS.common.md),
+then apply the project-specific rules below. Resolve that path relative to this file.
+Local rules take precedence over the shared defaults. If the shared file is unavailable,
+report that fact rather than proceeding without it.
 
-- Lake root is this directory. This directory is on NFS.
-- .lake is a symlink to /export/scratch1/braams/lean-codes-lake on local disk.
-- Never replace, delete, or retarget that symlink.
-- Never run lake build from a subdirectory as if it were the package root.
-- Never copy Mathlib or .lake onto NFS ($HOME).
-- Do not “fix” the link because it points outside the repo. That is intentional.
-- That lake directory is shared with the companion projects (lean-SCV, lean-codes, lean-AAR,
-  lean-LCS). They share `.lake/packages` (all pin the same Mathlib), but this project writes
-  its own build outputs to `.lake/build-CA` (`buildDir` in `lakefile.toml`), because Lake's
-  build traces include the package name and modules with equal names (`ComplexAnalysis.*`,
-  `ToMathlib.*`) would otherwise overwrite each other. Keep that `buildDir` setting; never
-  write to or delete another project's build directory.
-- Do not set `LEAN_PATH`, `LAKE_HOME`, or a custom cache dir unless asked.
-- If `.lake` is missing or is no longer a symlink to the path above, stop and ask. Do not repair it.
-- After every Lean edit: `lake build` from the Lake root.
-- For ordinary builds, use lake build > /tmp/ac-build.log 2>&1; reuse this filename to preserve
-  the existing command approval.
-- Without LSP/MCP: treat `lake build` output as the only proof-state.
-- Do not bump lean-toolchain or Mathlib unless asked.
+## Build settings
+
+- Lake root: the directory containing this `AGENTS.md`.
+- Build output: `.lake/build-CA`; preserve the matching `buildDir` in `lakefile.toml`.
+- Ordinary build command: `lake build > /tmp/ac-build.log 2>&1`.
 
 ## Project
 
@@ -56,55 +45,16 @@ The following are concerns to be kept in mind and addressed throughout the devel
   the mathematical scope, notation, and main results?
 - Can long proofs be simplified or broken up, perhaps with use of helper theorems?
 
-## Proof requirements
+## Dependencies and import layers
 
-- All proofs must be accepted by Lean.
-- Do not introduce axioms.
-- Do not replace `sorry` with `by exact Classical.choice ...` or other logically equivalent
-  escape mechanisms.
-- Search Mathlib first, then the pinned TauCeti modules, before developing substantial
-  local theory. Follow the upstream reuse policy below.
-- Additional lemmas are welcome when they clarify the mathematical structure.
-- Preserve theorem statements unless they are false or require missing assumptions.
-- If a statement appears false then mark the issue clearly before changing it.
-- Pay particular attention to empty, singleton, and nontrivial index types.
+Mathlib and TauCeti are allowed in `ToMathlib` and `ComplexAnalysis`.
+`ToMathlib` must not import `ComplexAnalysis`; `ComplexAnalysis` may import `ToMathlib`.
+When propagating source changes to lean-SCV, check that its dependency configuration
+supports new imports. Adding a dependency here does not authorize changing companion
+configurations. Follow the master-copy rules below.
 
-## Upstream reuse policy
+## Project-specific editing
 
-The order of preference for existing results is **Mathlib, then the pinned TauCeti, then
-local project code**. Apply this policy throughout `ToMathlib` and `ComplexAnalysis`:
-
-- Use a suitable Mathlib result in preference to a TauCeti or local version.
-- When Mathlib does not supply a suitable result, import the specific TauCeti module
-  providing it before developing a local proof. Prefer imports to copied proofs.
-- Remove redundant local declarations and update their callers when adopting an upstream
-  result. Small adapters may remain when they connect an upstream result to a useful local
-  interface without duplicating its mathematical proof.
-- Compare hypotheses and conclusions before replacing a declaration, and check for name
-  conflicts. Preserve existing generality: do not strengthen assumptions merely to fit
-  an upstream theorem. Retain local results whose additional scope is still needed.
-- Credit imported results at their point of use. When preparing a Mathlib contribution,
-  resolve its TauCeti prerequisites as part of that work.
-
-Mathlib and TauCeti are allowed external dependencies in both project layers. `ToMathlib`
-must not import `ComplexAnalysis`; `ComplexAnalysis` may import `ToMathlib`. Import specific
-TauCeti modules; `import TauCeti` does not re-export the library. Keep TauCeti pinned to the
-compatible revision in `lakefile.toml`, and preserve the common Mathlib pin when updating it.
-The shared package checkout does not make TauCeti a dependency of companion projects.
-When propagating a shared source change to `lean-SCV` under the rule below, also check that
-its dependency configuration supports any new imports. Adding TauCeti here alone does not
-authorize changes to companion dependency configurations.
-
-## Editing
-
-- Keep changes narrowly related to the requested theorem or proof cluster.
-- Preserve unrelated user changes.
-- Temporary experiments may go in `Scratch.lean`, but remove that file before finishing unless
-  asked to retain it.
-- Do not commit changes unless explicitly requested.
-- If a new Lean file is created, provide it with a documentation header section.
-- If a new Lean statement (definition, theorem, lemma or other) is introduced, provide it with
-  a brief docstring.
 - This project is the master copy of the `ComplexAnalysis` files. The companion project
   `../lean-SCV` holds exact copies of the subset it imports, and its `ToMathlib` files that
   share a name with ones here have identical content and path. The umbrella modules
@@ -113,36 +63,8 @@ authorize changes to companion dependency configurations.
   by copying; renaming or removing declarations in such a file requires a matching update in
   lean-SCV.
 
-## Validation
-
-For any lean file `f.lean` that has been changed, run:
-
-    lake env lean f.lean
-
-Also run:
-
-    git diff --check
-    rg -n '\bsorry\b' ...
-
-## Completion report
-
-Report:
-
-- which theorems were proved;
-- which `sorry`s remain;
-- validation commands and their results;
-- any changed assumptions;
-- any theorem found or suspected to be false.
-
 ## Documentation files
-
-Do not create dedicated documentation files or any other Markdown files in subdirectories.
-Such files should go into the main project directory at the top level.
-This includes Markdown files that provide a review of project updates or that describe
-planned work.
 
 Files README.md and STRUCTURE.md and SYNOPSIS.md are intended as public documentation, with
 README.md as the entry point for the reader. STRUCTURE.md is for more detailed description
 for developers and SYNOPSIS.md is content description for mathematicians.
-
-File REMINDERS.md is intended for private documentation for the owner or other editors.

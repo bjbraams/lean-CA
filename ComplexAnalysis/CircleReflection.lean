@@ -30,7 +30,8 @@ from its pole `-r`) shows `circleReflection r f = schwarzReflection g ∘ cayley
 holomorphic on the original domain.
 
 The domain hypotheses mirror `Reflection.lean`'s: an open, inversion-invariant set `U` avoiding
-the inversion pole `0` and the Möbius pole `-r`.
+the inversion pole `0`. The Cayley-type map has a pole at the point `-r` of the circle; there the
+argument is applied to `w ↦ f (-w)` instead, so the domain may contain the whole circle.
 
 ## Main definitions
 
@@ -276,11 +277,10 @@ private theorem sq_div_conj_ne_neg_ofReal (hr : 0 < r) {z : ℂ} (hz0 : z ≠ 0)
   have h2 := congrArg conj hcz
   simpa using h2
 
-/-- **Reflection across a circle.** Analogue of `Complex.analyticOnNhd_schwarzReflection` for
-the circle `‖z‖ = r` in place of the real axis: on an open, inversion-invariant domain `U`
-avoiding the inversion pole `0` and the Möbius pole `-r`, a function holomorphic inside the
-circle, continuous up to it, and real-valued on it extends holomorphically across the circle. -/
-theorem analyticOnNhd_circleReflection {r : ℝ} (hr : 0 < r) {U : Set ℂ} {f : ℂ → ℂ}
+/-- Reflection across a circle on a domain that also avoids the pole `-r` of the Cayley-type map
+`cayleyCircle r`. This is the transported real-axis reflection principle. -/
+private theorem analyticOnNhd_circleReflection_of_neg_notMem {r : ℝ} (hr : 0 < r) {U : Set ℂ}
+    {f : ℂ → ℂ}
     (hU : IsOpen U) (h0 : (0 : ℂ) ∉ U) (hmr : -(r : ℂ) ∉ U)
     (hs : MapsTo (fun z ↦ (r : ℂ) ^ 2 / conj z) U U)
     (hc : ContinuousOn f (U ∩ closedBall 0 r))
@@ -371,6 +371,56 @@ theorem analyticOnNhd_circleReflection {r : ℝ} (hr : 0 < r) {U : Set ℂ} {f :
       rw [hkey, hψ_def, hφ_def,
         cayleyCircleInv_cayleyCircle hr (sq_div_conj_ne_neg_ofReal hr hz0 hzr)]
   exact hcomp.congr hU heq.symm
+
+/-- Reflecting `w ↦ f (-w)` across the circle is reflecting `f` and then negating. -/
+private theorem circleReflection_comp_neg (r : ℝ) (f : ℂ → ℂ) :
+    circleReflection r f = circleReflection r (fun w ↦ f (-w)) ∘ fun w ↦ -w := by
+  funext z
+  simp only [circleReflection, Function.comp_apply, norm_neg, neg_neg, map_neg, div_neg]
+
+/-- **Reflection across a circle.** Analogue of `Complex.analyticOnNhd_schwarzReflection` for
+the circle `‖z‖ = r` in place of the real axis: on an open, inversion-invariant domain `U`
+avoiding the inversion pole `0`, a function holomorphic inside the circle, continuous up to it,
+and real-valued on it extends holomorphically across the circle.
+
+The domain may contain the whole circle. Away from `-r` this is the reflection transported by
+`cayleyCircle r`; near `-r` it is the same statement for `w ↦ f (-w)`. -/
+theorem analyticOnNhd_circleReflection {r : ℝ} (hr : 0 < r) {U : Set ℂ} {f : ℂ → ℂ}
+    (hU : IsOpen U) (h0 : (0 : ℂ) ∉ U)
+    (hs : MapsTo (fun z ↦ (r : ℂ) ^ 2 / conj z) U U)
+    (hc : ContinuousOn f (U ∩ closedBall 0 r))
+    (hd : DifferentiableOn ℂ f (U ∩ ball 0 r))
+    (hreal : ∀ z ∈ U, ‖z‖ = r → (f z).im = 0) :
+    AnalyticOnNhd ℂ (circleReflection r f) U := by
+  -- the statement on `U` with the point `-r` removed
+  have hsub : ∀ {f : ℂ → ℂ} {U : Set ℂ}, IsOpen U → (0 : ℂ) ∉ U →
+      MapsTo (fun z ↦ (r : ℂ) ^ 2 / conj z) U U → ContinuousOn f (U ∩ closedBall 0 r) →
+      DifferentiableOn ℂ f (U ∩ ball 0 r) → (∀ z ∈ U, ‖z‖ = r → (f z).im = 0) →
+      AnalyticOnNhd ℂ (circleReflection r f) (U \ {-(r : ℂ)}) := by
+    intro f U hU h0 hs hc hd hreal
+    refine analyticOnNhd_circleReflection_of_neg_notMem hr (hU.sdiff isClosed_singleton)
+      (fun h ↦ h0 h.1) (fun h ↦ h.2 rfl) (fun z hz ↦ ⟨hs hz.1, ?_⟩)
+      (hc.mono fun z hz ↦ ⟨hz.1.1, hz.2⟩) (hd.mono fun z hz ↦ ⟨hz.1.1, hz.2⟩)
+      fun z hz ↦ hreal z hz.1
+    exact sq_div_conj_ne_neg_ofReal hr (fun h ↦ h0 (h ▸ hz.1)) hz.2
+  intro z hz
+  by_cases hzr : z = -(r : ℂ)
+  · -- near `-r`, reflect `w ↦ f (-w)` on the negated domain
+    have hneg : AnalyticOnNhd ℂ (circleReflection r fun w ↦ f (-w))
+        ((fun w ↦ -w) ⁻¹' U \ {-(r : ℂ)}) := by
+      apply hsub (hU.preimage continuous_neg) (by simpa using h0)
+      · intro w hw
+        simpa [map_neg, div_neg] using hs hw
+      · exact hc.comp continuous_neg.continuousOn fun w hw ↦ ⟨hw.1, by simpa using hw.2⟩
+      · exact hd.comp (differentiableOn_neg _) fun w hw ↦ ⟨hw.1, by simpa using hw.2⟩
+      · exact fun w hw hwr ↦ hreal _ hw (by rwa [norm_neg])
+    have hrmem : (r : ℂ) ∈ (fun w ↦ -w) ⁻¹' U \ {-(r : ℂ)} := by
+      refine ⟨by simpa [← hzr] using hz, fun h ↦ ?_⟩
+      have : (r : ℂ) = 0 := by linear_combination (Set.mem_singleton_iff.mp h) / 2
+      exact hr.ne' (by exact_mod_cast this)
+    rw [circleReflection_comp_neg]
+    exact (hneg (-z) (by simpa [hzr] using hrmem)).comp analyticAt_id.neg
+  · exact hsub hU h0 hs hc hd hreal z ⟨hz, hzr⟩
 
 end Complex
 end

@@ -30,7 +30,7 @@ Cauchy's theorem also holds under continuous path homotopies with suitable bound
 regularity; moving endpoints contribute their own integrals. The improper-integral results
 state explicit convergence or vanishing conditions.
 
-The winding number of a closed $C^1$ curve is integer-valued, locally constant off the curve,
+The winding number of a closed piecewise $C^1$ curve is integer-valued, locally constant off the curve,
 zero on unbounded complementary components, and invariant under based homotopies avoiding
 the point. For a finite $C^1$ cycle $\Gamma$ in $U$ whose index vanishes outside $U$, the library
 proves the homological Cauchy theorem and formula. The corresponding residue theorem gives
@@ -117,7 +117,8 @@ annulus and continuous on its closure, with no nonvanishing hypothesis.
 
 Every nonempty simply connected proper plane domain has a conformal bijection onto the unit
 disc. Prescribing the image of one point to be zero and its derivative to be positive real
-makes the map unique. The library classifies disc and half-plane automorphisms and proves
+makes the map unique. The library classifies disc automorphisms, shows that half-plane
+automorphisms are real Möbius maps $z\mapsto(az+b)/(cz+d)$ with $ad-bc>0$, and proves
 both the distance and derivative forms of Schwarz–Pick.
 
 Injective holomorphic images of smaller closed discs have simple boundary contours with
@@ -148,14 +149,14 @@ subharmonic functions, holomorphic examples, and the $C^2$ criterion $\Delta u\g
 
 Perron's construction gives a harmonic envelope on a bounded open set for bounded boundary
 data. Barriers imply attainment of continuous data at the corresponding boundary points.
-In particular, the Dirichlet problem is solved when every boundary point $\zeta$ has an
-exterior closed disc meeting the closure of the domain only at $\zeta$. Under this condition,
-the library constructs a nonnegative Green function with zero boundary limits and the
+In particular, the Dirichlet problem is solved when every boundary point has a barrier, for
+example when every boundary point $\zeta$ has an exterior closed disc meeting the closure of the
+domain only at $\zeta$. Under this condition, the library constructs a nonnegative Green function with zero boundary limits and the
 logarithmic singularity at its pole. Symmetry and strict positivity are not established.
 
 Removability under continuity covers countable sets, analytic zero sets, and gluing across
-the real axis. Schwarz reflection covers the real axis and circles, the latter on suitable
-inversion-invariant domains avoiding the coordinate poles. Analytic continuation is unique
+the real axis. Schwarz reflection covers the real axis and circles, the latter on
+inversion-invariant domains avoiding the centre. Analytic continuation is unique
 along a fixed path; general monodromy remains outside the development. The series
 $\sum_{n\ge0}z^{2^n}$ is shown to have the unit circle as a natural boundary. Pringsheim–Vivanti
 is proved in the form that a holomorphic extension across the positive boundary point of a

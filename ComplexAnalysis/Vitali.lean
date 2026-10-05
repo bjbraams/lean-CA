@@ -39,8 +39,7 @@ open scoped Topology
 
 namespace Complex
 
-variable {F : Type*} [NormedAddCommGroup F] [NormedSpace ℂ F]
-  [CompleteSpace F] [FiniteDimensional ℂ F]
+variable {F : Type*} [NormedAddCommGroup F] [NormedSpace ℂ F] [FiniteDimensional ℂ F]
 
 /-- **Vitali's theorem** in the compact-open function space. Pointwise convergence on a
 set with an interior accumulation point determines convergence on the whole domain.
@@ -57,6 +56,7 @@ theorem exists_tendsto_of_holomorphic_bounded_on_compacts
     (hp : ∀ z ∈ V, ∃ y : F,
       Tendsto (fun n ↦ openExtension U (f n).val z) atTop (𝓝 y)) :
     ∃ g : HolomorphicMap U F, Tendsto f atTop (𝓝 g) := by
+  have := FiniteDimensional.complete ℂ F
   apply exists_tendsto_of_holomorphic_bounded_on_compacts_of_isClosed_of_unique
     (isClosed_holomorphicSubmodule U) f hb hVU _ hp
   intro p q he

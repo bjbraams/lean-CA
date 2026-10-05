@@ -146,7 +146,8 @@ theorem exists_int_index (hΓ : Γ.IsC1) {w : ℂ} (hw : w ∉ Γ.range) :
 /-- A cycle contained in a ball has index zero about every point outside that ball. -/
 theorem index_eq_zero_of_notMem_ball (hΓ : Γ.IsC1) {c w : ℂ} {R : ℝ}
     (hball : Γ.range ⊆ ball c R) (hw : w ∉ ball c R) : Γ.index w = 0 :=
-  Finset.sum_eq_zero fun i _ ↦ curveIndex_eq_zero_of_notMem_ball _ (hΓ i)
+  Finset.sum_eq_zero fun i _ ↦ curveIndex_eq_zero_of_notMem_ball _
+    (isPiecewiseC1On_extend_of_contDiffOn (hΓ i))
     (fun t ↦ hball (Γ.loop_mem_range i t)) hw
 
 /-- The index of a `C¹` cycle vanishes outside some ball around any given center. -/
@@ -157,14 +158,16 @@ theorem exists_pos_index_eq_zero_outside_ball (hΓ : Γ.IsC1) (c : ℂ) :
 
 /-- The index of a `C¹` cycle is continuous off the cycle. -/
 theorem continuousOn_index (hΓ : Γ.IsC1) : ContinuousOn Γ.index Γ.rangeᶜ :=
-  continuousOn_finsetSum _ fun i _ ↦ (continuousOn_curveIndex _ (hΓ i)).mono
+  continuousOn_finsetSum _ fun i _ ↦ (continuousOn_curveIndex _
+    (isPiecewiseC1On_extend_of_contDiffOn (hΓ i))).mono
     (compl_subset_compl.mpr (Γ.range_loop_subset i))
 
 /-- The index of a `C¹` cycle is constant on preconnected sets off the cycle. -/
 theorem index_eq_of_isPreconnected (hΓ : Γ.IsC1) {U : Set ℂ} (hU : IsPreconnected U)
     (hUΓ : U ⊆ Γ.rangeᶜ) {v w : ℂ} (hv : v ∈ U) (hw : w ∈ U) :
     Γ.index v = Γ.index w :=
-  Finset.sum_congr rfl fun i _ ↦ curveIndex_eq_of_isPreconnected _ (hΓ i) hU
+  Finset.sum_congr rfl fun i _ ↦ curveIndex_eq_of_isPreconnected _
+    (isPiecewiseC1On_extend_of_contDiffOn (hΓ i)) hU
     (hUΓ.trans (compl_subset_compl.mpr (Γ.range_loop_subset i))) hv hw
 
 /-- The index of a `C¹` cycle is constant on a ball around any point off the cycle. -/

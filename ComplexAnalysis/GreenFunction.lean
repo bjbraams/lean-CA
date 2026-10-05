@@ -10,7 +10,8 @@ public import ComplexAnalysis.Perron.Barrier
 /-!
 # The Green function of a domain
 
-For a bounded open set `U` with the exterior disc property and a pole `w ∈ U`, the **Green
+For a bounded open set `U` with a barrier at every boundary point, for instance one with the
+exterior disc property, and a pole `w ∈ U`, the **Green
 function** `G(·, w)` is the harmonic compensator for the logarithmic singularity at `w`: a
 function `G : ℂ → ℝ`, harmonic on `U \ {w}`, with `G(z) + log ‖z - w‖` extending harmonically
 across `w`, vanishing at the boundary of `U`, and nonnegative on `U \ {w}` (the sharper
@@ -28,8 +29,9 @@ here.
 
 ## Main results
 
-* `Complex.exists_greenFunction`: existence, the harmonic compensator, boundary vanishing, and
-  nonnegativity of the Green function.
+* `Complex.exists_greenFunction_of_isBarrier`: existence, the harmonic compensator, boundary
+  vanishing, and nonnegativity of the Green function on domains with barriers.
+* `Complex.exists_greenFunction`: the same on domains with the exterior disc property.
 
 ## References
 
@@ -63,12 +65,11 @@ theorem mem_frontier_or_eq_of_mem_frontier_diff_singleton (hU : IsOpen U) {w ζ 
     refine ⟨hcl', fun hζU ↦ hnU ⟨hζU, ?_⟩⟩
     simpa using hζw
 
-/-- **Existence of the Green function.** On a bounded open set with the exterior disc property,
-with pole `w ∈ U`, there is a function `G` harmonic on `U \ {w}`, whose sum with `log ‖z - w‖`
-extends harmonically across `w`, vanishing at the boundary of `U`, and positive elsewhere on
-`U`. -/
-theorem exists_greenFunction (hU : IsOpen U) (hUb : Bornology.IsBounded U)
-    (hext : ∀ ζ ∈ frontier U, ∃ (c : ℂ) (R : ℝ), 0 < R ∧ closedBall c R ∩ closure U = {ζ})
+/-- **Existence of the Green function.** On a bounded open set with a barrier at every boundary
+point, with pole `w ∈ U`, there is a function `G` whose sum with `log ‖z - w‖` is harmonic on
+`U`, vanishing at the boundary of `U`, and nonnegative elsewhere on `U`. -/
+theorem exists_greenFunction_of_isBarrier (hU : IsOpen U) (hUb : Bornology.IsBounded U)
+    (hbar : ∀ ζ ∈ frontier U, ∃ β : ℂ → ℝ, IsBarrier U ζ β)
     {w : ℂ} (hw : w ∈ U) :
     ∃ G : ℂ → ℝ, HarmonicOnNhd (fun z ↦ G z + Real.log ‖z - w‖) U ∧
       (∀ ζ ∈ frontier U, Tendsto G (𝓝[U] ζ) (𝓝 0)) ∧
@@ -77,7 +78,7 @@ theorem exists_greenFunction (hU : IsOpen U) (hUb : Bornology.IsBounded U)
   have hgcont : ContinuousOn (fun ζ ↦ Real.log ‖ζ - w‖) (frontier U) := by
     refine ContinuousOn.log (by fun_prop) fun ζ hζ ↦ ?_
     exact norm_ne_zero_iff.mpr (sub_ne_zero.mpr fun h ↦ hwU (h ▸ hζ))
-  obtain ⟨h, hharm, hbd⟩ := exists_harmonicOnNhd_tendsto_of_exteriorDisc hU hUb hext hgcont
+  obtain ⟨h, hharm, hbd⟩ := exists_harmonicOnNhd_tendsto_of_isBarrier hU hUb hbar hgcont
   set G : ℂ → ℝ := fun z ↦ h z - Real.log ‖z - w‖ with hG_def
   have hharmG : HarmonicOnNhd (fun z ↦ G z + Real.log ‖z - w‖) U := by
     have hev : (fun z ↦ G z + Real.log ‖z - w‖) = h := by funext z; rw [hG_def]; ring
@@ -143,6 +144,17 @@ theorem exists_greenFunction (hU : IsOpen U) (hUb : Bornology.IsBounded U)
   have hz₀mem : z₀ ∈ U \ {w} := ⟨hz₀U, hz₀w⟩
   have := hmax z₀ hz₀mem
   linarith
+
+/-- **Existence of the Green function.** On a bounded open set with the exterior disc property,
+with pole `w ∈ U`, there is a function `G` whose sum with `log ‖z - w‖` is harmonic on `U`,
+vanishing at the boundary of `U`, and nonnegative elsewhere on `U`. -/
+theorem exists_greenFunction (hU : IsOpen U) (hUb : Bornology.IsBounded U)
+    (hext : ∀ ζ ∈ frontier U, ∃ (c : ℂ) (R : ℝ), 0 < R ∧ closedBall c R ∩ closure U = {ζ})
+    {w : ℂ} (hw : w ∈ U) :
+    ∃ G : ℂ → ℝ, HarmonicOnNhd (fun z ↦ G z + Real.log ‖z - w‖) U ∧
+      (∀ ζ ∈ frontier U, Tendsto G (𝓝[U] ζ) (𝓝 0)) ∧
+      (∀ z ∈ U, z ≠ w → 0 ≤ G z) :=
+  exists_greenFunction_of_isBarrier hU hUb (exists_isBarrier_of_exteriorDisc hU hUb hext) hw
 
 end Complex
 

@@ -6,20 +6,28 @@ Authors: Bastiaan J Braams
 module
 
 public import ComplexAnalysis.ArgumentPrinciple
-public import Mathlib.Topology.Connected.TotallyDisconnected
+public import TauCeti.Analysis.Complex.Conformal.Rouche
 
 /-!
 # Rouché's theorem on disks
 
 A strict boundary perturbation preserves the total divisor degree, hence the number
-of zeros counted with multiplicity. The proof deforms the function along a line segment;
-the normalized logarithmic-derivative integral is continuous and integer-valued.
+of zeros counted with multiplicity. The divisor degree on a closed disk without boundary zeros is
+the zero count in the open disk, and Rouché's theorem in that zero-count form is imported from the
+Tau Ceti contributors' `TauCeti.Analysis.Complex.Conformal.Rouche`, including the symmetric
+hypothesis `‖f - g‖ < ‖f‖ + ‖g‖`.
+
+The continuity of logarithmic-derivative circle integrals in a parameter is also recorded; it
+gives the classical homotopy proof of Rouché's theorem.
 
 ## Main results
 
 * `Complex.continuous_circleIntegral_logDeriv`: A family of logarithmic-derivative circle
   integrals is continuous when the functions and their derivatives vary continuously on the
   boundary and never vanish there.
+* `Complex.finsum_divisor_eq_finsum_analyticOrderNatAt`: the divisor degree on a closed disk
+  without boundary zeros counts the zeros in the open disk with multiplicity.
+* `Complex.sum_divisor_eq_of_norm_sub_lt_norm_add_norm`: **Rouché's theorem**, symmetric form.
 * `Complex.sum_divisor_eq_of_norm_sub_lt`: **Rouché's theorem.** Two holomorphic functions with
   `‖g - f‖ < ‖f‖` on a circle have the same number of zeros in the disk, counted with
   multiplicity as divisor degree.
@@ -33,7 +41,7 @@ the normalized logarithmic-derivative integral is continuous and integer-valued.
 public noncomputable section
 
 open Set Filter Metric Function MeasureTheory MeromorphicOn
-open scoped Topology unitInterval
+open scoped Topology
 
 namespace Complex
 
@@ -60,66 +68,59 @@ theorem continuous_circleIntegral_logDeriv {X : Type*} [TopologicalSpace X]
     (continuous_parametric_integral_of_continuous (μ := volume) hk
       (isCompact_Icc : IsCompact (Icc (0 : ℝ) (2 * Real.pi))))
 
+/-- On a closed disk whose boundary circle contains no zeros of the analytic function `f`, the
+divisor degree of `f` is the number of zeros in the open disk counted with analytic multiplicity.
+This connects the divisor form used here with the zero counts of Tau Ceti's Rouché and Hurwitz
+theorems. -/
+theorem finsum_divisor_eq_finsum_analyticOrderNatAt {f : ℂ → ℂ} {c : ℂ} {R : ℝ}
+    (hR : 0 < R) (hf : AnalyticOnNhd ℂ f (closedBall c R)) (hb : ∀ z ∈ sphere c R, f z ≠ 0) :
+    (∑ᶠ z, divisor f (closedBall c R) z) =
+      ((∑ᶠ z ∈ ball c R, analyticOrderNatAt f z : ℕ) : ℤ) := by
+  have hw : c + (R : ℂ) ∈ sphere c R := by simp [abs_of_pos hR]
+  have hne : ∀ z ∈ closedBall c R, analyticOrderAt f z ≠ ⊤ := fun z hz ↦
+    hf.analyticOrderAt_ne_top_of_isPreconnected (convex_closedBall c R).isPreconnected
+      (sphere_subset_closedBall hw) hz
+      (by rw [(hf _ (sphere_subset_closedBall hw)).analyticOrderAt_eq_zero.mpr (hb _ hw)]; simp)
+  simp only [finsum_mem_def]
+  refine Eq.trans ?_ ((Nat.castAddMonoidHom ℤ).map_finsum_of_injective Nat.cast_injective _).symm
+  refine finsum_congr fun z ↦ ?_
+  by_cases hz : z ∈ closedBall c R
+  · rw [hf.divisor_apply hz]
+    by_cases hzb : z ∈ ball c R
+    · obtain ⟨n, hn⟩ := ENat.ne_top_iff_exists.mp (hne z hz)
+      simp [indicator_of_mem hzb, analyticOrderNatAt, ← hn]
+    · have hzs : z ∈ sphere c R := by
+        simp only [mem_closedBall, mem_ball, not_lt] at hz hzb
+        exact mem_sphere.mpr (le_antisymm hz hzb)
+      simp [indicator_of_notMem hzb, (hf z hz).analyticOrderAt_eq_zero.mpr (hb z hzs)]
+  · simp only [indicator_of_notMem fun h ↦ hz (ball_subset_closedBall h), map_zero]
+    exact notMem_support.mp fun h ↦ hz ((divisor _ _).supportWithinDomain h)
+
+/-- **Rouché's theorem**, symmetric form. Two holomorphic functions with
+`‖f - g‖ < ‖f‖ + ‖g‖` on a circle have the same number of zeros in the disk, counted with
+multiplicity as divisor degree.
+
+This adapts the Tau Ceti contributors' `TauCeti.rouche_symm` from
+`TauCeti.Analysis.Complex.Conformal.Rouche`; the winding-number proof is imported. -/
+theorem sum_divisor_eq_of_norm_sub_lt_norm_add_norm {f g : ℂ → ℂ} {c : ℂ} {R : ℝ}
+    (hR : 0 < R) (hf : AnalyticOnNhd ℂ f (closedBall c R))
+    (hg : AnalyticOnNhd ℂ g (closedBall c R))
+    (hb : ∀ z ∈ sphere c R, ‖f z - g z‖ < ‖f z‖ + ‖g z‖) :
+    (∑ᶠ z, divisor f (closedBall c R) z) = ∑ᶠ z, divisor g (closedBall c R) z := by
+  have hf0 : ∀ z ∈ sphere c R, f z ≠ 0 := fun z hz h ↦ by simpa [h] using hb z hz
+  have hg0 : ∀ z ∈ sphere c R, g z ≠ 0 := fun z hz h ↦ by simpa [h] using hb z hz
+  rw [finsum_divisor_eq_finsum_analyticOrderNatAt hR hf hf0,
+    finsum_divisor_eq_finsum_analyticOrderNatAt hR hg hg0, TauCeti.rouche_symm hR hf hg hb]
+
 /-- **Rouché's theorem.** Two holomorphic functions with `‖g - f‖ < ‖f‖` on a circle
 have the same number of zeros in the disk, counted with multiplicity as divisor degree. -/
 theorem sum_divisor_eq_of_norm_sub_lt {f g : ℂ → ℂ} {c : ℂ} {R : ℝ}
     (hR : 0 < R) (hf : AnalyticOnNhd ℂ f (closedBall c R))
     (hg : AnalyticOnNhd ℂ g (closedBall c R))
     (hb : ∀ z ∈ sphere c R, ‖g z - f z‖ < ‖f z‖) :
-    (∑ᶠ z, divisor f (closedBall c R) z) = ∑ᶠ z, divisor g (closedBall c R) z := by
-  let q : I → ℂ → ℂ := fun t z ↦ f z + (t : ℂ) * (g z - f z)
-  have hq (t : I) : AnalyticOnNhd ℂ (q t) (closedBall c R) := by
-    intro z hz
-    exact (hf z hz).add (analyticAt_const.mul ((hg z hz).sub (hf z hz)))
-  have hqn (t : I) (z : ℂ) (hz : z ∈ sphere c R) : q t z ≠ 0 := by
-    have hsmall : ‖(t : ℂ) * (g z - f z)‖ < ‖f z‖ := by
-      calc
-        ‖(t : ℂ) * (g z - f z)‖ = (t : ℝ) * ‖g z - f z‖ := by
-          rw [norm_mul, norm_real, Real.norm_eq_abs, abs_of_nonneg t.property.1]
-        _ ≤ ‖g z - f z‖ := mul_le_of_le_one_left (norm_nonneg _) t.property.2
-        _ < ‖f z‖ := hb z hz
-    intro he
-    have heq : (t : ℂ) * (g z - f z) = -f z := (eq_neg_iff_add_eq_zero).mpr (by
-      simpa [q, add_comm] using he)
-    simp [heq] at hsmall
-  have hdq (t : I) {z : ℂ} (hz : z ∈ closedBall c R) :
-      deriv (q t) z = deriv f z + (t : ℂ) * (deriv g z - deriv f z) := by
-    exact ((hf z hz).differentiableAt.hasDerivAt.add
-      (((hg z hz).differentiableAt.hasDerivAt.sub
-        (hf z hz).differentiableAt.hasDerivAt).const_mul (t : ℂ))).deriv
-  have hf' : ContinuousOn (fun p : I × ℂ ↦ f p.2) (univ ×ˢ sphere c R) :=
-    (hf.continuousOn.mono sphere_subset_closedBall).comp continuous_snd.continuousOn
-      (fun _ hp ↦ hp.2)
-  have hg' : ContinuousOn (fun p : I × ℂ ↦ g p.2) (univ ×ˢ sphere c R) :=
-    (hg.continuousOn.mono sphere_subset_closedBall).comp continuous_snd.continuousOn
-      (fun _ hp ↦ hp.2)
-  have hdf : ContinuousOn (fun p : I × ℂ ↦ deriv f p.2) (univ ×ˢ sphere c R) :=
-    (hf.deriv.continuousOn.mono sphere_subset_closedBall).comp continuous_snd.continuousOn
-      (fun _ hp ↦ hp.2)
-  have hdg : ContinuousOn (fun p : I × ℂ ↦ deriv g p.2) (univ ×ˢ sphere c R) :=
-    (hg.deriv.continuousOn.mono sphere_subset_closedBall).comp continuous_snd.continuousOn
-      (fun _ hp ↦ hp.2)
-  have ht : ContinuousOn (fun p : I × ℂ ↦ (p.1 : ℂ)) (univ ×ˢ sphere c R) := by fun_prop
-  have hc : Continuous (fun t : I ↦ (2 * Real.pi * Complex.I)⁻¹ *
-      (∮ z in C(c, R), logDeriv (q t) z)) := by
-    apply continuous_const.mul
-    apply continuous_circleIntegral_logDeriv hR.le (hf'.add (ht.mul (hg'.sub hf')))
-      _ hqn
-    apply (hdf.add (ht.mul (hdg.sub hdf))).congr
-    intro p hp
-    exact hdq p.1 (sphere_subset_closedBall hp.2)
-  have hm : MapsTo (fun t : I ↦ (2 * Real.pi * Complex.I)⁻¹ *
-      (∮ z in C(c, R), logDeriv (q t) z)) univ (range ((↑) : ℤ → ℂ)) := by
-    intro t _
-    exact ⟨∑ᶠ z, divisor (q t) (closedBall c R) z,
-      (two_pi_I_inv_mul_circleIntegral_logDeriv_of_analyticOnNhd hR (hq t) (hqn t)).symm⟩
-  have he := isPreconnected_univ.constant_of_mapsTo
-    isClosedEmbedding_intCast.isEmbedding.isDiscrete_range hc.continuousOn hm
-    (mem_univ (0 : I)) (mem_univ (1 : I))
-  have hq0 : q 0 = f := by funext z; simp [q]
-  have hq1 : q 1 = g := by funext z; simp [q]
-  rw [two_pi_I_inv_mul_circleIntegral_logDeriv_of_analyticOnNhd hR (hq 0) (hqn 0),
-    two_pi_I_inv_mul_circleIntegral_logDeriv_of_analyticOnNhd hR (hq 1) (hqn 1), hq0, hq1] at he
-  exact_mod_cast he
+    (∑ᶠ z, divisor f (closedBall c R) z) = ∑ᶠ z, divisor g (closedBall c R) z :=
+  sum_divisor_eq_of_norm_sub_lt_norm_add_norm hR hf hg fun z hz ↦ by
+    rw [norm_sub_rev]
+    exact (hb z hz).trans_le (le_add_of_nonneg_right (norm_nonneg _))
 
 end Complex
