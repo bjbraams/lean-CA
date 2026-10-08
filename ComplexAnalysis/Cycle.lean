@@ -311,13 +311,13 @@ theorem replicate_isC1 (k : ℕ) {γ : Loop} (hγ : ContDiffOn ℝ 1 γ.2.extend
   fun _ ↦ hγ
 
 /-- The integral over a cycle of `k` copies of a loop is `k` times the loop integral. -/
-theorem replicate_integral (k : ℕ) (γ : Loop) (ω : ℂ → ℂ →L[ℂ] F) :
+theorem integral_replicate (k : ℕ) (γ : Loop) (ω : ℂ → ℂ →L[ℂ] F) :
     (replicate k γ).integral ω = k • curveIntegral ω γ.2 := by
   change ∑ _i : Fin k, curveIntegral ω γ.2 = k • curveIntegral ω γ.2
   rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin]
 
 /-- The index of a cycle of `k` copies of a loop is `k` times the loop index. -/
-theorem replicate_index (k : ℕ) (γ : Loop) (w : ℂ) :
+theorem index_replicate (k : ℕ) (γ : Loop) (w : ℂ) :
     (replicate k γ).index w = k * curveIndex γ.2 w := by
   change ∑ _i : Fin k, curveIndex γ.2 w = k * curveIndex γ.2 w
   rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
@@ -353,7 +353,7 @@ theorem append_isC1 {Γ₁ Γ₂ : Cycle} (h₁ : Γ₁.IsC1) (h₂ : Γ₂.IsC1
   | right i => exact (Γ₁.append_loop_natAdd Γ₂ i).symm ▸ h₂ i
 
 /-- The integral over an appended cycle is the sum of the two cycle integrals. -/
-theorem append_integral (Γ₁ Γ₂ : Cycle) (ω : ℂ → ℂ →L[ℂ] F) :
+theorem integral_append (Γ₁ Γ₂ : Cycle) (ω : ℂ → ℂ →L[ℂ] F) :
     (Γ₁.append Γ₂).integral ω = Γ₁.integral ω + Γ₂.integral ω := by
   change ∑ i : Fin (Γ₁.n + Γ₂.n), curveIntegral ω ((Γ₁.append Γ₂).loop i).2 = _
   rw [Fin.sum_univ_add]
@@ -363,7 +363,7 @@ theorem append_integral (Γ₁ Γ₂ : Cycle) (ω : ℂ → ℂ →L[ℂ] F) :
   · exact Finset.sum_congr rfl fun i _ ↦ by rw [append_loop_natAdd]
 
 /-- The index of an appended cycle is the sum of the two cycle indices. -/
-theorem append_index (Γ₁ Γ₂ : Cycle) (w : ℂ) :
+theorem index_append (Γ₁ Γ₂ : Cycle) (w : ℂ) :
     (Γ₁.append Γ₂).index w = Γ₁.index w + Γ₂.index w := by
   change ∑ i : Fin (Γ₁.n + Γ₂.n), curveIndex ((Γ₁.append Γ₂).loop i).2 w = _
   rw [Fin.sum_univ_add]
@@ -392,10 +392,10 @@ theorem zsmulLoop_isC1 (m : ℤ) {γ : Loop} (hγ : ContDiffOn ℝ 1 γ.2.extend
     exact replicate_isC1 _ (Loop.contDiffOn_symm hγ)
 
 /-- The integral over a loop with integer multiplicity is that integer times the loop integral. -/
-theorem zsmulLoop_integral (m : ℤ) (γ : Loop) (ω : ℂ → ℂ →L[ℂ] F) :
+theorem integral_zsmulLoop (m : ℤ) (γ : Loop) (ω : ℂ → ℂ →L[ℂ] F) :
     (zsmulLoop m γ).integral ω = m • curveIntegral ω γ.2 := by
   unfold zsmulLoop
-  rw [replicate_integral]
+  rw [integral_replicate]
   rcases le_or_gt 0 m with hm | hm
   · rw [Loop.zsign_of_nonneg hm, ← natCast_zsmul, Int.natAbs_of_nonneg hm]
   · rw [Loop.zsign_of_neg hm]
@@ -404,10 +404,10 @@ theorem zsmulLoop_integral (m : ℤ) (γ : Loop) (ω : ℂ → ℂ →L[ℂ] F) 
       smul_neg, neg_neg]
 
 /-- The index of a loop with integer multiplicity is that integer times the loop index. -/
-theorem zsmulLoop_index (m : ℤ) (γ : Loop) (w : ℂ) :
+theorem index_zsmulLoop (m : ℤ) (γ : Loop) (w : ℂ) :
     (zsmulLoop m γ).index w = m * curveIndex γ.2 w := by
   unfold zsmulLoop
-  rw [replicate_index]
+  rw [index_replicate]
   rcases le_or_gt 0 m with hm | hm
   · rw [Loop.zsign_of_nonneg hm, ← Int.cast_natCast, Int.natAbs_of_nonneg hm]
   · rw [Loop.zsign_of_neg hm]

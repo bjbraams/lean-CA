@@ -131,10 +131,10 @@ theorem sum_residue_add_residueAtInfty {f : ℂ → F} (S : Finset ℂ)
     (fun w hw ↦ absurd (mem_univ w) hw) (by rw [← Set.compl_eq_univ_sdiff]; exact hf)
   have hleft : Γ.integral (fun w ↦ ContinuousLinearMap.toSpanSingleton ℂ (f w)) =
       ∮ z in C(0, R), f z := by
-    rw [hΓ_def, Cycle.replicate_integral, one_smul, hγ_def]
+    rw [hΓ_def, Cycle.integral_replicate, one_smul, hγ_def]
     exact curveIntegral_circle f 0 R
   have hindex : ∀ a ∈ S, Γ.index a = 1 := fun a ha ↦ by
-    rw [hΓ_def, Cycle.replicate_index, hγ_def]
+    rw [hΓ_def, Cycle.index_replicate, hγ_def]
     change ((1 : ℕ) : ℂ) * curveIndex (Path.circle 0 R) a = 1
     rw [curveIndex_circle_of_mem_ball (hSR a ha), mul_one, Nat.cast_one]
   have hinfty : (∮ z in C(0, R), f z) = -((2 * π * I : ℂ) • residueAtInfty f) := by

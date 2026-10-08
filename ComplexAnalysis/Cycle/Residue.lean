@@ -109,7 +109,7 @@ theorem integral_eq_sum_index_smul_residue {U : Set ℂ} (hU : IsOpen U) (S : Fi
         · exact hz'.2.2 (Finset.mem_coe.mpr h)
       have hΓ₁ind : ∀ w, w ∉ U \ {a} → Γ₁.index w = 0 := by
         intro w hw
-        rw [append_index, zsmulLoop_index]
+        rw [index_append, index_zsmulLoop]
         by_cases hwU : w ∈ U
         · have hwa : w = a := by
             by_contra h
@@ -127,12 +127,12 @@ theorem integral_eq_sum_index_smul_residue {U : Set ℂ} (hU : IsOpen U) (S : Fi
       have hih := ih (U := U \ {a}) (Γ := Γ₁) hU' hΓ₁ hΓ₁U hΓ₁ind hf'
       have hidx : ∀ b ∈ S, Γ₁.index b = Γ.index b := by
         intro b hb
-        rw [append_index, zsmulLoop_index]
+        rw [index_append, index_zsmulLoop]
         change Γ.index b + (-n : ℤ) * curveIndex (Path.circle a r) b = Γ.index b
         rw [curveIndex_circle_of_notMem_closedBall hr0.le
           (fun h ↦ (hcb h).2.2 (Finset.mem_coe.mpr hb))]
         ring
-      rw [append_integral, zsmulLoop_integral,
+      rw [integral_append, integral_zsmulLoop,
         Finset.sum_congr rfl (fun b hb ↦ by rw [hidx b hb])] at hih
       have hcirc : curveIntegral (fun w ↦ toSpanSingleton ℂ (f w)) C.2 =
           (2 * Real.pi * Complex.I : ℂ) • residue f a := by
