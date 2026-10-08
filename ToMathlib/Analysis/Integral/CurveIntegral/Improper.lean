@@ -30,10 +30,6 @@ Ordinary improper endpoint formulas use Mathlib's fundamental theorem directly.
   the ambient space.
 * `tendsto_curveIntegral_map_segment`: An integrable half-line pullback is the limit of the
   corresponding finite curve integrals. No primitive for the form is required.
-
-## References
-
-* `Mathlib.MeasureTheory.Integral.IntegralEqImproper`: formal background used by this module.
 -/
 
 public section

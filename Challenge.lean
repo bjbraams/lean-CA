@@ -253,7 +253,8 @@ theorem mittag_leffler :
     (∀ a ∈ S, DifferentiableOn ℂ (P a) {a}ᶜ) →
     ∃ (f : ℂ → ℂ),
     DifferentiableOn ℂ f (U \ S) ∧
-    ∀ a ∈ S, ∃ (g : ℂ → ℂ), AnalyticAt ℂ g a ∧ f =ᶠ[nhdsWithin a {a}ᶜ] fun (z : ℂ) ↦ P a z + g z := by sorry
+    ∀ a ∈ S, ∃ (g : ℂ → ℂ), AnalyticAt ℂ g a ∧
+        f =ᶠ[nhdsWithin a {a}ᶜ] fun (z : ℂ) ↦ P a z + g z := by sorry
 
 /-- 9. The compact-support C¹ Cauchy–Pompeiu identity; Banach-valued.
 Related scalar theorem: Will (Ziang) Li (RiemannDynamics). See CREDITS.md.
@@ -303,7 +304,8 @@ theorem hadamard :
     (∀ (i : ι), f (a i) = 0) ∧
     (Summable fun (i : ι) ↦ ‖a i‖⁻¹ ^ (k + 1)) ∧
     P.natDegree ≤ k ∧
-    ∀ (z : ℂ), f z = Complex.exp (Polynomial.eval z P) * z ^ m * Complex.canonicalProduct k a z := by sorry
+    ∀ (z : ℂ), f z = Complex.exp (Polynomial.eval z P) * z ^ m *
+        Complex.canonicalProduct k a z := by sorry
 
 /-- 13. The multiplicity-weighted Blaschke condition for nonzero zeros of a bounded nontrivial
 holomorphic function.
@@ -314,7 +316,8 @@ theorem blaschke_condition :
     ∀ {M : ℝ},
     (∀ z ∈ Metric.ball 0 1, ‖f z‖ ≤ M) →
     (∃ z ∈ Metric.ball 0 1, f z ≠ 0) →
-    Summable fun (w : { w : ℂ // ‖w‖ < 1 ∧ f w = 0 ∧ w ≠ 0 }) ↦ ((analyticOrderAt f (w : ℂ)).toNat : ℝ) *
+    Summable fun (w : { w : ℂ // ‖w‖ < 1 ∧ f w = 0 ∧ w ≠ 0 }) ↦
+        ((analyticOrderAt f (w : ℂ)).toNat : ℝ) *
     (1 - ‖(w : ℂ)‖) := by sorry
 
 /-- 14. Riesz factorization into an origin power, a Blaschke product and a zero-free bounded
@@ -361,7 +364,8 @@ theorem koebe_growth :
     ∀ {f : ℂ → ℂ},
     DifferentiableOn ℂ f (Metric.ball 0 1) →
     Set.InjOn f (Metric.ball 0 1) →
-    f 0 = 0 → deriv f 0 = 1 → ∀ {z₀ : ℂ}, z₀ ∈ Metric.ball 0 1 → ‖f z₀‖ ≤ ‖z₀‖ / (1 - ‖z₀‖) ^ 2 := by sorry
+    f 0 = 0 → deriv f 0 = 1 → ∀ {z₀ : ℂ},
+        z₀ ∈ Metric.ball 0 1 → ‖f z₀‖ ≤ ‖z₀‖ / (1 - ‖z₀‖) ^ 2 := by sorry
 
 /-- 18. The Dirichlet problem on a disc with arbitrary continuous boundary data.
 Library: `Complex.exists_harmonicContOnCl_eqOn_sphere`. -/
@@ -426,7 +430,8 @@ theorem green_function :
     w ∈ U →
     ∃ (G : ℂ → ℝ),
     InnerProductSpace.HarmonicOnNhd (fun (z : ℂ) ↦ G z + Real.log ‖z - w‖) U ∧
-    (∀ ζ ∈ frontier U, Filter.Tendsto G (nhdsWithin ζ U) (nhds 0)) ∧ ∀ z ∈ U, z ≠ w → 0 ≤ G z := by sorry
+    (∀ ζ ∈ frontier U, Filter.Tendsto G (nhdsWithin ζ U) (nhds 0)) ∧
+      ∀ z ∈ U, z ≠ w → 0 ≤ G z := by sorry
 
 /-- 24. The lacunary series with exponents `2 ^ n` has no continuous extension across any point of
 the unit circle.

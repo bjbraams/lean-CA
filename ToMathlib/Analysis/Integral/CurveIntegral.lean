@@ -36,13 +36,6 @@ the latter automatically.
   segment gives its endpoint difference.
 * `ContinuousLinearMap.curveIntegral_comp_comm`: A continuous linear map commutes with a curve
   integral.
-
-## References
-
-* `Mathlib.MeasureTheory.Integral.CurveIntegral.Basic`: formal background used by this module.
-* `Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus`: formal background used by
-  this module.
-* `Mathlib.Analysis.Calculus.ContDiff.Operations`: formal background used by this module.
 -/
 
 public section

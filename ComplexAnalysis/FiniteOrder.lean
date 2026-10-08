@@ -269,8 +269,8 @@ theorem summable_norm_rpow_neg_of_ncard_le
           rw [tsum_mul_left, tsum_geometric_of_lt_one hq0.le hq1, div_eq_mul_inv]
 
 /-- **Summability of the inverse powers of the zeros.** If `f` is entire with `f 0 ≠ 0` and
-satisfies the growth bound `‖f z‖ ≤ A exp (B ‖z‖ ^ ρ)`, and `a` enumerates its zeros with multiplicity, then `∑ ‖a i‖ ^ (-s)`
-converges for every `s > ρ`.
+satisfies the growth bound `‖f z‖ ≤ A exp (B ‖z‖ ^ ρ)`, and `a` enumerates its zeros with
+multiplicity, then `∑ ‖a i‖ ^ (-s)` converges for every `s > ρ`.
 
 A counterpart under a related growth hypothesis appears in Matteo Cipollina's Hadamard
 development. See `CREDITS.md`. -/

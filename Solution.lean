@@ -131,7 +131,8 @@ theorem mittag_leffler :
     (∀ a ∈ S, DifferentiableOn ℂ (P a) {a}ᶜ) →
     ∃ (f : ℂ → ℂ),
     DifferentiableOn ℂ f (U \ S) ∧
-    ∀ a ∈ S, ∃ (g : ℂ → ℂ), AnalyticAt ℂ g a ∧ f =ᶠ[nhdsWithin a {a}ᶜ] fun (z : ℂ) ↦ P a z + g z := by
+    ∀ a ∈ S, ∃ (g : ℂ → ℂ), AnalyticAt ℂ g a ∧
+        f =ᶠ[nhdsWithin a {a}ᶜ] fun (z : ℂ) ↦ P a z + g z := by
   exact @Complex.mittagLeffler_of_forall_le_dist
 
 /-- 9. The compact-support C¹ Cauchy–Pompeiu identity; Banach-valued.
@@ -192,7 +193,8 @@ theorem hadamard :
     (∀ (i : ι), f (a i) = 0) ∧
     (Summable fun (i : ι) ↦ ‖a i‖⁻¹ ^ (k + 1)) ∧
     P.natDegree ≤ k ∧
-    ∀ (z : ℂ), f z = Complex.exp (Polynomial.eval z P) * z ^ m * Complex.canonicalProduct k a z := by
+    ∀ (z : ℂ), f z = Complex.exp (Polynomial.eval z P) * z ^ m *
+        Complex.canonicalProduct k a z := by
   exact @Complex.exists_hadamard_factorization
 
 /-- 13. The multiplicity-weighted Blaschke condition for nonzero zeros of a bounded nontrivial
@@ -204,7 +206,8 @@ theorem blaschke_condition :
     ∀ {M : ℝ},
     (∀ z ∈ Metric.ball 0 1, ‖f z‖ ≤ M) →
     (∃ z ∈ Metric.ball 0 1, f z ≠ 0) →
-    Summable fun (w : { w : ℂ // ‖w‖ < 1 ∧ f w = 0 ∧ w ≠ 0 }) ↦ ((analyticOrderAt f (w : ℂ)).toNat : ℝ) *
+    Summable fun (w : { w : ℂ // ‖w‖ < 1 ∧ f w = 0 ∧ w ≠ 0 }) ↦
+        ((analyticOrderAt f (w : ℂ)).toNat : ℝ) *
     (1 - ‖(w : ℂ)‖) := by
   exact @Complex.summable_analyticOrderAt_toNat_mul_one_sub_norm_of_bounded
 
@@ -255,7 +258,8 @@ theorem koebe_growth :
     ∀ {f : ℂ → ℂ},
     DifferentiableOn ℂ f (Metric.ball 0 1) →
     Set.InjOn f (Metric.ball 0 1) →
-    f 0 = 0 → deriv f 0 = 1 → ∀ {z₀ : ℂ}, z₀ ∈ Metric.ball 0 1 → ‖f z₀‖ ≤ ‖z₀‖ / (1 - ‖z₀‖) ^ 2 := by
+    f 0 = 0 → deriv f 0 = 1 → ∀ {z₀ : ℂ},
+        z₀ ∈ Metric.ball 0 1 → ‖f z₀‖ ≤ ‖z₀‖ / (1 - ‖z₀‖) ^ 2 := by
   exact @Complex.norm_le_div_one_sub_sq_of_class_S
 
 /-- 18. The Dirichlet problem on a disc with arbitrary continuous boundary data.

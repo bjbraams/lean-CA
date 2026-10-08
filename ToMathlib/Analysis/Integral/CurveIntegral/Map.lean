@@ -28,10 +28,6 @@ integrability assumption. The map need only be differentiable along the path.
   complex normed spaces.
 * `curveIntegral_map_segment`: Integrating along a parametrized finite interval agrees with the
   integral of the pulled-back form. The endpoints may occur in either order or coincide.
-
-## References
-
-* `ToMathlib.Analysis.Integral.CurveIntegral`: formal background used by this module.
 -/
 
 public section
