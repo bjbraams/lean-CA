@@ -5,6 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
+
 public import ComplexAnalysis.LaurentSeries.Annulus
 public import ComplexAnalysis.CauchyTransform
 public import Mathlib.Analysis.SpecialFunctions.PolarCoord

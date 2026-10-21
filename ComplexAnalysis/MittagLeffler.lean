@@ -221,8 +221,8 @@ theorem mittagLeffler {U : Set ℂ} (hU : IsOpen U) {S : Set ℂ} (hSU : S ⊆ U
   set K : ℕ → Set ℂ := mlHull U
   set t : ℕ → ℂ → ℂ := fun n z ↦ ∑ a ∈ T n, P a z - r n z
   have htdiff : ∀ n, DifferentiableOn ℂ (t n) (U \ (T n : Set ℂ)) := fun n ↦
-    ((differentiableOn_sum_principalParts hP (hTS n)).mono fun z hz ↦ hz.2).sub
-      ((hr n).mono fun z hz ↦ hz.1)
+    ((differentiableOn_sum_principalParts hP (hTS n)).mono fun z (hz : z ∈ U \ (T n : Set ℂ)) ↦ hz.2).sub
+      ((hr n).mono fun z (hz : z ∈ U \ (T n : Set ℂ)) ↦ hz.1)
   have hsummable : ∀ m z, z ∈ K m → Summable fun n ↦ t n z := fun m z hz ↦
     summable_geometric_two.of_norm_bounded_eventually <| by
       rw [Nat.cofinite_eq_atTop]

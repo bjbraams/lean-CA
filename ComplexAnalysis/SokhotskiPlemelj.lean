@@ -322,7 +322,7 @@ theorem tendsto_cauchyTypeIntegral_exterior (hR : 0 < R)
     (hc : Summable (fun k : ℤ ↦ ‖c k‖ * R ^ k)) {t : ℂ} (ht : ‖t‖ = R) :
     Tendsto (cauchyTypeIntegral c R) (𝓝[{z | R < ‖z‖}] t) (𝓝 (cauchyTypeExterior c t)) := by
   have hcont := continuousOn_cauchyTypeExterior hR hc t (show R ≤ ‖t‖ from ht.ge)
-  refine (hcont.tendsto.mono_left (nhdsWithin_mono _ fun z (hz : R < ‖z‖) ↦ hz.le)).congr' ?_
+  refine (hcont.tendsto.mono_left (nhdsWithin_mono (s := {z : ℂ | R < ‖z‖}) _ fun z (hz : R < ‖z‖) ↦ hz.le)).congr' ?_
   filter_upwards [self_mem_nhdsWithin] with z hz
   exact cauchyTypeExterior_eq_circleIntegral hR hc hz
 

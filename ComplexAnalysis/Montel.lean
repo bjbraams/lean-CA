@@ -68,6 +68,7 @@ theorem exists_subseq_tendstoLocallyUniformlyOn_of_bounded_on_compacts
     (hb : ∀ K ⊆ U, IsCompact K → ∃ M : ℝ, ∀ n, ∀ z ∈ K, ‖f n z‖ ≤ M) :
     ∃ (g : ℂ → F) (φ : ℕ → ℕ), StrictMono φ ∧ DifferentiableOn ℂ g U ∧
       TendstoLocallyUniformlyOn (fun n ↦ f (φ n)) g atTop U := by
+  letI : ProperSpace F := FiniteDimensional.proper ℂ F
   obtain ⟨φ, g, hφ, hg, hlim⟩ :=
     TauCeti.montel hU hf (TauCeti.isLocallyBoundedOn_def.mpr hb)
   exact ⟨g, φ, hφ, hg, hlim⟩

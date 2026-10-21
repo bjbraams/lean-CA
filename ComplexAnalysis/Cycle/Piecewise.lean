@@ -180,7 +180,7 @@ theorem sum_curveIntegral_sub_inv_smul_of_piecewise (hU : IsOpen U)
   · simp
   obtain ⟨hC1, hΓU, hΓind⟩ := single_piecewise_hyps γ hx hn hγ hγU hind
   have hcont : ContinuousOn (fun w ↦ (w - z)⁻¹ • f w) ({z}ᶜ ∩ U) :=
-    ((ContinuousOn.inv₀ (f := fun w : ℂ ↦ w - z) (by fun_prop) fun w hw ↦
+    ((ContinuousOn.inv₀ (f := fun w : ℂ ↦ w - z) (by fun_prop) fun w (hw : w ∈ {z}ᶜ ∩ U) ↦
       sub_ne_zero.mpr hw.1).smul (hf.continuousOn.mono inter_subset_right))
   rw [← integral_single_piecewise γ hx _ (fun i ↦ (hγ i).differentiableOn one_ne_zero)
     fun i ↦ curveIntegrable_of_continuousOn hcont (hγ i) fun t ↦ ⟨hzγ i t, hγU i t⟩,

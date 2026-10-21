@@ -82,6 +82,7 @@ theorem exists_tendstoLocallyUniformlyOn_of_forall_exists_tendsto
     (hVD : V ⊆ D) {a : ℂ} (ha : a ∈ D) (hacc : a ∈ closure (V \ {a}))
     (hp : ∀ z ∈ V, ∃ y : F, Tendsto (fun n ↦ f n z) atTop (𝓝 y)) :
     ∃ g : ℂ → F, DifferentiableOn ℂ g D ∧ TendstoLocallyUniformlyOn f g atTop D := by
+  letI : CompleteSpace F := FiniteDimensional.complete ℂ F
   let U : TopologicalSpace.Opens ℂ := ⟨D, hD⟩
   let s (n : ℕ) := holomorphicMapOfAnalyticOnNhd U (f n) ((hf n).analyticOnNhd hD)
   have hs (n : ℕ) {z : ℂ} (hz : z ∈ D) : openExtension U (s n).val z = f n z :=

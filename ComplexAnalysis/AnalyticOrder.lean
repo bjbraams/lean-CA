@@ -207,8 +207,9 @@ theorem Set.ncard_sigma_fin_fiber {α : Type*} (Z : Set α) (n : α → ℕ) (w 
       (f := fun j : Fin (n w) ↦ (⟨⟨w, hw⟩, j⟩ : Σ z : Z, Fin (n z)))
       fun j j' h ↦ eq_of_heq (Sigma.mk.inj_iff.mp h).2,
       Nat.card_eq_fintype_card, Fintype.card_fin]
-  · convert Set.ncard_empty (Σ z : Z, Fin (n z))
-    ext ⟨⟨w', hw'⟩, j⟩
-    simp only [Set.mem_ofPred_eq, Set.mem_empty_iff_false, iff_false]
-    rintro rfl
-    exact hw hw'
+  · have hempty : {i : Σ z : Z, Fin (n z) | (i.1 : α) = w} = ∅ := by
+      ext ⟨⟨w', hw'⟩, j⟩
+      simp only [Set.mem_ofPred_eq, Set.mem_empty_iff_false, iff_false]
+      rintro rfl
+      exact hw hw'
+    rw [hempty, Set.ncard_empty]

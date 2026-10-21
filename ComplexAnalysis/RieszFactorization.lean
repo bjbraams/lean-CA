@@ -48,7 +48,7 @@ variable {f : ℂ → ℂ}
 
 /-! ### The Riesz factorization theorem -/
 
-variable {a : ι → ℂ}
+variable {ι : Type*} {a : ι → ℂ}
 
 /-- Restricting the Blaschke summable bound to the complement of a finite index set. -/
 theorem hasSummableBoundOn_blaschke_compl (ha : ∀ i, ‖a i‖ < 1) (ha0 : ∀ i, a i ≠ 0)

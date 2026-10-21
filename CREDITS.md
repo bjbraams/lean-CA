@@ -407,3 +407,19 @@ docstrings only; declaration types, proofs, assumptions, and dependencies are un
 [zulip-laurent]: https://leanprover-community.github.io/archive/stream/217875-Is-there-code-for-X%3F/topic/Cauchy%27s.20residue.20theorem.20on.20punctured.20disk.html
 [zulip-argument]: https://leanprover-community.github.io/archive/stream/116395-maths/topic/Argument.20principle.html
 [zulip-contours]: https://leanprover-community.github.io/archive/stream/116395-maths/topic/contour.20integrals.html
+
+
+## Shared Mathlib upgrade (2026-10-18)
+
+The contour normalization wrapper now reuses the Tau Ceti contributors'
+`AbsolutelyContinuousOnInterval.windingNumber_eq_two_pi_I_inv_mul_curveIntegral`
+in `TauCeti.Analysis.Contour.Winding.AbsolutelyContinuous.Path`, reached from
+the existing piecewise C¹ assumption via
+`TauCeti.Contour.IsPiecewiseC1On.absolutelyContinuousOnInterval`.
+Its original hypotheses and conclusion are preserved. The one-line compatibility
+edit to TauCeti's finite-measure extension proof is saved in `TauCeti-4.36.patch`;
+it uses Mathlib's renamed `ContinuousMap.coe_ofClass` without changing the proof.
+
+The local analytic divided-slope lemma is superseded by the Mathlib contributors'
+more general `AnalyticAt.dslope` in `Mathlib.Analysis.Calculus.DSlope`.
+The principal-part construction now imports and applies that theorem directly.

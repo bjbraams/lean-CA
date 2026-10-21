@@ -5,6 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import Mathlib.Analysis.Calculus.Deriv.AffineMap
+
 public import ToMathlib.Analysis.Integral.CurveIntegral
 
 /-!

@@ -91,7 +91,7 @@ theorem integral_ball_circleIntegral_deriv_div_sub (hU : IsOpen U)
       funext p
       by_cases hp : p.2 ∈ ball (0 : ℂ) ρ
       · rw [indicator_of_mem hp, indicator_of_mem (mk_mem_prod (mem_univ _) hp)]
-      · rw [indicator_of_notMem hp, indicator_of_notMem fun h ↦ hp h.2]
+      · rw [indicator_of_notMem hp, indicator_of_notMem fun (h : p ∈ univ ×ˢ ball (0 : ℂ) ρ) ↦ hp h.2]
     rw [h2]
     exact this.indicator (MeasurableSet.univ.prod measurableSet_ball)
   set μ : Measure ℝ := volume.restrict (Ioc 0 (2 * π))

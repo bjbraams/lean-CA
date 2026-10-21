@@ -5,6 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import Mathlib.Analysis.Calculus.DSlope
+
 public import ComplexAnalysis.Residue
 public import Mathlib.Analysis.Meromorphic.Basic
 public import Mathlib.Analysis.Complex.RemovableSingularity
@@ -15,7 +17,7 @@ public import Mathlib.Order.Filter.Finite
 
 A meromorphic germ is the sum of a finite principal part and an analytic germ, on a
 punctured neighborhood. The construction repeatedly divides by the coordinate difference
-and uses analytic divided slopes. Finite principal parts have normalized circle integral
+and uses Mathlib's `AnalyticAt.dslope` from `Mathlib.Analysis.Calculus.DSlope`. Finite principal parts have normalized circle integral
 equal to their residue on any enclosing circle.
 
 ## Main results
@@ -65,13 +67,6 @@ theorem meromorphicAt_principalPart {n : ℕ} (c : ℂ) (a : Fin n → F) (z : �
     ((analyticAt_id.sub analyticAt_const).meromorphicAt.zpow _).smul
       analyticAt_const.meromorphicAt)
 
-/-- An analytic germ has an analytic divided slope at its center. -/
-theorem _root_.AnalyticAt.dslope {f : ℂ → F} {c : ℂ} (hf : AnalyticAt ℂ f c) :
-    AnalyticAt ℂ (dslope f c) c := by
-  obtain ⟨r, hr, ha⟩ := hf.exists_ball_analyticOnNhd
-  exact ((differentiableOn_dslope (ball_mem_nhds c hr)).mpr ha.differentiableOn).analyticAt
-    (ball_mem_nhds c hr)
-
 /-- A meromorphic germ splits into a finite principal part and an analytic remainder.
 The equality is on a punctured neighborhood, so the assigned center value is immaterial. -/
 theorem _root_.MeromorphicAt.exists_principalPart {f : ℂ → F} {c : ℂ}
@@ -88,7 +83,7 @@ theorem _root_.MeromorphicAt.exists_principalPart {f : ℂ → F} {c : ℂ}
       have hg : AnalyticAt ℂ (fun z ↦ (z - c) ^ m • ((z - c) • f z)) c := by
         simpa only [smul_smul, ← pow_succ] using hm
       obtain ⟨n, a, g, hga, he⟩ := ih hg
-      refine ⟨n + 1, Fin.cons (g c) a, dslope g c, hga.dslope, ?_⟩
+      refine ⟨n + 1, Fin.cons (g c) a, dslope g c, hga.dslope c, ?_⟩
       filter_upwards [he, self_mem_nhdsWithin] with z hz hzc
       have hne : z - c ≠ 0 := sub_ne_zero.mpr hzc
       have hsum : (z - c)⁻¹ • principalPart c a z =

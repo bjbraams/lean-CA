@@ -5,6 +5,10 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import TauCeti.Analysis.Contour.Winding.AbsolutelyContinuous.Path
+
+public import TauCeti.Analysis.Contour.AbsolutelyContinuous
+
 public import ComplexAnalysis.CauchyIntegral
 public import Mathlib.Analysis.SpecialFunctions.ExpDeriv
 public import TauCeti.Analysis.Contour.Winding.EndpointRatio
@@ -98,13 +102,13 @@ theorem isPiecewiseC1On_extend_of_contDiffOn {a b : ℂ} {γ : Path a b}
 /-- The Cauchy-kernel curve integral along a piecewise `C¹` path avoiding `w` is `2πi` times the
 winding number `TauCeti.Contour.windingNumber` of the Tau Ceti contributors.
 
-This is `TauCeti.Contour.windingNumber_eq_two_pi_I_inv_mul_curveIntegral`, rewritten for the
+This is `AbsolutelyContinuousOnInterval.windingNumber_eq_two_pi_I_inv_mul_curveIntegral`, rewritten for the
 kernel `ContinuousLinearMap.toSpanSingleton ℂ (z - w)⁻¹`. -/
 theorem curveIntegral_sub_inv_eq_two_pi_I_mul_windingNumber {a b w : ℂ} {γ : Path a b}
     (hγ : TauCeti.Contour.IsPiecewiseC1On γ.extend 0 1) (hw : ∀ t, γ t ≠ w) :
     curveIntegral (fun z ↦ ContinuousLinearMap.toSpanSingleton ℂ ((z - w)⁻¹)) γ =
       (2 * (Real.pi : ℂ) * Complex.I) * TauCeti.Contour.windingNumber γ.extend 0 1 w := by
-  rw [TauCeti.Contour.windingNumber_eq_two_pi_I_inv_mul_curveIntegral hγ hw, ← mul_assoc,
+  rw [hγ.absolutelyContinuousOnInterval.windingNumber_eq_two_pi_I_inv_mul_curveIntegral hw, ← mul_assoc,
     mul_inv_cancel₀ two_pi_I_ne_zero, one_mul]
   congr 1
   funext z
